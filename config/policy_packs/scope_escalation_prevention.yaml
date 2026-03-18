@@ -1,0 +1,35 @@
+# OWASP LLM07 — Insecure Plugin Design
+# Prevents agents from escalating beyond authorized scope
+name: scope_escalation_prevention
+version: "1.0.0"
+owasp_ref: LLM07
+description: >
+  Detects agents attempting to access resources, permissions,
+  or capabilities outside their declared scope. Covers direct
+  permission requests, cross-service token reuse, and
+  schema modification attempts.
+
+thresholds:
+  permission_escalation_count:
+    warning: 1
+    throttle: 2
+    block: 1       # any cross-tenant = immediate block
+
+  cross_tenant_probe_count:
+    warning: 0     # zero tolerance
+    throttle: 0
+    block: 1       # first probe = block
+
+score_penalties:
+  warning: -75
+  throttle: -150
+  block: -300
+
+enforcement_action: AUDIT
+escalation_action: BLOCK
+human_review_required: true
+
+explainability_template:
+  policy_fired: scope_escalation_prevention_v1
+  policy_threshold: "Cross-tenant probe or permission escalation detected"
+  recommended_action: "Audit agent scope definition and re-authorize"

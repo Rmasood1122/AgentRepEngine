@@ -1,0 +1,35 @@
+# OWASP LLM01 — Prompt Injection
+# Detects agents exhibiting prompt injection patterns via tool calls
+name: prompt_injection_prevention
+version: "1.0.0"
+owasp_ref: LLM01
+description: >
+  Detects agents making permission escalation attempts or
+  unusual tool call patterns consistent with prompt injection.
+  Covers direct injection via tool parameters and indirect
+  injection via retrieved content.
+
+thresholds:
+  permission_escalation_count:
+    warning: 1
+    throttle: 2
+    block: 3
+
+  tool_call_rate_per_hour:
+    warning: 150
+    throttle: 250
+    block: 500
+
+score_penalties:
+  warning: -50
+  throttle: -150
+  block: -300
+
+enforcement_action: AUDIT
+escalation_action: BLOCK
+human_review_required: true
+
+explainability_template:
+  policy_fired: prompt_injection_prevention_v1
+  policy_threshold: "Permission escalation attempts >{threshold} in session"
+  recommended_action: "Review agent tool call logs for injection patterns"

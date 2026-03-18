@@ -1,0 +1,34 @@
+# OWASP LLM08/LLM09 — Excessive Agency / Overreliance
+# Prevents runaway sub-agent spawning and autonomous scope expansion
+name: recursive_spawn_prevention
+version: "1.0.0"
+owasp_ref: LLM08
+description: >
+  Detects agents spawning sub-agents beyond authorized depth,
+  creating new identities at suspicious rates, or operating
+  autonomously outside their declared task scope.
+
+thresholds:
+  sub_agent_spawn_depth:
+    warning: 2
+    throttle: 3
+    block: 5        # hard limit from APEX v5.2 spec
+
+  token_refresh_rate:
+    warning: 3      # per hour
+    throttle: 5
+    block: 10       # identity cycling indicator
+
+score_penalties:
+  warning: -50
+  throttle: -100
+  block: -300
+
+enforcement_action: THROTTLE
+escalation_action: BLOCK
+human_review_required: true
+
+explainability_template:
+  policy_fired: recursive_spawn_prevention_v1
+  policy_threshold: "Sub-agent spawn depth >{threshold} or token refresh rate >{token_threshold}/hour"
+  recommended_action: "Review agent orchestration plan and sub-agent authorization"
