@@ -1,0 +1,23 @@
+# Phase 1 scoring weights — APEX v5.2 spec
+# Must sum to 1.0 exactly — validated on service start
+# H = historical score (reputation decay)
+# V = velocity z-score (anomaly component)
+weights:
+  historical: 0.5
+  velocity: 0.5
+
+# Score decay rate — applied as e^(-rate * days)
+decay_rate: 0.1
+
+# Z-score threshold before penalty applies
+zscore_threshold: 3.0
+
+# Penalty per sigma above threshold (capped at max_penalty)
+penalty_per_sigma: 100.0
+max_penalty: 300.0
+
+# Minimum std_dev to prevent division instability
+min_std_dev: 0.1
+
+# Bootstrap: use cluster baseline until agent has this many samples
+bootstrap_sample_threshold: 100

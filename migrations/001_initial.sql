@@ -87,3 +87,39 @@ CREATE TABLE IF NOT EXISTS daily_fp_metrics (
 
 -- Revoke UPDATE and DELETE on enforcement_decisions
 REVOKE UPDATE, DELETE ON enforcement_decisions FROM PUBLIC;
+-- Agent behavioral baselines (Task 4)
+CREATE TABLE IF NOT EXISTS agent_baselines (
+    id              BIGSERIAL PRIMARY KEY,
+    agent_did       TEXT,
+    org_id          UUID,
+    cluster_id      TEXT DEFAULT 'default',
+    feature_name    TEXT NOT NULL,
+    mean            NUMERIC(12,4) DEFAULT 0,
+    std_dev         NUMERIC(12,4) DEFAULT 1,
+    sample_count    INTEGER DEFAULT 0,
+    last_updated    TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(agent_did, feature_name)
+);
+
+CREATE TABLE IF NOT EXISTS cluster_baselines (
+    id              BIGSERIAL PRIMARY KEY,
+    cluster_id      TEXT NOT NULL DEFAULT 'default',
+    feature_name    TEXT NOT NULL,
+    mean            NUMERIC(12,4) DEFAULT 0,
+    std_dev         NUMERIC(12,4) DEFAULT 1,
+    sample_count    INTEGER DEFAULT 0,
+    last_updated    TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(cluster_id, feature_name)
+);
+
+INSERT INTO cluster_baselines (cluster_id, feature_name, mean, std_dev, sample_count)
+VALUES
+    ('default', 'tool_call_rate_per_hour',       80,  60,  0),
+    ('default', 'unique_endpoints_per_hour',      25,  30,  0),
+    ('default', 'bulk_access_count_per_session',  400, 400, 0),
+    ('default', 'pii_field_access_rate',          20,  25,  0),
+    ('default', 'cross_tenant_probe_count',       0,   0.1, 0),
+    ('default', 'permission_escalation_count',    0,   0.5, 0),
+    ('default', 'sub_agent_spawn_depth',          0,   0.3, 0),
+    ('default', 'token_refresh_rate',             1,   1,   0)
+ON CONFLICT (cluster_id, feature_name) DO NOTHING;
