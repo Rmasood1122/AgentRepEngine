@@ -1,26 +1,26 @@
-code ~/AgentRepEngine/CONTINUATION_PROMPT.md
+code CONTINUATION_PROMPT.md
 ```
 
-In VS Code — `Ctrl+A`, delete everything, paste this updated version, `Ctrl+S`:
+`Ctrl+A`, delete, paste this, `Ctrl+S`:
 ```
 AGENTREPENGINE — CONTINUATION PROMPT
 Last updated: March 18, 2026
 
 CURRENT STATE
 Phase    : Phase 1 — THE WEDGE
-Task     : Task 4 — Velocity + Z-Score Anomaly Engine (NEXT)
+Task     : Task 7 — Replay / Forensics Mode (NEXT)
 Clock    : 12 months remaining
 Rework   : 0% real work
 
 TASK BOARD
 0  Evaluation harness      COMPLETE   G-FP 0.00% / TP 86.67%
-1  JWT identity library    COMPLETE   G-IDENTITY — 7/7 tests passed
-2  Kong gateway plugin     COMPLETE   Redis→score→band→log working
-3  Redis + Postgres store  COMPLETE   Health ok, event consumer running
-4  Velocity + z-score      NOT STARTED — NEXT
-5  YAML policy packs       NOT STARTED
-6  Explainability engine   NOT STARTED
-7  Replay / forensics      NOT STARTED
+1  JWT identity library    COMPLETE   G-IDENTITY — 7/7 tests
+2  Kong gateway plugin     COMPLETE   Redis→score→band→log
+3  Redis + Postgres store  COMPLETE   Health ok, event consumer
+4  Velocity + z-score      COMPLETE   G-SCORE — 7/7 tests
+5  YAML policy packs       COMPLETE   5 OWASP packs, policy engine
+6  Explainability engine   COMPLETE   G-EXPLAIN — 4/4 tests passed
+7  Replay / forensics      NOT STARTED — NEXT
 8  First enterprise deploy NOT STARTED
 9  Open header spec        NOT STARTED
 
@@ -42,6 +42,14 @@ FP rate (harness)  : 0.00%
 TP rate (harness)  : 86.67%
 Blocked incidents  : 0
 Paying enterprises : 0
+Tests passing      : 24 total across identity + scoring + eval harness
+
+GATES PASSED
+G-FP       : ✅ 0.00%
+G-IDENTITY : ✅ 7/7
+G-SCORE    : ✅ 7/7
+G-EXPLAIN  : ✅ 4/4
+G-FP       : ✅ re-confirmed after each task
 
 DECISIONS LOG
 1   2026-03-17  JWT + RS256 identity model         APEX v5.2 Phase 1 lock
@@ -52,7 +60,7 @@ DECISIONS LOG
 6   2026-03-17  Scoring: Go                        Latency + single language
 7   2026-03-17  Shell: Git Bash on Windows         Already installed
 8   2026-03-17  Runtime: Docker Desktop Windows    Redis + Postgres containers
-9   2026-03-18  titan-gate not relevant            Python crypto system, no overlap
+9   2026-03-18  titan-gate not relevant            Python crypto system
 10  2026-03-18  go-redis/v9 for Redis client       Standard maintained library
 
 PARKING LOT
@@ -64,8 +72,8 @@ OPA policy engine                    — Never in Phase 1
 Isolation Forest                     — Phase 2 (needs 90d data)
 
 NEXT SESSION
-First command : APEX ACTIVATE — Task 4
-Gates to run  : G-ENV, G-STATE, G-KILL, G-SCORE
+First command : APEX ACTIVATE — Task 7
+Gates to run  : G-ENV, G-STATE, G-KILL, G-TAMPER
 
 COMPETITIVE CLOCK
 Started  : March 17, 2026
@@ -73,4 +81,3 @@ Expires  : March 17, 2027
 Remaining: 12 months
 Threat   : Check Point bundling Lakera into 100K renewals
 Advantage: Deploy in 4 hours. First value in 7 days.
-git add -A && git commit -m "docs: Tasks 1-3 complete" && git push
