@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/agentrepengine/are/internal/audit"
 	"github.com/agentrepengine/are/internal/scoring"
 	"github.com/agentrepengine/are/internal/store"
 	_ "github.com/lib/pq"
@@ -75,6 +76,10 @@ func main() {
 
 	// Event ingest endpoint — POST /event
 	mux.HandleFunc("/event", eventHandler(db, scoreStore))
+	// Audit endpoints — Task 7
+	auditHandler := audit.NewHandler(db)
+	mux.HandleFunc("/audit/replay", auditHandler.ReplayHandler)
+	mux.HandleFunc("/audit/export", auditHandler.ExportHandler)
 
 	slog.Info("scoring service ready", "port", port)
 	if err := http.ListenAndServe(":"+port, mux); err != nil {

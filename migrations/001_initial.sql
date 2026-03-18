@@ -123,3 +123,25 @@ VALUES
     ('default', 'sub_agent_spawn_depth',          0,   0.3, 0),
     ('default', 'token_refresh_rate',             1,   1,   0)
 ON CONFLICT (cluster_id, feature_name) DO NOTHING;
+-- Hash chain verification function (Task 7)
+CREATE OR REPLACE FUNCTION verify_hash_chain(table_name TEXT)
+RETURNS BOOLEAN AS $$
+DECLARE
+    rec RECORD;
+    running_hash TEXT := '';
+    valid BOOLEAN := TRUE;
+BEGIN
+    FOR rec IN
+        SELECT id, created_at, decision, this_hash, prev_hash AS stored_prev
+        FROM enforcement_decisions
+        ORDER BY id ASC
+    LOOP
+        IF rec.stored_prev IS DISTINCT FROM running_hash THEN
+            RAISE NOTICE 'Hash chain break at id=%', rec.id;
+            valid := FALSE;
+        END IF;
+        running_hash := COALESCE(rec.this_hash, '');
+    END LOOP;
+    RETURN valid;
+END;
+$$ LANGUAGE plpgsql;
