@@ -1,0 +1,21 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: test-upstream
+    url: http://httpbin.org/anything
+    routes:
+      - name: test-route
+        paths:
+          - /test
+        methods:
+          - GET
+          - POST
+    plugins:
+      - name: agent-reputation
+        config:
+          redis_host: redis
+          redis_port: 6379
+          redis_timeout_ms: 2000
+          enforcement_mode: observe
+          scoring_service_url: http://scoring-service:8080

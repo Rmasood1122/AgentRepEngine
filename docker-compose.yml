@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   redis:
     image: redis:7-alpine
@@ -26,6 +25,33 @@ services:
       retries: 10
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  kong:
+    image: kong:3.6-ubuntu
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /kong/declarative/kong.yml
+      KONG_PLUGINS: bundled,agent-reputation
+      KONG_LUA_PACKAGE_PATH: /kong/plugins/?.lua;;
+      KONG_LOG_LEVEL: info
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+    volumes:
+      - ./kong/plugins:/kong/plugins
+      - ./kong/declarative:/kong/declarative
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   pgdata:
