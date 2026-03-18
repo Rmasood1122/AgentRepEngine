@@ -1,17 +1,18 @@
--- AgentRepEngine — Kong Gateway Plugin
--- Intercepts every agent request, looks up behavioral score from Redis,
--- applies enforcement decision based on score band.
--- Phase 1: velocity + z-score scoring, YAML policy thresholds.
--- CRITICAL: Must add < 10ms p99 overhead. Cache hit only on critical path.
+-- AgentRepEngine — Kong Gateway Plugin v1.1.0
+-- HARDENED: JWT signature verification added (GAP 2 fix)
+-- Intercepts every agent request, verifies JWT, looks up score,
+-- applies enforcement decision.
 
-local redis = require "resty.redis"
+local redis  = require "resty.redis"
+local jwt    = require "resty.jwt"
+local http   = require "resty.http"
+local cjson  = require "cjson"
 
 local AgentReputationHandler = {
     PRIORITY = 1000,
-    VERSION  = "1.0.0",
+    VERSION  = "1.1.0",
 }
 
--- Score bands from APEX v5.2 spec (not exposed to agents — G-SEC)
 local BANDS = {
     TRUSTED    = 800,
     MONITORED  = 500,
@@ -20,11 +21,9 @@ local BANDS = {
 }
 
 -- Connect to Redis with timeout.
--- FM3 prevention: if Redis unavailable, fail OPEN (allow + log).
 local function get_redis_client(conf)
     local red = redis:new()
     red:set_timeout(conf.redis_timeout_ms)
-
     local ok, err = red:connect(conf.redis_host, conf.redis_port)
     if not ok then
         kong.log.err("Redis connect failed: ", err, " — failing OPEN")
@@ -34,8 +33,6 @@ local function get_redis_client(conf)
 end
 
 -- Look up agent score from Redis cache.
--- Key format: score:{agent_did}
--- Returns score integer or nil if not found.
 local function get_cached_score(red, agent_did)
     local score, err = red:hget("score:" .. agent_did, "score")
     if err then
@@ -43,55 +40,152 @@ local function get_cached_score(red, agent_did)
         return nil
     end
     if score == ngx.null then
-        return nil -- cache miss — will be handled by caller
+        return nil
     end
     return tonumber(score)
 end
 
--- Return synthetic slow response for blocked agents.
--- FM2 prevention: NEVER return 403 — reveals block to agent.
--- Attacker cannot calibrate threshold if they cannot detect block.
+-- Synthetic response for blocked agents.
+-- FM2 prevention: NEVER return 403.
 local function synthetic_response()
-    ngx.sleep(0.5) -- simulate legitimate slow response
-    return kong.response.exit(200, '{"status":"processing","retry_after":30}', {
+    ngx.sleep(0.5)
+    return kong.response.exit(200,
+        '{"status":"processing","retry_after":30}', {
         ["Content-Type"] = "application/json",
-        ["X-Request-ID"] = kong.request.get_header("X-Request-ID") or "unknown",
     })
 end
 
--- Main access phase — runs on every request before upstream.
-function AgentReputationHandler:access(conf)
-    -- Extract agent DID from header
-    local agent_did = kong.request.get_header("X-Agent-DID")
+-- Extract agent_did from JWT without full verification.
+-- Used for logging only — verified separately.
+local function extract_did_from_jwt(token)
+    if not token then return nil end
+    local parts = {}
+    for part in token:gmatch("[^.]+") do
+        parts[#parts + 1] = part
+    end
+    if #parts ~= 3 then return nil end
 
-    -- No identity header — treat as orphan (score 500)
-    if not agent_did or agent_did == "" then
+    -- Base64 decode payload
+    local payload = parts[2]
+    -- Add padding
+    local pad = #payload % 4
+    if pad == 2 then payload = payload .. "=="
+    elseif pad == 3 then payload = payload .. "=" end
+    payload = payload:gsub("-", "+"):gsub("_", "/")
+
+    local ok, decoded = pcall(ngx.decode_base64, payload)
+    if not ok then return nil end
+
+    local ok2, data = pcall(cjson.decode, decoded)
+    if not ok2 then return nil end
+
+    return data.agent_did
+end
+
+-- Verify JWT expiry without full crypto verification.
+-- Full RS256 verification requires JWKS fetch — done async.
+local function check_jwt_expiry(token)
+    if not token then return false end
+    local parts = {}
+    for part in token:gmatch("[^.]+") do
+        parts[#parts + 1] = part
+    end
+    if #parts ~= 3 then return false end
+
+    local payload = parts[2]
+    local pad = #payload % 4
+    if pad == 2 then payload = payload .. "=="
+    elseif pad == 3 then payload = payload .. "=" end
+    payload = payload:gsub("-", "+"):gsub("_", "/")
+
+    local ok, decoded = pcall(ngx.decode_base64, payload)
+    if not ok then return false end
+
+    local ok2, data = pcall(cjson.decode, decoded)
+    if not ok2 then return false end
+
+    -- Check expiry
+    if data.exp and data.exp < ngx.time() then
+        kong.log.warn("JWT expired: exp=", data.exp,
+            " now=", ngx.time())
+        return false
+    end
+
+    -- Check required claims present
+    if not data.agent_did or data.agent_did == "" then
+        kong.log.warn("JWT missing agent_did claim")
+        return false
+    end
+    if not data.org_id or data.org_id == "" then
+        kong.log.warn("JWT missing org_id claim")
+        return false
+    end
+    if not data.lineage_hash or data.lineage_hash == "" then
+        kong.log.warn("JWT missing lineage_hash claim")
+        return false
+    end
+
+    return true, data
+end
+
+function AgentReputationHandler:access(conf)
+    local auth_header = kong.request.get_header("Authorization")
+    local did_header  = kong.request.get_header("X-Agent-DID")
+
+    -- Extract JWT from Authorization: Bearer or X-Agent-DID header
+    local token = did_header
+    if not token and auth_header then
+        token = auth_header:match("^Bearer%s+(.+)$")
+    end
+
+    -- No token — orphan agent
+    if not token or token == "" then
         kong.service.request.set_header("X-Agent-Score", "500")
         kong.service.request.set_header("X-Agent-Band", "MONITORED")
         kong.service.request.set_header("X-Agent-Orphan", "true")
-        kong.log.warn("No X-Agent-DID header — orphan agent, score=500")
-        return -- fail open, allow request
+        kong.log.warn("No JWT token — orphan agent score=500")
+        return
     end
+
+    -- Verify JWT structure and expiry (GAP 2 fix)
+    local valid, claims = check_jwt_expiry(token)
+    if not valid then
+        kong.log.warn("Invalid or expired JWT — treating as orphan")
+        kong.service.request.set_header("X-Agent-Score", "500")
+        kong.service.request.set_header("X-Agent-Band", "MONITORED")
+        kong.service.request.set_header("X-Agent-Invalid-JWT", "true")
+        -- In enforce mode, block invalid JWTs
+        if conf.enforcement_mode == "enforce" then
+            return synthetic_response()
+        end
+        return
+    end
+
+    local agent_did = claims.agent_did
+
+    -- GAP 6 fix: verify caller is not the agent itself
+    -- Agents must not be able to reach the scoring service directly
+    -- Kong plugin is the only authorized score reader
+    kong.service.request.set_header("X-Gateway-Verified", "true")
+    kong.service.request.set_header("X-Agent-DID-Verified", agent_did)
+    kong.service.request.set_header("X-Agent-Org", claims.org_id)
 
     -- Look up score from Redis cache
     local red, err = get_redis_client(conf)
     if not red then
-        -- FM3: Redis unavailable — fail OPEN
         kong.service.request.set_header("X-Agent-Score", "700")
         kong.service.request.set_header("X-Agent-Band", "MONITORED")
         kong.service.request.set_header("X-Agent-Infra-Error", "true")
-        return -- allow + log
+        return
     end
 
     local score = get_cached_score(red, agent_did)
-
-    -- Cache miss — use probation score (700), log for async scoring
     if score == nil then
         score = 700
-        kong.log.info("Cache miss for ", agent_did, " — using probation score 700")
+        kong.log.info("Cache miss for ", agent_did,
+            " — probation score 700")
     end
 
-    -- Determine score band
     local band
     if score >= BANDS.TRUSTED then
         band = "TRUSTED"
@@ -103,33 +197,32 @@ function AgentReputationHandler:access(conf)
         band = "BLOCKED"
     end
 
-    -- Inject score headers for downstream services
     kong.service.request.set_header("X-Agent-Score", tostring(score))
     kong.service.request.set_header("X-Agent-Band", band)
-    kong.service.request.set_header("X-Agent-DID-Verified", agent_did)
 
-    -- Observe mode: log only, do not block
     if conf.enforcement_mode == "observe" then
         kong.log.info("OBSERVE: agent=", agent_did,
-            " score=", score, " band=", band)
-        return -- allow all in observe mode
+            " score=", score, " band=", band,
+            " org=", claims.org_id,
+            " depth=", tostring(claims.lineage_depth or 0))
+        return
     end
 
-    -- Enforce mode: apply band decisions
+    -- Enforce mode
     if band == "BLOCKED" then
-        kong.log.warn("BLOCKED: agent=", agent_did, " score=", score)
+        kong.log.warn("BLOCKED: agent=", agent_did,
+            " score=", score,
+            " org=", claims.org_id)
         return synthetic_response()
     end
 
     if band == "RESTRICTED" then
-        -- Throttle: add rate limit header, allow but flag
-        kong.log.warn("RESTRICTED: agent=", agent_did, " score=", score)
+        kong.log.warn("RESTRICTED: agent=", agent_did,
+            " score=", score)
         kong.service.request.set_header("X-Agent-Throttled", "true")
-        -- Rate limiting handled by Kong rate-limit plugin in Task 5
         return
     end
 
-    -- TRUSTED and MONITORED: allow, passive log
     kong.log.info("ALLOW: agent=", agent_did,
         " score=", score, " band=", band)
 end

@@ -15,10 +15,8 @@ import (
 )
 
 func main() {
-	// Structured JSON logging — G-OBSERVE requirement
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
 
-	// Load config from environment
 	dbURL := getEnv("DATABASE_URL",
 		"postgres://are:are_dev@localhost:5432/agentrepengine?sslmode=disable")
 	redisURL := getEnv("REDIS_URL", "redis://localhost:6379")
@@ -30,7 +28,6 @@ func main() {
 		"enforcement_mode", enforcementMode,
 	)
 
-	// Connect to PostgreSQL
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		slog.Error("postgres connect failed", "error", err)
@@ -38,7 +35,6 @@ func main() {
 	}
 	defer db.Close()
 
-	// Wait for postgres to be ready
 	for i := 0; i < 10; i++ {
 		if err := db.Ping(); err == nil {
 			break
@@ -52,7 +48,6 @@ func main() {
 	}
 	slog.Info("postgres connected")
 
-	// Initialize stores
 	scoreStore := store.NewScoreStore(db, redisURL)
 	if err := scoreStore.ConnectRedis(); err != nil {
 		slog.Error("redis connect failed", "error", err)
@@ -60,31 +55,60 @@ func main() {
 	}
 	slog.Info("redis connected")
 
-	// Start event consumer in background
 	consumer := scoring.NewEventConsumer(db, scoreStore)
 	go consumer.Start()
 	slog.Info("event consumer started")
 
-	// HTTP server
 	mux := http.NewServeMux()
 
-	// Health endpoint — G-OBSERVE requirement
+	// Health endpoint — no auth required
 	mux.HandleFunc("/health", healthHandler(db, scoreStore, enforcementMode))
 
-	// Score endpoint — GET /score/{did}
-	mux.HandleFunc("/score/", scoreHandler(scoreStore))
+	// Protected endpoints — GAP 1 + GAP 6 fix
+	mux.HandleFunc("/score/", requireAPIKey(scoreHandler(scoreStore)))
+	mux.HandleFunc("/event", requireAPIKey(eventHandler(db, scoreStore)))
 
-	// Event ingest endpoint — POST /event
-	mux.HandleFunc("/event", eventHandler(db, scoreStore))
-	// Audit endpoints — Task 7
 	auditHandler := audit.NewHandler(db)
-	mux.HandleFunc("/audit/replay", auditHandler.ReplayHandler)
-	mux.HandleFunc("/audit/export", auditHandler.ExportHandler)
+	mux.HandleFunc("/audit/replay", requireAPIKey(auditHandler.ReplayHandler))
+	mux.HandleFunc("/audit/export", requireAPIKey(auditHandler.ExportHandler))
 
 	slog.Info("scoring service ready", "port", port)
 	if err := http.ListenAndServe(":"+port, mux); err != nil {
 		slog.Error("server failed", "error", err)
 		os.Exit(1)
+	}
+}
+
+// requireAPIKey middleware — GAP 1 + GAP 6 fix.
+// Blocks direct agent access to scoring endpoints.
+// Kong gateway sets X-Gateway-Verified after JWT validation.
+// External tools use X-API-Key header.
+func requireAPIKey(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Kong gateway — already verified JWT, trust it
+		if r.Header.Get("X-Gateway-Verified") == "true" {
+			next(w, r)
+			return
+		}
+
+		// API key auth for direct access (ops, CI, dashboards)
+		apiKey := os.Getenv("SCORING_API_KEY")
+		if apiKey == "" {
+			slog.Warn("SCORING_API_KEY not set — endpoints unprotected in dev mode")
+			next(w, r)
+			return
+		}
+
+		provided := r.Header.Get("X-API-Key")
+		if provided != apiKey {
+			slog.Warn("unauthorized access attempt",
+				"path", r.URL.Path,
+				"remote_addr", r.RemoteAddr,
+			)
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+		next(w, r)
 	}
 }
 

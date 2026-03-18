@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/agentrepengine/are/internal/scoring"
@@ -142,15 +143,24 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 		return fmt.Errorf("postgres score write: %w", err)
 	}
 
-	// Write Redis cache
+	// Write Redis cache — GAP 3 fix: log failures, never silently ignore
+	// Redis failure is non-fatal — Postgres is source of truth
 	key := "score:" + agentDID
-	s.rdb.HSet(s.ctx, key,
+	if err := s.rdb.HSet(s.ctx, key,
 		"score", score,
 		"band", band,
 		"reason", string(reasonJSON),
 		"updated_at", time.Now().Unix(),
-	)
-	s.rdb.Expire(s.ctx, key, 60*time.Second)
+	).Err(); err != nil {
+		slog.Error("redis_write_failed",
+			"agent_did", agentDID,
+			"error", err,
+		)
+		// Do not return error — Postgres write succeeded
+		// Kong will miss cache on next request — acceptable
+	} else {
+		s.rdb.Expire(s.ctx, key, 60*time.Second)
+	}
 
 	return nil
 }
