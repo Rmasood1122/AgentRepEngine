@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -230,7 +232,59 @@ func eventHandler(db *sql.DB, s *store.ScoreStore) http.HandlerFunc {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
+
+		var body struct {
+			AgentDID    string `json:"agent_did"`
+			OrgID       string `json:"org_id"`
+			EventType   string `json:"event_type"`
+			PrivacyTier int    `json:"privacy_tier"`
+			Payload     struct {
+				Method         string  `json:"method"`
+				Path           string  `json:"path"`
+				StatusCode     int     `json:"status_code"`
+				ScoreAtRequest float64 `json:"score_at_request"`
+				BandAtRequest  string  `json:"band_at_request"`
+			} `json:"payload"`
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			http.Error(w, "invalid json", http.StatusBadRequest)
+			return
+		}
+		if body.AgentDID == "" || body.EventType == "" {
+			http.Error(w, "agent_did and event_type required", http.StatusBadRequest)
+			return
+		}
+
+		privacyTier := body.PrivacyTier
+		if privacyTier == 0 {
+			privacyTier = 1
+		}
+
+		// Construct feature vector from gateway-observable signals.
+		// Gateway sees: request rate proxy (1.0 per call), endpoint breadth.
+		// PII/cross-tenant/escalation fields require agent-side instrumentation
+		// and will be populated in Phase 2 SDK. Default to 0 until then.
+		vector := scoring.FeatureVector{
+			ToolCallRatePerHour:       1.0,
+			UniqueEndpointsPerHour:    1.0,
+			BulkAccessCountPerSession: 0,
+			PIIFieldAccessRate:        0,
+			CrossTenantProbeCount:     0,
+			PermissionEscalationCount: 0,
+			SubAgentSpawnDepth:        0,
+			TokenRefreshRate:          0,
+		}
+
+		if err := s.EnqueueEvent(body.AgentDID, body.EventType,
+			vector, privacyTier); err != nil {
+			log.Printf("ERROR enqueue event agent=%s: %v", body.AgentDID, err)
+			http.Error(w, "enqueue failed", http.StatusInternalServerError)
+			return
+		}
+
 		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusAccepted)
 		fmt.Fprintf(w, `{"status":"queued"}`)
 	}
 }

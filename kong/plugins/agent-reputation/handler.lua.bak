@@ -1,13 +1,14 @@
--- AgentRepEngine — Kong Gateway Plugin v1.3.0
--- Phase 2: adds log phase event emission for data moat
+-- AgentRepEngine — Kong Gateway Plugin v1.2.0
 -- Uses only Kong-bundled libraries: resty.redis, cjson, ngx
+-- JWT claims extracted via base64 decode (no external JWT lib needed)
+-- Full RS256 verification deferred to scoring service
 
 local redis = require "resty.redis"
 local cjson = require "cjson"
 
 local AgentReputationHandler = {
     PRIORITY = 1000,
-    VERSION  = "1.3.0",
+    VERSION  = "1.2.0",
 }
 
 local BANDS = {
@@ -48,25 +49,34 @@ local function synthetic_response()
     })
 end
 
+-- Extract JWT claims via base64 decode (no external lib needed)
+-- Returns claims table or nil
 local function extract_jwt_claims(token)
     if not token or token == "" then return nil end
+
     local parts = {}
     for part in token:gmatch("[^.]+") do
         parts[#parts + 1] = part
     end
     if #parts ~= 3 then return nil end
+
+    -- Pad base64
     local payload = parts[2]
     local pad = #payload % 4
     if pad == 2 then payload = payload .. "=="
     elseif pad == 3 then payload = payload .. "=" end
     payload = payload:gsub("-", "+"):gsub("_", "/")
+
     local decoded = ngx.decode_base64(payload)
     if not decoded then return nil end
+
     local ok, claims = pcall(cjson.decode, decoded)
     if not ok then return nil end
+
     return claims
 end
 
+-- Validate required JWT claims are present and token not expired
 local function validate_claims(claims)
     if not claims then return false, "no claims" end
     if not claims.agent_did or claims.agent_did == "" then
@@ -87,6 +97,7 @@ end
 function AgentReputationHandler:access(conf)
     local token = kong.request.get_header("X-Agent-DID")
 
+    -- No token — orphan agent
     if not token or token == "" then
         kong.service.request.set_header("X-Agent-Score", "500")
         kong.service.request.set_header("X-Agent-Band", "MONITORED")
@@ -95,6 +106,7 @@ function AgentReputationHandler:access(conf)
         return
     end
 
+    -- Extract and validate claims (GAP 2 fix — no resty.jwt needed)
     local claims = extract_jwt_claims(token)
     local valid, reason = validate_claims(claims)
 
@@ -111,10 +123,12 @@ function AgentReputationHandler:access(conf)
 
     local agent_did = claims.agent_did
 
+    -- Set verified headers for downstream services
     kong.service.request.set_header("X-Gateway-Verified", "true")
     kong.service.request.set_header("X-Agent-DID-Verified", agent_did)
     kong.service.request.set_header("X-Agent-Org", claims.org_id)
 
+    -- Look up score from Redis
     local red, err = get_redis_client(conf)
     if not red then
         kong.service.request.set_header("X-Agent-Score", "700")
@@ -162,58 +176,62 @@ function AgentReputationHandler:access(conf)
 
     kong.log.info("ALLOW: agent=", agent_did, " score=", score, " band=", band)
 end
-
 function AgentReputationHandler:log(conf)
-    -- Emit behavioral event for data moat (L6 — must collect from day one)
-    -- Runs after response is sent — zero latency impact on critical path
     local token = kong.request.get_header("X-Agent-DID")
     if not token or token == "" then return end
 
     local claims = extract_jwt_claims(token)
     if not claims or not claims.agent_did then return end
 
-    local agent_did = claims.agent_did
-    local org_id    = claims.org_id or "unknown"
-    local method    = kong.request.get_method()
-    local path      = kong.request.get_path()
-    local status    = kong.response.get_status()
-    local score     = kong.request.get_header("X-Agent-Score") or "700"
-    local band      = kong.request.get_header("X-Agent-Band") or "MONITORED"
+    local agent_did  = claims.agent_did
+    kong.log.warn("DEBUG log phase reached: agent_did=", claims.agent_did or "NIL")
+    local org_id     = claims.org_id or "unknown"
+    local method     = kong.request.get_method()
+    local path       = kong.request.get_path()
+    local status     = kong.response.get_status()
+    local score      = kong.request.get_header("X-Agent-Score") or "700"
+    local band       = kong.request.get_header("X-Agent-Band") or "MONITORED"
 
     local event_payload = cjson.encode({
-        agent_did    = agent_did,
-        org_id       = org_id,
-        event_type   = "http_request",
-        payload      = {
-            method           = method,
-            path             = path,
-            status_code      = status,
+        agent_did         = agent_did,
+        org_id            = org_id,
+        event_type        = "http_request",
+        payload           = {
+            method      = method,
+            path        = path,
+            status_code = status,
             score_at_request = tonumber(score),
             band_at_request  = band,
         },
-        privacy_tier   = 1,
+        privacy_tier  = 1,
         schema_version = "v1",
     })
 
-    local scoring_url = conf.scoring_service_url or "http://scoring-service:8080"
-    local host, port  = scoring_url:match("https?://([^:]+):(%d+)")
+    -- Parse host from scoring_service_url (strip http://)
+    local scoring_url  = conf.scoring_service_url or "http://scoring-service:8080"
+    local host, port   = scoring_url:match("https?://([^:]+):(%d+)")
     if not host then
         host = scoring_url:match("https?://(.+)")
         port = "8080"
     end
     port = tonumber(port) or 8080
 
-    -- ngx.socket not available in log phase — use timer (runs in background)
+    
+    sock:settimeout(100)
+-- Use timer to emit event (ngx.socket not available in log phase)
     local ok, err = ngx.timer.at(0, function(premature)
         if premature then return end
+
         local sock = ngx.socket.tcp()
         sock:settimeout(200)
-        local connected, connect_err = sock:connect(host, port)
-        if not connected then
+
+        local connect_ok, connect_err = sock:connect(host, port)
+        if not connect_ok then
             ngx.log(ngx.WARN, "Event emit failed (connect): ", connect_err)
             sock:close()
             return
         end
+
         local api_key = conf.api_key or ""
         local req = "POST /event HTTP/1.1\r\n"
                  .. "Host: " .. host .. "\r\n"
@@ -223,17 +241,18 @@ function AgentReputationHandler:log(conf)
                  .. "Connection: close\r\n"
                  .. "\r\n"
                  .. event_payload
+
         local _, send_err = sock:send(req)
         if send_err then
             ngx.log(ngx.WARN, "Event emit failed (send): ", send_err)
         end
+
         sock:receive("*l")
         sock:close()
     end)
 
     if not ok then
-        kong.log.warn("Event emit timer failed: ", err)
-    end
+    sock:receive("*l")    sock:close()
 end
 
 return AgentReputationHandler
