@@ -1,49 +1,48 @@
-code CONTINUATION_PROMPT.md
-```
-
-`Ctrl+A`, delete, paste this, `Ctrl+S`:
-```
 AGENTREPENGINE — CONTINUATION PROMPT
-Last updated: March 19, 2026
+Last updated: 2026-03-19 (Session B complete)
 
 ACTIVATION COMMAND FOR NEW CHAT:
 APEX ACTIVATE — Phase 2
 
 CURRENT STATE
-Phase    : 2 — INTELLIGENCE
-Session  : B (next — DB timeouts, composite z-score, permanent flag)
-Score    : 65 → 73 (Session A complete)
-Clock    : 12 months
-Tests    : 27 passing, 0 failing, 4 skip (Windows networking)
+Phase    : 2 — INTELLIGENCE (activated Session B)
+Session  : C (next)
 FP rate  : 0.00%
-
-SESSION A — COMPLETE ✅
-  A1  Architecture diagram     ✅ docs/architecture/system-architecture.md
-  A2  Metrics instrumented     ✅ cache hits, blocked decisions, active agents
-  A9  Data retention policy    ✅ config/retention_policy.yaml
-
-SESSION B — NEXT
-  B3  DB query timeouts        2 hrs  +5 pts  all DB calls need context timeout
-  B4  Composite z-score        4 hrs  +5 pts  replace worstZ with weighted RMS
-  B6  Permanent flag           2 hrs  +4 pts  caught_count + recidivism multiplier
-
-SESSION C — AFTER B
-  C5  Two-tier explainability  3 hrs  +4 pts
-  C7  Hot-reload policy        3 hrs  +3 pts
-  C8  Helm chart               6 hrs  +3 pts
-  C10 DLQ monitoring           2 hrs  +3 pts
-
-SCORE TARGETS
-  Session A complete : 65 → 73
-  Session B complete : 73 → 83
-  Session C complete : 83 → 90+
-  FAANG grade        : 85+
+Clock    : 12 months from 2026-03-17
+Tests    : 27 passing, 0 failing, 4 skip (Windows networking)
 
 PHASE 1 — COMPLETE ✅
   Tasks 0–9 done
   1 blocked incident: did:jwt:finserv-demo:trading-agent:001
-  score 743→187, delta -556, bulk_pii_access_prevention_v1
-  chain_verified: true, FP 0.00%
+    score 743→187, delta -556, bulk_pii_access_prevention_v1
+    chain_verified: true, FP 0.00%
+  Open header spec: docs/specs/agent-reputation-header-spec-v1-DRAFT.md
+
+PHASE 2 — ACTIVE
+  Data collection started: 2026-03-19
+  agent_events pipeline: LIVE ✅ (fixed Session B)
+  Isolation Forest unblock date: ~2026-06-17 (90 days from data start)
+
+SESSION B — COMPLETE ✅
+  Fixed: Event pipeline never wired (RC-P2-001)
+    Kong log phase now emits via ngx.timer.at(0) to /event endpoint
+    eventHandler stub replaced with real EnqueueEvent call
+    agent_events collecting on every Kong-proxied request
+  Fixed: psql alias set permanently in ~/.bashrc
+    alias psql="docker exec -i agentrepengine-postgres-1 psql -U are -d agentrepengine"
+  ZROS v2.6 restored + Session B rework log committed
+  Fix rate this session: ~67% 🔴 — root causes gated in ZROS
+
+SESSION C — NEXT (priority order)
+  1. Task 11 — LangChain native plugin         → MODE 2
+  2. Task 15 — SOC2 compliance export          → MODE 4
+  3. Task 14 — Multi-tenant SaaS architecture  → MODE 2
+  10. Task 10 — Isolation Forest               → PARKED until 2026-06-17
+
+SESSION C FIRST COMMANDS
+  Run G-STATE before any build work:
+  psql -c "SELECT COUNT(*) FROM agent_events WHERE created_at > NOW() - INTERVAL '24 hours';"
+  # Must be >0 — if 0, pipeline gap, fix before proceeding
 
 SERVICES RUNNING (6)
   Kong             : localhost:8000/8001  ✅
@@ -57,50 +56,54 @@ ENVIRONMENT
   Shell   : Git Bash on Windows
   Runtime : Docker Desktop Windows
   Go      : 1.24.1
+  DB user : are / DB name: agentrepengine
   GitHub  : https://github.com/Rehanrana11/AgentRepEngine.git
 
+TOOLING RULES (learned Session B)
+  1. Go code change → docker compose build <service> → docker compose up -d
+     NEVER just docker compose restart after code changes
+  2. Lua file edit → verify with sed -n after any find-replace
+     For Lua: prefer full rewrite over surgical find-replace
+  3. Kong socket in log phase → always use ngx.timer.at(0, fn)
+     ngx.socket.tcp() NOT available directly in log_by_lua*
+  4. psql alias must be set at session start — verify with psql -c "SELECT 1;"
+
 KEY FILES
-  cmd/scoring-service/main.go         — HTTP server, graceful shutdown, metrics
-  cmd/gentoken/main.go                — JWT token generator for testing
-  internal/identity/                  — JWT RS256, claims, probation
-  internal/scoring/                   — H+V formula, policy, explainability
-  internal/store/score_store.go       — Redis+Postgres, cache invalidation, metrics
-  internal/audit/                     — replay, export, override, SIEM
-  internal/metrics/metrics.go         — Prometheus metrics definitions
-  kong/plugins/agent-reputation/      — Kong Lua plugin v1.2.0
-  config/policy_packs/                — 5 OWASP LLM Top 10 packs
-  config/scoring_weights.yaml         — H=0.5, V=0.5, decay=0.1
-  config/prometheus/prometheus.yml    — Prometheus scrape config
-  config/retention_policy.yaml        — Data retention policy
-  docs/architecture/system-architecture.md — CISO-ready architecture doc
-  docs/specs/agent-reputation-header-spec-v1-DRAFT.md — Open header spec
-  migrations/001_initial.sql          — All tables + hash chain function
-  tests/eval_harness/harness_test.go  — G-FP gate 0.00%
+  cmd/scoring-service/main.go              — HTTP server, eventHandler, metrics
+  internal/scoring/features.go             — FeatureVector struct (8 fields)
+  internal/store/score_store.go            — EnqueueEvent, Redis+Postgres
+  internal/scoring/consumer.go             — Event consumer, 100 batch/5s
+  kong/plugins/agent-reputation/handler.lua — Kong plugin v1.3.0 (log phase added)
+  config/policy_packs/                     — 5 OWASP LLM Top 10 packs
+  config/scoring_weights.yaml              — H=0.5, V=0.5, decay=0.1
+  migrations/001_initial.sql               — All tables + hash chain function
+  tests/eval_harness/harness_test.go       — G-FP gate 0.00%
+  ZROS-v2_6-AgentRepEngine.txt            — Execution discipline + rework log
+  docs/specs/agent-reputation-header-spec-v1-DRAFT.md
 
 DECISIONS LOG
   1   JWT + RS256 identity model
   2   PostgreSQL async queue not Kafka
   3   YAML policy not OPA
-  4   Velocity + z-score not IsoForest (needs 90d data)
+  4   Velocity + z-score not IsoForest (needs 90d data — unblocks 2026-06-17)
   5   Gateway: Kong (Lua)
   6   Scoring: Go
   7   Shell: Git Bash on Windows
   8   Runtime: Docker Desktop Windows
   9   go-redis/v9 for Redis client
   10  Audit tests skip on Windows — Docker VM networking
-  11  Hardening round 1 complete — GAP1-3,6 fixed
-  12  bootstrap.go removed — was overwriting harness_test.go
-  13  Kong plugin v1.2.0 — native JWT extraction, no resty.jwt
+  11  Kong plugin v1.3.0 — log phase emits events via ngx.timer.at
+  12  eventHandler: constructs FeatureVector from gateway signals (Tier 1 only)
+  13  DB credentials: POSTGRES_USER=are, POSTGRES_DB=agentrepengine
 
-ANTI-SCOPE (never in Phase 1)
-  Federation, Kafka, OPA, Isolation Forest, DID/ledger,
-  multi-tenant before single-tenant validated
+ANTI-SCOPE (never in Phase 1 or early Phase 2)
+  Federation, Kafka, OPA, Isolation Forest before 2026-06-17,
+  DID/ledger, multi-tenant before single-tenant validated
 
 VALUATION
   Phase 1 complete + blocked incident : $35M–$75M [H]
   Phase 2 complete + 3 enterprises    : $75M–$150M [H]
-  Competitive clock                   : 12 months from March 17 2026
+  Competitive clock                   : 12 months from 2026-03-17
 
 NEXT SESSION FIRST COMMAND
   APEX ACTIVATE — Phase 2
-  Then immediately: APEX SESSION B
