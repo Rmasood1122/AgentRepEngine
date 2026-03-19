@@ -103,3 +103,4 @@ Threat   : Check Point bundling Lakera into 100K renewals
 Advantage: Already deployed. Blocked incident on record.
            Check Point is a renewal conversation 6 months from now.
            We are already live.
+           git add CONTINUATION_PROMPT.md && git commit -m "docs: FAANG hardening complete, Phase 2 ready" && git push
