@@ -1,106 +1,106 @@
+code CONTINUATION_PROMPT.md
+```
+
+`Ctrl+A`, delete, paste this, `Ctrl+S`:
+```
 AGENTREPENGINE — CONTINUATION PROMPT
-Last updated: March 18, 2026
+Last updated: March 19, 2026
+
+ACTIVATION COMMAND FOR NEW CHAT:
+APEX ACTIVATE — Phase 2
 
 CURRENT STATE
-Phase    : Phase 2 — INTELLIGENCE (Months 6–12)
-Task     : Task 10 — Isolation Forest (NOT STARTED — needs 90 days data)
-           First action: Task 13 AWS Marketplace + Task 11 LangChain
-Clock    : 12 months remaining
-Rework   : 0% real work
+Phase    : 2 — INTELLIGENCE
+Session  : B (next — DB timeouts, composite z-score, permanent flag)
+Score    : 65 → 73 (Session A complete)
+Clock    : 12 months
+Tests    : 27 passing, 0 failing, 4 skip (Windows networking)
+FP rate  : 0.00%
+
+SESSION A — COMPLETE ✅
+  A1  Architecture diagram     ✅ docs/architecture/system-architecture.md
+  A2  Metrics instrumented     ✅ cache hits, blocked decisions, active agents
+  A9  Data retention policy    ✅ config/retention_policy.yaml
+
+SESSION B — NEXT
+  B3  DB query timeouts        2 hrs  +5 pts  all DB calls need context timeout
+  B4  Composite z-score        4 hrs  +5 pts  replace worstZ with weighted RMS
+  B6  Permanent flag           2 hrs  +4 pts  caught_count + recidivism multiplier
+
+SESSION C — AFTER B
+  C5  Two-tier explainability  3 hrs  +4 pts
+  C7  Hot-reload policy        3 hrs  +3 pts
+  C8  Helm chart               6 hrs  +3 pts
+  C10 DLQ monitoring           2 hrs  +3 pts
+
+SCORE TARGETS
+  Session A complete : 65 → 73
+  Session B complete : 73 → 83
+  Session C complete : 83 → 90+
+  FAANG grade        : 85+
 
 PHASE 1 — COMPLETE ✅
-All 3 completion criteria met:
-  ✅ Tasks 0–9 complete
-  ✅ 1 documented blocked incident
-     did:jwt:finserv-demo:trading-agent:001
-     score 743→187 delta -556
-     bulk_pii_access_prevention_v1
-     chain_verified: true
-  ✅ FP rate 0.00% measured
+  Tasks 0–9 done
+  1 blocked incident: did:jwt:finserv-demo:trading-agent:001
+  score 743→187, delta -556, bulk_pii_access_prevention_v1
+  chain_verified: true, FP 0.00%
 
-PHASE 2 TASK BOARD
-10  Isolation Forest scoring    NOT STARTED (needs 90d behavioral data)
-11  LangChain native plugin     NOT STARTED — PRIORITY
-12  AutoGen integration         NOT STARTED
-13  AWS Marketplace listing     NOT STARTED — PRIORITY
-14  Multi-tenant SaaS           NOT STARTED
-15  Compliance export SOC2      NOT STARTED
-16  Open spec published         NOT STARTED (after 3+ enterprises)
-
-PHASE 2 COMPLETION CRITERIA
-☐ 3+ paying enterprises
-☐ Compliance export shipped
-☐ Federation governance designed
-☐ Open spec published + referenced by 1+ framework
+SERVICES RUNNING (6)
+  Kong             : localhost:8000/8001  ✅
+  Scoring service  : localhost:8080       ✅
+  PostgreSQL       : localhost:5432       ✅
+  Redis            : localhost:6379       ✅
+  Prometheus       : localhost:9090       ✅
+  Grafana          : localhost:3000       ✅
 
 ENVIRONMENT
-Scoring language : Go
-Gateway          : Kong (Lua)
-Shell            : Git Bash on Windows
-Runtime          : Docker Desktop on Windows
-GitHub           : https://github.com/Rehanrana11/AgentRepEngine.git
+  Shell   : Git Bash on Windows
+  Runtime : Docker Desktop Windows
+  Go      : 1.24.1
+  GitHub  : https://github.com/Rehanrana11/AgentRepEngine.git
 
-SERVICES RUNNING
-Kong             : localhost:8000 / localhost:8001
-Scoring service  : localhost:8080
-PostgreSQL       : localhost:5432
-Redis            : localhost:6379
-
-METRICS
-FP rate (harness)  : 0.00%
-TP rate (harness)  : 86.67%
-Blocked incidents  : 1 (documented)
-Paying enterprises : 0 (design partner outreach next)
-Tests passing      : 24+
-
-GATES PASSED — PHASE 1
-G-FP       : ✅ 0.00%
-G-IDENTITY : ✅ 7/7
-G-SCORE    : ✅ 7/7
-G-EXPLAIN  : ✅ 4/4
-G-TAMPER   : ✅ chain_verified = true
-G-DEPLOY   : ✅ blocked incident on record
+KEY FILES
+  cmd/scoring-service/main.go         — HTTP server, graceful shutdown, metrics
+  cmd/gentoken/main.go                — JWT token generator for testing
+  internal/identity/                  — JWT RS256, claims, probation
+  internal/scoring/                   — H+V formula, policy, explainability
+  internal/store/score_store.go       — Redis+Postgres, cache invalidation, metrics
+  internal/audit/                     — replay, export, override, SIEM
+  internal/metrics/metrics.go         — Prometheus metrics definitions
+  kong/plugins/agent-reputation/      — Kong Lua plugin v1.2.0
+  config/policy_packs/                — 5 OWASP LLM Top 10 packs
+  config/scoring_weights.yaml         — H=0.5, V=0.5, decay=0.1
+  config/prometheus/prometheus.yml    — Prometheus scrape config
+  config/retention_policy.yaml        — Data retention policy
+  docs/architecture/system-architecture.md — CISO-ready architecture doc
+  docs/specs/agent-reputation-header-spec-v1-DRAFT.md — Open header spec
+  migrations/001_initial.sql          — All tables + hash chain function
+  tests/eval_harness/harness_test.go  — G-FP gate 0.00%
 
 DECISIONS LOG
-1   2026-03-17  JWT + RS256 identity model         APEX v5.2 Phase 1 lock
-2   2026-03-17  PostgreSQL async queue not Kafka   Phase 1 anti-scope
-3   2026-03-17  YAML policy not OPA                Phase 1 anti-scope
-4   2026-03-17  Velocity + z-score not IsoForest   Phase 1 anti-scope
-5   2026-03-17  Gateway: Kong (Lua)                Fastest Phase 1 validation
-6   2026-03-17  Scoring: Go                        Latency + single language
-7   2026-03-17  Shell: Git Bash on Windows         Already installed
-8   2026-03-17  Runtime: Docker Desktop Windows    Redis + Postgres containers
-9   2026-03-18  titan-gate not relevant            Python crypto system
-10  2026-03-18  go-redis/v9 for Redis client       Standard maintained library
-11  2026-03-18  Audit tests skip on Windows        Docker VM networking — curl verified
+  1   JWT + RS256 identity model
+  2   PostgreSQL async queue not Kafka
+  3   YAML policy not OPA
+  4   Velocity + z-score not IsoForest (needs 90d data)
+  5   Gateway: Kong (Lua)
+  6   Scoring: Go
+  7   Shell: Git Bash on Windows
+  8   Runtime: Docker Desktop Windows
+  9   go-redis/v9 for Redis client
+  10  Audit tests skip on Windows — Docker VM networking
+  11  Hardening round 1 complete — GAP1-3,6 fixed
+  12  bootstrap.go removed — was overwriting harness_test.go
+  13  Kong plugin v1.2.0 — native JWT extraction, no resty.jwt
 
-PARKING LOT
-Cross-federated reputation database  — Phase 3
-Outbound scraping reputation tagging — Phase 3
-CI/CD pipeline                       — After Phase 1 proven ✅ now eligible
-Multi-tenant architecture            — After single-tenant validated ✅ Task 14
-OPA policy engine                    — Never in Phase 1
-Isolation Forest                     — Phase 2 Task 10 (needs 90d data)
-DID/ledger identity                  — Never in v1
+ANTI-SCOPE (never in Phase 1)
+  Federation, Kafka, OPA, Isolation Forest, DID/ledger,
+  multi-tenant before single-tenant validated
 
 VALUATION
-Phase 1 complete + blocked incident  : $35M–$75M [H]
-Phase 2 complete + 3 enterprises     : $75M–$150M [H]
-Competitive clock                    : 12 months
+  Phase 1 complete + blocked incident : $35M–$75M [H]
+  Phase 2 complete + 3 enterprises    : $75M–$150M [H]
+  Competitive clock                   : 12 months from March 17 2026
 
-NEXT SESSION
-First command : APEX ACTIVATE — Phase 2
-First actions :
-  1. APEX BUYER — prepare outreach to 20 financial services firms
-  2. APEX COMPETE — Check Point bundling contrast ready
-  3. Start Task 11 LangChain plugin OR Task 13 AWS Marketplace
-
-COMPETITIVE CLOCK
-Started  : March 17, 2026
-Expires  : March 17, 2027
-Remaining: 12 months
-Threat   : Check Point bundling Lakera into 100K renewals
-Advantage: Already deployed. Blocked incident on record.
-           Check Point is a renewal conversation 6 months from now.
-           We are already live.
-           git add CONTINUATION_PROMPT.md && git commit -m "docs: FAANG hardening complete, Phase 2 ready" && git push
+NEXT SESSION FIRST COMMAND
+  APEX ACTIVATE — Phase 2
+  Then immediately: APEX SESSION B
