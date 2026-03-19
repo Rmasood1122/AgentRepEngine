@@ -69,6 +69,27 @@ func main() {
 	consumer := scoring.NewEventConsumer(db, scoreStore)
 	go consumer.Start()
 	slog.Info("event consumer started")
+	// Background metrics collector — updates gauges every 60 seconds
+	go func() {
+		for {
+			var agentCount float64
+			db.QueryRow(`SELECT COUNT(*) FROM agent_identities
+				WHERE last_seen > NOW() - INTERVAL '24 hours'`).Scan(&agentCount)
+			metrics.ActiveAgentCount.Set(agentCount)
+
+			var queueDepth float64
+			db.QueryRow(`SELECT COUNT(*) FROM agent_event_queue
+				WHERE processed = false`).Scan(&queueDepth)
+			metrics.EventQueueDepth.Set(queueDepth)
+
+			var fpRate float64
+			db.QueryRow(`SELECT COALESCE(fp_rate, 0) FROM daily_fp_metrics
+				ORDER BY date DESC LIMIT 1`).Scan(&fpRate)
+			metrics.FPRateGauge.Set(fpRate)
+
+			time.Sleep(60 * time.Second)
+		}
+	}()
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", healthHandler(db, scoreStore, enforcementMode))

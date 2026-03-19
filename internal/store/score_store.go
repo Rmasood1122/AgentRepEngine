@@ -8,11 +8,11 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/agentrepengine/are/internal/metrics"
 	"github.com/agentrepengine/are/internal/scoring"
 	"github.com/redis/go-redis/v9"
 )
 
-// ScoreResult is returned by GetScore.
 type ScoreResult struct {
 	Score      int
 	Band       string
@@ -20,7 +20,6 @@ type ScoreResult struct {
 	ReasonJSON string
 }
 
-// ScoreStore handles reading and writing scores to Redis and PostgreSQL.
 type ScoreStore struct {
 	db       *sql.DB
 	redisURL string
@@ -50,11 +49,15 @@ func (s *ScoreStore) Ping() error {
 }
 
 // GetScore retrieves agent score — Redis first, PostgreSQL fallback.
+// Instruments cache hit/miss metrics.
 func (s *ScoreStore) GetScore(agentDID string) (*ScoreResult, error) {
 	key := "score:" + agentDID
 
 	vals, err := s.rdb.HGetAll(s.ctx, key).Result()
 	if err == nil && len(vals) > 0 {
+		// Cache HIT — instrument metric
+		metrics.RedisCacheHits.WithLabelValues("hit").Inc()
+
 		score := 700
 		if v, ok := vals["score"]; ok {
 			fmt.Sscanf(v, "%d", &score)
@@ -72,6 +75,9 @@ func (s *ScoreStore) GetScore(agentDID string) (*ScoreResult, error) {
 			ReasonJSON: reason,
 		}, nil
 	}
+
+	// Cache MISS — instrument metric
+	metrics.RedisCacheHits.WithLabelValues("miss").Inc()
 
 	var currentScore int
 	var status string
@@ -117,7 +123,7 @@ func (s *ScoreStore) GetScore(agentDID string) (*ScoreResult, error) {
 }
 
 // WriteScore writes score to PostgreSQL first, then Redis.
-// FAANG standard: immediate cache invalidation on BLOCK decisions.
+// Instruments blocked decisions and score update metrics.
 func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{}) error {
 	band := scoring.ScoreBand(score)
 
@@ -125,6 +131,18 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 	if err != nil {
 		reasonJSON = []byte(fmt.Sprintf(`{"score":%d,"band":"%s"}`, score, band))
 	}
+
+	// Extract policy name for metrics label
+	policyName := "unknown"
+	if rm, ok := reasonObj.(map[string]interface{}); ok {
+		if pf, ok := rm["policy_fired"].(string); ok && pf != "" {
+			policyName = pf
+		}
+	}
+
+	// Instrument enforcement decision metrics
+	metrics.BlockedDecisionsTotal.WithLabelValues(band, policyName).Inc()
+	metrics.ScoreUpdatesTotal.WithLabelValues(band, policyName).Inc()
 
 	// PostgreSQL first — source of truth
 	_, err = s.db.Exec(`
@@ -139,8 +157,7 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 	key := "score:" + agentDID
 
 	if band == "BLOCKED" {
-		// FAANG standard: immediate cache invalidation on block
-		// Never serve stale score for blocked agents
+		// Immediate cache invalidation on block
 		if err := s.rdb.Del(s.ctx, key).Err(); err != nil {
 			slog.Error("redis_invalidation_failed",
 				"agent_did", agentDID, "error", err)
@@ -149,7 +166,6 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 				"agent_did", agentDID, "score", score)
 		}
 	} else {
-		// Non-blocked: write with TTL
 		if err := s.rdb.HSet(s.ctx, key,
 			"score", score,
 			"band", band,
@@ -167,6 +183,7 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 }
 
 // EnqueueEvent adds a behavioral event to the async processing queue.
+// Feature vector stored atomically — T19 prevention.
 func (s *ScoreStore) EnqueueEvent(agentDID, eventType string,
 	vector scoring.FeatureVector, privacyTier int) error {
 
