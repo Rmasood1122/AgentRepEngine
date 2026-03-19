@@ -1,17 +1,22 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/agentrepengine/are/internal/audit"
+	"github.com/agentrepengine/are/internal/metrics"
 	"github.com/agentrepengine/are/internal/scoring"
 	"github.com/agentrepengine/are/internal/store"
 	_ "github.com/lib/pq"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -34,6 +39,12 @@ func main() {
 		os.Exit(1)
 	}
 	defer db.Close()
+
+	// FAANG standard: explicit connection pool
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(5)
+	db.SetConnMaxLifetime(5 * time.Minute)
+	db.SetConnMaxIdleTime(1 * time.Minute)
 
 	for i := 0; i < 10; i++ {
 		if err := db.Ping(); err == nil {
@@ -60,47 +71,61 @@ func main() {
 	slog.Info("event consumer started")
 
 	mux := http.NewServeMux()
-
-	// Health endpoint — no auth required
 	mux.HandleFunc("/health", healthHandler(db, scoreStore, enforcementMode))
-
-	// Protected endpoints — GAP 1 + GAP 6 fix
+	// Prometheus metrics — G-OBSERVE requirement
+	_ = metrics.ActiveAgentCount // initialize metrics package
+	mux.Handle("/metrics", promhttp.Handler())
 	mux.HandleFunc("/score/", requireAPIKey(scoreHandler(scoreStore)))
 	mux.HandleFunc("/event", requireAPIKey(eventHandler(db, scoreStore)))
 
 	auditHandler := audit.NewHandler(db)
 	mux.HandleFunc("/audit/replay", requireAPIKey(auditHandler.ReplayHandler))
 	mux.HandleFunc("/audit/export", requireAPIKey(auditHandler.ExportHandler))
-
-	slog.Info("scoring service ready", "port", port)
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
-		slog.Error("server failed", "error", err)
-		os.Exit(1)
+	mux.HandleFunc("/enforcement/override", requireAPIKey(auditHandler.OverrideHandler))
+	// FAANG standard: graceful shutdown
+	srv := &http.Server{
+		Addr:         ":" + port,
+		Handler:      mux,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		IdleTimeout:  60 * time.Second,
 	}
+
+	go func() {
+		slog.Info("scoring service ready", "port", port)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			slog.Error("server failed", "error", err)
+			os.Exit(1)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	sig := <-quit
+	slog.Info("shutdown signal received", "signal", sig.String())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		slog.Error("server shutdown failed", "error", err)
+	}
+	slog.Info("scoring service stopped cleanly")
 }
 
-// requireAPIKey middleware — GAP 1 + GAP 6 fix.
-// Blocks direct agent access to scoring endpoints.
-// Kong gateway sets X-Gateway-Verified after JWT validation.
-// External tools use X-API-Key header.
 func requireAPIKey(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Kong gateway — already verified JWT, trust it
 		if r.Header.Get("X-Gateway-Verified") == "true" {
 			next(w, r)
 			return
 		}
-
-		// API key auth for direct access (ops, CI, dashboards)
 		apiKey := os.Getenv("SCORING_API_KEY")
 		if apiKey == "" {
-			slog.Warn("SCORING_API_KEY not set — endpoints unprotected in dev mode")
+			slog.Warn("SCORING_API_KEY not set — unprotected in dev mode")
 			next(w, r)
 			return
 		}
-
-		provided := r.Header.Get("X-API-Key")
-		if provided != apiKey {
+		if r.Header.Get("X-API-Key") != apiKey {
 			slog.Warn("unauthorized access attempt",
 				"path", r.URL.Path,
 				"remote_addr", r.RemoteAddr,
@@ -147,29 +172,19 @@ func scoreHandler(s *store.ScoreStore) http.HandlerFunc {
 			http.Error(w, "missing agent DID", http.StatusBadRequest)
 			return
 		}
-
 		requestID := r.Header.Get("X-Request-ID")
 		if requestID == "" {
 			requestID = fmt.Sprintf("req-%d", time.Now().UnixNano())
 		}
-
 		start := time.Now()
-		slog.Info("score_request",
-			"request_id", requestID,
-			"agent_did", did,
-		)
-
+		slog.Info("score_request", "request_id", requestID, "agent_did", did)
 		result, err := s.GetScore(did)
 		if err != nil {
 			slog.Error("get score failed",
-				"request_id", requestID,
-				"agent_did", did,
-				"error", err,
-			)
+				"request_id", requestID, "agent_did", did, "error", err)
 			http.Error(w, "score lookup failed", http.StatusInternalServerError)
 			return
 		}
-
 		slog.Info("score_response",
 			"request_id", requestID,
 			"agent_did", did,
@@ -177,7 +192,6 @@ func scoreHandler(s *store.ScoreStore) http.HandlerFunc {
 			"band", result.Band,
 			"duration_ms", time.Since(start).Milliseconds(),
 		)
-
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, `{
   "agent_did": "%s",

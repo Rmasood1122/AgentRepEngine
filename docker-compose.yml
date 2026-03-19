@@ -35,6 +35,8 @@ services:
       REDIS_URL: redis://redis:6379
       ENFORCEMENT_MODE: observe
       PORT: "8080"
+      SIEM_WEBHOOK_URL: ""
+      SCORING_API_KEY: ""
     depends_on:
       postgres:
         condition: service_healthy
@@ -73,5 +75,32 @@ services:
       timeout: 5s
       retries: 5
 
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus:/etc/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    depends_on:
+      - scoring-service
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: are_admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+
 volumes:
   pgdata:
+  grafana_data:

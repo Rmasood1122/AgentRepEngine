@@ -16,12 +16,11 @@ import (
 type ScoreResult struct {
 	Score      int
 	Band       string
-	Source     string // "cache" or "db"
+	Source     string
 	ReasonJSON string
 }
 
 // ScoreStore handles reading and writing scores to Redis and PostgreSQL.
-// PostgreSQL is source of truth. Redis is cache only.
 type ScoreStore struct {
 	db       *sql.DB
 	redisURL string
@@ -29,7 +28,6 @@ type ScoreStore struct {
 	ctx      context.Context
 }
 
-// NewScoreStore creates a new ScoreStore.
 func NewScoreStore(db *sql.DB, redisURL string) *ScoreStore {
 	return &ScoreStore{
 		db:       db,
@@ -38,7 +36,6 @@ func NewScoreStore(db *sql.DB, redisURL string) *ScoreStore {
 	}
 }
 
-// ConnectRedis initializes the Redis client.
 func (s *ScoreStore) ConnectRedis() error {
 	opts, err := redis.ParseURL(s.redisURL)
 	if err != nil {
@@ -48,17 +45,14 @@ func (s *ScoreStore) ConnectRedis() error {
 	return s.Ping()
 }
 
-// Ping checks Redis connectivity.
 func (s *ScoreStore) Ping() error {
 	return s.rdb.Ping(s.ctx).Err()
 }
 
 // GetScore retrieves agent score — Redis first, PostgreSQL fallback.
-// FM2 prevention: PostgreSQL is always source of truth.
 func (s *ScoreStore) GetScore(agentDID string) (*ScoreResult, error) {
 	key := "score:" + agentDID
 
-	// Try Redis cache first
 	vals, err := s.rdb.HGetAll(s.ctx, key).Result()
 	if err == nil && len(vals) > 0 {
 		score := 700
@@ -79,7 +73,6 @@ func (s *ScoreStore) GetScore(agentDID string) (*ScoreResult, error) {
 		}, nil
 	}
 
-	// Cache miss — fetch from PostgreSQL
 	var currentScore int
 	var status string
 	err = s.db.QueryRow(`
@@ -88,8 +81,7 @@ func (s *ScoreStore) GetScore(agentDID string) (*ScoreResult, error) {
 		WHERE did = $1`, agentDID).Scan(&currentScore, &status)
 
 	if err == sql.ErrNoRows {
-		// Unknown agent — orphan score
-		reason := fmt.Sprintf(`{"score":500,"band":"MONITORED","source":"orphan","note":"unknown agent"}`)
+		reason := `{"score":500,"band":"MONITORED","source":"orphan","note":"unknown agent"}`
 		return &ScoreResult{
 			Score:      500,
 			Band:       "MONITORED",
@@ -105,14 +97,16 @@ func (s *ScoreStore) GetScore(agentDID string) (*ScoreResult, error) {
 	reason := fmt.Sprintf(`{"score":%d,"band":"%s","source":"db","status":"%s"}`,
 		currentScore, band, status)
 
-	// Backfill Redis cache
-	s.rdb.HSet(s.ctx, key,
-		"score", currentScore,
-		"band", band,
-		"reason", reason,
-		"updated_at", time.Now().Unix(),
-	)
-	s.rdb.Expire(s.ctx, key, 60*time.Second)
+	// Backfill Redis cache (only for non-blocked agents)
+	if band != "BLOCKED" {
+		s.rdb.HSet(s.ctx, key,
+			"score", currentScore,
+			"band", band,
+			"reason", reason,
+			"updated_at", time.Now().Unix(),
+		)
+		s.rdb.Expire(s.ctx, key, 60*time.Second)
+	}
 
 	return &ScoreResult{
 		Score:      currentScore,
@@ -122,9 +116,8 @@ func (s *ScoreStore) GetScore(agentDID string) (*ScoreResult, error) {
 	}, nil
 }
 
-// WriteScore writes a score update to both PostgreSQL and Redis.
-// PostgreSQL first — source of truth.
-// FM2 prevention: never write Redis only.
+// WriteScore writes score to PostgreSQL first, then Redis.
+// FAANG standard: immediate cache invalidation on BLOCK decisions.
 func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{}) error {
 	band := scoring.ScoreBand(score)
 
@@ -133,7 +126,7 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 		reasonJSON = []byte(fmt.Sprintf(`{"score":%d,"band":"%s"}`, score, band))
 	}
 
-	// Write PostgreSQL first
+	// PostgreSQL first — source of truth
 	_, err = s.db.Exec(`
 		UPDATE agent_identities
 		SET current_score = $1, last_seen = NOW()
@@ -143,30 +136,37 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 		return fmt.Errorf("postgres score write: %w", err)
 	}
 
-	// Write Redis cache — GAP 3 fix: log failures, never silently ignore
-	// Redis failure is non-fatal — Postgres is source of truth
 	key := "score:" + agentDID
-	if err := s.rdb.HSet(s.ctx, key,
-		"score", score,
-		"band", band,
-		"reason", string(reasonJSON),
-		"updated_at", time.Now().Unix(),
-	).Err(); err != nil {
-		slog.Error("redis_write_failed",
-			"agent_did", agentDID,
-			"error", err,
-		)
-		// Do not return error — Postgres write succeeded
-		// Kong will miss cache on next request — acceptable
+
+	if band == "BLOCKED" {
+		// FAANG standard: immediate cache invalidation on block
+		// Never serve stale score for blocked agents
+		if err := s.rdb.Del(s.ctx, key).Err(); err != nil {
+			slog.Error("redis_invalidation_failed",
+				"agent_did", agentDID, "error", err)
+		} else {
+			slog.Info("cache_invalidated_on_block",
+				"agent_did", agentDID, "score", score)
+		}
 	} else {
-		s.rdb.Expire(s.ctx, key, 60*time.Second)
+		// Non-blocked: write with TTL
+		if err := s.rdb.HSet(s.ctx, key,
+			"score", score,
+			"band", band,
+			"reason", string(reasonJSON),
+			"updated_at", time.Now().Unix(),
+		).Err(); err != nil {
+			slog.Error("redis_write_failed",
+				"agent_did", agentDID, "error", err)
+		} else {
+			s.rdb.Expire(s.ctx, key, 60*time.Second)
+		}
 	}
 
 	return nil
 }
 
 // EnqueueEvent adds a behavioral event to the async processing queue.
-// Feature vector stored atomically with event — T19 prevention.
 func (s *ScoreStore) EnqueueEvent(agentDID, eventType string,
 	vector scoring.FeatureVector, privacyTier int) error {
 
@@ -175,8 +175,6 @@ func (s *ScoreStore) EnqueueEvent(agentDID, eventType string,
 		return fmt.Errorf("marshal feature vector: %w", err)
 	}
 
-	// Store event with feature vector in one atomic INSERT
-	// T19 prevention: feature_vector is in same row as event
 	_, err = s.db.Exec(`
 		INSERT INTO agent_events
 			(event_id, agent_did, event_type, feature_vector, created_at)
@@ -186,7 +184,6 @@ func (s *ScoreStore) EnqueueEvent(agentDID, eventType string,
 		return fmt.Errorf("insert agent event: %w", err)
 	}
 
-	// Also queue for async score update
 	payload, _ := json.Marshal(map[string]interface{}{
 		"agent_did":      agentDID,
 		"event_type":     eventType,
