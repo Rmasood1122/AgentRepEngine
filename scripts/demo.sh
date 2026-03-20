@@ -10,6 +10,11 @@ SCORING="http://localhost:8080"
 KONG="http://localhost:8000"
 AGENT_DID="did:jwt:finserv-demo:trading-agent:001"
 ORG_ID="11111111-1111-1111-1111-111111111111"
+# Reset demo state for clean hash chain on each run
+docker exec -i agentrepengine-postgres-1 psql -U are -d agentrepengine \
+  -c "DELETE FROM enforcement_decisions; DELETE FROM agent_identities WHERE did = '$AGENT_DID';" \
+  > /dev/null 2>&1
+docker exec -i agentrepengine-redis-1 redis-cli DEL "score:$AGENT_DID" > /dev/null 2>&1
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
