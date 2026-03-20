@@ -1,13 +1,13 @@
--- AgentRepEngine — Kong Gateway Plugin v1.3.0
--- Phase 2: adds log phase event emission for data moat
--- Uses only Kong-bundled libraries: resty.redis, cjson, ngx
+-- AgentRepEngine — Kong Gateway Plugin v1.4.0
+-- Fixed: log phase event emission uses resty.http (not ngx.socket)
+-- Uses only Kong-bundled libraries: resty.redis, resty.http, cjson, ngx
 
 local redis = require "resty.redis"
 local cjson = require "cjson"
 
 local AgentReputationHandler = {
     PRIORITY = 1000,
-    VERSION  = "1.3.0",
+    VERSION  = "1.4.0",
 }
 
 local BANDS = {
@@ -164,7 +164,7 @@ function AgentReputationHandler:access(conf)
 end
 
 function AgentReputationHandler:log(conf)
-    -- Emit behavioral event for data moat (L6 — must collect from day one)
+    -- Emit behavioral event for data moat (Law L6 — collect from day one)
     -- Runs after response is sent — zero latency impact on critical path
     local token = kong.request.get_header("X-Agent-DID")
     if not token or token == "" then return end
@@ -195,40 +195,28 @@ function AgentReputationHandler:log(conf)
         schema_version = "v1",
     })
 
-    local scoring_url = conf.scoring_service_url or "http://scoring-service:8080"
-    local host, port  = scoring_url:match("https?://([^:]+):(%d+)")
-    if not host then
-        host = scoring_url:match("https?://(.+)")
-        port = "8080"
-    end
-    port = tonumber(port) or 8080
+    -- Capture values for timer closure — conf userdata not safe across async boundary
+    local scoring_url  = conf.scoring_service_url or "http://scoring-service:8080"
+    local payload_copy = event_payload
+    local api_key_copy = conf.api_key or ""
 
-    -- ngx.socket not available in log phase — use timer (runs in background)
+    -- resty.http is available in timer context — correct fix for log phase
     local ok, err = ngx.timer.at(0, function(premature)
         if premature then return end
-        local sock = ngx.socket.tcp()
-        sock:settimeout(200)
-        local connected, connect_err = sock:connect(host, port)
-        if not connected then
-            ngx.log(ngx.WARN, "Event emit failed (connect): ", connect_err)
-            sock:close()
-            return
+        local http  = require "resty.http"
+        local httpc = http.new()
+        httpc:set_timeout(500)
+        local res, req_err = httpc:request_uri(scoring_url .. "/event", {
+            method  = "POST",
+            body    = payload_copy,
+            headers = {
+                ["Content-Type"] = "application/json",
+                ["X-API-Key"]    = api_key_copy,
+            },
+        })
+        if not res then
+            ngx.log(ngx.WARN, "Event emit failed: ", req_err)
         end
-        local api_key = conf.api_key or ""
-        local req = "POST /event HTTP/1.1\r\n"
-                 .. "Host: " .. host .. "\r\n"
-                 .. "Content-Type: application/json\r\n"
-                 .. "X-API-Key: " .. api_key .. "\r\n"
-                 .. "Content-Length: " .. #event_payload .. "\r\n"
-                 .. "Connection: close\r\n"
-                 .. "\r\n"
-                 .. event_payload
-        local _, send_err = sock:send(req)
-        if send_err then
-            ngx.log(ngx.WARN, "Event emit failed (send): ", send_err)
-        end
-        sock:receive("*l")
-        sock:close()
     end)
 
     if not ok then
