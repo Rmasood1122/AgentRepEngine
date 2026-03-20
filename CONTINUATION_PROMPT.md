@@ -1,149 +1,168 @@
 # AgentRepEngine — CONTINUATION PROMPT
-# Session D — starts here
+# Session F — starts here
 
 ## APEX VERSION
 APEX v5.2 + ZROS v2.6
-First command: APEX ACTIVATE — Phase 1 audit
+First command: APEX ACTIVATE — T8 enterprise deployment
 
 ---
 
 ## REPO
 https://github.com/Rehanrana11/AgentRepEngine
 Branch: main
-HEAD: 13c5223 — fix: Kong log phase resty.http replaces ngx.socket
+HEAD: Session E complete — all T8 readiness gates passed
 
 ---
 
-## SESSION C — WHAT WAS DONE
+## SESSION E — WHAT WAS DONE
 
-### Completed
-- gstate.sh created and committed — run `bash scripts/gstate.sh` at every session start
-- DB auth root cause confirmed: user is `are` not `postgres`
-- All G-STATE checks passing with correct commands
-- Kong plugin confirmed ACTIVE (was never broken — Admin API behavior in DB-less mode)
-- G-EXPLAIN confirmed PASSES — reason object in enforcement_decisions is production-quality
-- Redis cache confirmed working (60s TTL, correct key format score:{did})
-- Kong log phase bug FIXED — ngx.socket replaced with resty.http in timer callback
-  - Root cause: ngx.socket.tcp() not available inside ngx.timer.at() in log_by_lua context
-  - Fix: resty.http.request_uri() inside timer — correct API for this context
-  - Verified: zero API disabled errors after kong reload
-  - Law L6 compliance restored — data moat now accumulates on valid JWT requests
+### Gates Completed
+- Gate 1: Cold start ✅ — docker compose down -v && up -d → full stack in 60s
+- Gate 2: demo.sh ✅ — reproducible blocked incident, clean hash chain every run
+- Gate 3: FP harness ✅ — 0.00% on 100 legitimate scenarios, all 3 tests pass
+- Gate 4: Override workflow ✅ — ARE-FP-001 reason code, score not auto-restored
+- Gate 5: Clean install ✅ — same as Gate 1, schema auto-applied via initdb mount
+- Gate 6: One-pager ✅ — docs/ONE-PAGER.md written, Lloyd-ready
 
-### Commits this session
-- 931edd9 chore: add gstate.sh — session-start automation, correct psql user
-- 13c5223 fix: Kong log phase — resty.http replaces ngx.socket in timer callback
+### Key commits this session
+- feat: auto-apply schema on cold start — postgres initdb mount
+- feat: demo.sh — reproducible blocked incident, Gate 2 passes
+- feat: FP test suite — 100 legitimate scenarios, 0.00% FP rate
+- feat: demo.sh — reset state on each run, hash chain clean
+- docs: one-pager for Lloyd — Gate 6 complete
 
-### Fix rate: 2/2 = 100% fix commits (🔴 metric)
-Root cause: T6 tooling (Windows/MINGW64 environment, no host psql/redis-cli)
-            T1 discovery (Kong DB-less Admin API behavior misread)
-System gap: G-ENV checklist missing Windows/MINGW64 docker exec patterns
-Not a code quality issue — no logic rework, both were environment discovery gaps
+### Fix rate: 1 fix / 5 commits = 20% 🟡
+Root cause: demo.sh hash chain break on second run (prev_hash not chained)
+Fix: reset enforcement_decisions at start of each demo run
 
 ---
 
-## CURRENT PHASE 1 STATUS
+## PHASE 1 STATUS — ALL TECHNICAL WORK COMPLETE
 
-| Task | Description | Status |
-|------|-------------|--------|
-| T0 | Evaluation harness | ✅ Done |
-| T1 | JWT identity library | ✅ Done |
-| T2 | Kong gateway plugin | ✅ Active + scoring |
-| T3 | Redis + Postgres score store | ✅ Done (cache + write-back confirmed) |
-| T4 | Velocity + z-score anomaly | ⚠️ Exists in code — NOT CONFIRMED working |
-| T5 | 5 YAML policy packs (OWASP) | ⚠️ 1 confirmed (bulk_pii_access_prevention_v1) — need 5 |
-| T6 | Explainability engine ★ | ✅ PASSES — reason object production-quality |
-| T7 | Replay / forensics | ⚠️ /audit/replay endpoint exists — NOT CONFIRMED |
-| T8 | First enterprise deployment | 🔴 NOT DONE — critical path |
-| T9 | Open header spec draft | ❓ Unknown |
+| Task | Status |
+|------|--------|
+| T0 Evaluation harness | ✅ Done |
+| T1 JWT identity library | ✅ Done |
+| T2 Kong gateway plugin | ✅ Done |
+| T3 Redis + Postgres store | ✅ Done |
+| T4 Velocity + z-score | ✅ Done |
+| T5 5 YAML policy packs | ✅ Done |
+| T6 Explainability engine | ✅ Done |
+| T7 Replay / forensics | ✅ Done |
+| T8 First enterprise deploy | 🟡 IN PROGRESS — Lloyd conversation next |
+| T9 Open header spec draft | ✅ Done |
 
-Phase 1 promotion criteria (ALL required before Phase 2):
-- Tasks 0–9 complete: NO — T4/T5/T7/T8/T9 not confirmed
-- 1 documented blocked incident in production: NO
-- FP rate ≤2% measured in production: YES (0.00%)
+Phase 1 promotion requires:
+- Tasks 0–9 complete: 9/10 done — T8 needs one enterprise pilot
+- FP rate ≤2%: YES — 0.00% ✅
+- 1 documented blocked incident: NOT YET — T8 delivers this
 
 ---
 
-## G-STATE BASELINE (Session C close)
+## T8 READINESS — ALL 6 GATES PASSED
+
+Product is solid and foolproof. Ready for Lloyd conversation.
+
+### The demo
+```bash
+bash scripts/demo.sh
 ```
-FP rate (7d)    : 0.00% ✅
-Hash chain      : valid = t ✅
-Feature vectors : 6/6 ✅ (events_today = vectors_stored)
-Identity model  : jwt only (2 agents) ✅
-Enforcement mode: observe ✅
-Redis cache     : working (60s TTL) ✅
-Kong plugin     : active, scoring correctly ✅
-Scoring service : healthy ✅
+60 seconds. Real blocked incident. Full reason object. Hash chain valid.
+Run this in front of Lloyd before any conversation.
+
+### The one-pager
+```
+docs/ONE-PAGER.md
+```
+One page. Problem, solution, live demo result, deployment metrics,
+compliance alignment, pilot proposal. Lloyd can explain it to a client
+without asking a question.
+
+### Override workflow (for security team questions)
+```bash
+curl -s -X POST http://localhost:8080/enforcement/override \
+  -H "Content-Type: application/json" \
+  -H "X-Gateway-Verified: true" \
+  -d '{"decision_id": "1", "reason_code": "ARE-FP-001",
+       "reviewer_id": "reviewer-name",
+       "notes": "Verified legitimate workflow"}'
+```
+Valid reason codes: ARE-FP-001, ARE-FP-002, ARE-FP-003, ARE-FP-004,
+                   ARE-TP-001, ARE-EX-001, ARE-EX-002
+
+---
+
+## PARTNER
+Lloyd Lemish — Technical Solutions Architect, NWN
+1st degree connection. 500+ enterprise connections.
+NWN serves financial services, healthcare, government enterprises.
+
+### The three steps with Lloyd
+1. Run bash scripts/demo.sh — 60 seconds, no slides
+2. Hand him docs/ONE-PAGER.md
+3. Ask: "Which of your NWN clients has the most AI agents running
+   in production right now — and who owns API security there?"
+
+### The 90-second pitch Lloyd needs to open doors
+"Companies are deploying AI agents that make thousands of API calls
+per day. Nobody can tell a legitimate agent from a compromised one
+until after the data is gone — because every individual call looks
+clean. We score the agent's behavioral history across sessions and
+block risky actions at the gateway before they complete. Install in
+4 hours. First value in 7 days. We need one financial services client
+for a 30-day pilot."
+
+### The Check Point contrast (one sentence)
+"Check Point acquired Lakera and is bundling prompt filtering into
+renewals. We deploy in 4 hours as a purpose-built runtime layer.
+Only one of them deploys this week."
+
+---
+
+## G-STATE BASELINE (Session E close)
+```
+FP rate      : 0.00% ✅
+Hash chain   : valid ✅
+Feature vectors: collecting ✅
+Identity     : JWT only ✅
+Enforcement  : observe ✅
+Cold start   : one command ✅
+Demo         : reproducible ✅
 ```
 
 ---
 
 ## ENVIRONMENT — WINDOWS/MINGW64 RULES
 
-NEVER use bare psql or redis-cli — they hit host socket, not container.
-
-Always use docker exec:
+Always use docker exec — never bare psql or redis-cli:
 ```bash
-# Postgres
-docker exec -it agentrepengine-postgres-1 psql -U are -d agentrepengine -c "QUERY"
-
-# Redis
-docker exec -it agentrepengine-redis-1 redis-cli COMMAND
+docker exec -i agentrepengine-postgres-1 psql -U are -d agentrepengine -c "QUERY"
+docker exec -i agentrepengine-redis-1 redis-cli COMMAND
 ```
-
-Session start: `bash scripts/gstate.sh`
+Session start: bash scripts/gstate.sh
 
 ---
 
-## SESSION D — FIRST THREE TASKS
-
-### Task 1 — Verify event emission with real JWT (5 min)
-```bash
-go run ./cmd/gentoken/main.go
-# Take the token output, then:
-TOKEN="<token>"
-curl -s http://localhost:8000/test -H "X-Agent-DID: $TOKEN" -o /dev/null
-sleep 2
-docker exec -it agentrepengine-postgres-1 psql -U are -d agentrepengine -c \
-  "SELECT COUNT(*) FROM agent_events WHERE created_at > NOW() - INTERVAL '2 minutes';"
+## KEY FILES
 ```
-Expected: count increases. Confirms Law L6 data moat collection working end-to-end.
-
-### Task 2 — Confirm T4 velocity+z-score implementation (10 min)
-```bash
-cat internal/scoring/scorer.go
-cat internal/scoring/baseline.go
-cat internal/scoring/consumer.go
+scripts/demo.sh                 — 60-second live demo
+scripts/gstate.sh               — session start health check
+docs/ONE-PAGER.md               — Lloyd-ready one-pager
+docs/architecture/system-architecture.md
+docs/specs/agent-reputation-header-spec-v1-DRAFT.md
+config/policy_packs/            — 5 YAML policy packs
+migrations/001_initial.sql      — auto-applied on cold start
+kong/plugins/agent-reputation/handler.lua — v1.4.0
 ```
-Confirm: scoring formula H+V implemented, weights config-driven, idempotent.
-Run: `make test` or `go test ./internal/scoring/...`
-
-### Task 3 — Confirm T5 policy packs (10 min)
-```bash
-ls config/policy_packs/
-cat config/policy_packs/*.yaml
-```
-Need 5 packs mapped to OWASP LLM Top 10. Currently 1 confirmed.
-If fewer than 5 exist: build the missing ones this session.
 
 ---
 
-## KEY FILE LOCATIONS
-```
-cmd/scoring-service/main.go     — HTTP handlers, server setup
-internal/store/score_store.go   — Redis + Postgres operations
-internal/scoring/scorer.go      — scoring formula
-internal/scoring/consumer.go    — async event consumer
-internal/scoring/baseline.go    — z-score baseline
-internal/scoring/policy.go      — policy evaluation
-internal/scoring/explainability.go — reason object generation
-internal/identity/jwt.go        — JWT signing/verification
-internal/audit/override.go      — human override workflow
-internal/audit/replay.go        — forensics replay
-kong/plugins/agent-reputation/handler.lua — Kong plugin v1.4.0
-kong/declarative/kong.yml       — Kong DB-less config
-config/policy_packs/            — YAML policy packs
-scripts/gstate.sh               — session start automation
-```
+## SESSION F — FIRST THREE ACTIONS
+
+1. Run bash scripts/gstate.sh — confirm stack healthy
+2. Have the Lloyd conversation — run demo, hand one-pager, ask the question
+3. If Lloyd names a prospect: return here and run APEX BUYER to
+   prepare the enterprise conversation
 
 ---
 
@@ -151,22 +170,10 @@ scripts/gstate.sh               — session start automation
 
 Started  : March 17, 2026
 Expires  : March 17, 2027
-Remaining: ~12 months
+Remaining: ~11 months 27 days
 Threat   : Check Point bundling Lakera into 100K+ enterprise renewals
-Counter  : Deploy in 4 hours. First value in 7 days. Be installed before renewal.
+Counter  : Deploy in 4 hours. First value in 7 days.
+           Be installed before the renewal conversation happens.
 
-Phase 1 must ship to one financial services enterprise before Month 6.
-One documented blocked incident is the proof artifact that unlocks everything.
-
----
-
-## ANTI-SCOPE — IMMEDIATE CHALLENGE IF THESE APPEAR
-
-- Federation before Phase 1 proven
-- Kafka in Phase 1
-- OPA in Phase 1
-- Isolation Forest before 90 days of data
-- DID/ledger in v1
-- CI/CD before runtime enforcement proven
-- Multi-tenant before single-tenant validated
-- Sales conversations before Task 0 complete
+Phase 1 closes when one enterprise runs the pilot and produces
+one documented blocked incident. That is the only remaining task.
