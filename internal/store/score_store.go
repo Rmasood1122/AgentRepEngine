@@ -51,6 +51,11 @@ func (s *ScoreStore) Ping() error {
 	return s.rdb.Ping(s.ctx).Err()
 }
 
+// GetRedisClient exposes the Redis client for ModeController.
+func (s *ScoreStore) GetRedisClient() *redis.Client {
+	return s.rdb
+}
+
 // GetScore retrieves agent score — Redis first, PostgreSQL fallback.
 // Instruments cache hit/miss metrics.
 func (s *ScoreStore) GetScore(agentDID string) (*ScoreResult, error) {

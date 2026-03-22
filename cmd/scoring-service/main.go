@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/agentrepengine/are/internal/audit"
+	"github.com/agentrepengine/are/internal/enforcement"
 	"github.com/agentrepengine/are/internal/metrics"
 	"github.com/agentrepengine/are/internal/scoring"
 	"github.com/agentrepengine/are/internal/store"
@@ -42,7 +43,6 @@ func main() {
 	}
 	defer db.Close()
 
-	// FAANG standard: explicit connection pool
 	db.SetMaxOpenConns(25)
 	db.SetMaxIdleConns(5)
 	db.SetConnMaxLifetime(5 * time.Minute)
@@ -68,10 +68,23 @@ func main() {
 	}
 	slog.Info("redis connected")
 
+	// V6 FIX: ModeController — runtime enforcement mode + auto-rollback
+	// Stores mode in Redis — changes take effect without restart
+	// Auto-rolls back to observe if FP rate exceeds 2%
+	// Never auto-escalates to enforce — human decision only
+	modeCtrl := enforcement.NewModeController(
+		scoreStore.GetRedisClient(), db, enforcementMode)
+	modeCtrl.StartFPMonitor()
+	slog.Info("mode_controller_started",
+		"initial_mode", enforcementMode,
+		"fp_threshold_pct", 2.0,
+		"check_interval", "5m")
+
 	consumer := scoring.NewEventConsumer(db, scoreStore)
 	go consumer.Start()
 	slog.Info("event consumer started")
-	// Background metrics collector — updates gauges every 60 seconds
+
+	// Background metrics collector
 	go func() {
 		for {
 			var agentCount float64
@@ -94,9 +107,9 @@ func main() {
 	}()
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/health", healthHandler(db, scoreStore, enforcementMode))
-	// Prometheus metrics — G-OBSERVE requirement
-	_ = metrics.ActiveAgentCount // initialize metrics package
+	// Health endpoint returns live enforcement mode from Redis
+	mux.HandleFunc("/health", healthHandler(db, scoreStore, modeCtrl))
+	_ = metrics.ActiveAgentCount
 	mux.Handle("/metrics", promhttp.Handler())
 	mux.HandleFunc("/score/", requireAPIKey(scoreHandler(scoreStore)))
 	mux.HandleFunc("/event", requireAPIKey(eventHandler(db, scoreStore)))
@@ -105,7 +118,7 @@ func main() {
 	mux.HandleFunc("/audit/replay", requireAPIKey(auditHandler.ReplayHandler))
 	mux.HandleFunc("/audit/export", requireAPIKey(auditHandler.ExportHandler))
 	mux.HandleFunc("/enforcement/override", requireAPIKey(auditHandler.OverrideHandler))
-	// FAANG standard: graceful shutdown
+
 	srv := &http.Server{
 		Addr:         ":" + port,
 		Handler:      mux,
@@ -167,7 +180,9 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-func healthHandler(db *sql.DB, s *store.ScoreStore, mode string) http.HandlerFunc {
+// healthHandler returns live enforcement mode from Redis via ModeController.
+// Mode reflects auto-rollback state instantly — no restart needed.
+func healthHandler(db *sql.DB, s *store.ScoreStore, mc *enforcement.ModeController) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		dbStatus := "ok"
 		if err := db.Ping(); err != nil {
@@ -177,6 +192,8 @@ func healthHandler(db *sql.DB, s *store.ScoreStore, mode string) http.HandlerFun
 		if err := s.Ping(); err != nil {
 			redisStatus = "error"
 		}
+		// Live mode from Redis — reflects auto-rollback instantly
+		currentMode := mc.GetMode()
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, `{
   "status": "ok",
@@ -184,7 +201,7 @@ func healthHandler(db *sql.DB, s *store.ScoreStore, mode string) http.HandlerFun
   "postgres": "%s",
   "enforcement_mode": "%s",
   "log_format": "json"
-}`, redisStatus, dbStatus, mode)
+}`, redisStatus, dbStatus, currentMode)
 	}
 }
 
@@ -261,10 +278,6 @@ func eventHandler(db *sql.DB, s *store.ScoreStore) http.HandlerFunc {
 			privacyTier = 1
 		}
 
-		// Construct feature vector from gateway-observable signals.
-		// Gateway sees: request rate proxy (1.0 per call), endpoint breadth.
-		// PII/cross-tenant/escalation fields require agent-side instrumentation
-		// and will be populated in Phase 2 SDK. Default to 0 until then.
 		vector := scoring.FeatureVector{
 			ToolCallRatePerHour:       1.0,
 			UniqueEndpointsPerHour:    1.0,
