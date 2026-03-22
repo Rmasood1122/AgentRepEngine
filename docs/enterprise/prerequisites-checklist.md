@@ -145,5 +145,30 @@ Contact during install: rehan@naseem-a2a.com
 
 ---
 
+### Security Configuration Required Before Go-Live
+
+**SCORING_API_KEY must be set before production deployment.**
+
+The scoring service API is protected by an API key.
+In development mode (empty key), the endpoint is open.
+In production, set a strong random key:
+```bash
+# Generate a secure key
+openssl rand -hex 32
+
+# Set in docker-compose.yml or Kubernetes secret:
+SCORING_API_KEY=<generated-key>
+```
+
+The Kong gateway sets `X-Gateway-Verified: true` on internal
+requests — this bypasses the API key check for gateway traffic.
+External direct access to port 8080 requires the API key.
+
+**Recommendation:** Block port 8080 at the network level
+in production. Only Kong (port 8000/8001) should be
+externally accessible.
+
+---
+
 *Prerequisites current as of March 2026.
 Updated when stack versions change.*
