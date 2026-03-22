@@ -3,28 +3,31 @@
 
 ## APEX VERSION
 APEX v5.2 + ZROS v2.7 + MASTER_LEARNINGS v2.1 DELTA
-First command: APEX ACTIVATE — check Lloyd response first
+First command: APEX ACTIVATE — check Lloyd + 5 LinkedIn messages first
 
 ---
 
 ## REPO
 https://github.com/Rehanrana11/AgentRepEngine
 Branch: main
-HEAD: 501257d — security: wire Kong RS256 signature verification via /verify endpoint
+HEAD: 44b26c0 — eval: 11X-5 call-level vs agent-level benchmark confirmed
 
 ---
 
 ## CURRENT STATE — March 22, 2026
 
 Phase 1: COMPLETE — all 10 tasks done
-Hardening score: 89/100 FAANG-GRADE ✅
-Lloyd email: SENT ✅ — text message also drafted, ready to send
-APEX TEST: COMPLETE — 84/100 composite, 5 bugs fixed
-Synthetic demo: WORKING ✅ — detection confirmed, reason object confirmed
-Feature vector pipeline: VERIFIED ✅ — pii_field_access_rate 0.85 confirmed in queue
-Kong RS256 verification: WORKING ✅ — X-Gateway-Verified=true confirmed
+Hardening score: 94/100 ✅
+Lloyd email: SENT ✅
+5 LinkedIn messages sent: Sri Rajan, Gideon Mann, Brad Murtha, Amila Ranasinghe, John Hyatt
+Synthetic demo: WORKING ✅
+Kong RS256 verification: WORKING ✅
+V4 slow-walk corpus: COMPLETE ✅ — 100% detection
+11X-5 benchmark: COMPLETE ✅ — 0.3ns call overhead
 
 ### All commits March 22
+- 44b26c0  eval: 11X-5 call-level vs agent-level benchmark confirmed
+- 23844b6  docs: continuation prompt updated
 - 501257d  security: wire Kong RS256 signature verification via /verify endpoint
 - feat:    feature vector pipeline verified — synthetic demo detection confirmed
 - 570c41e  security: JWT replay + Redis ACL
@@ -33,14 +36,6 @@ Kong RS256 verification: WORKING ✅ — X-Gateway-Verified=true confirmed
 - 1ecb011  docs: 72-question FAANG audit
 - dbd7d48  docs: hardening meta-prompt v1.0
 - a2e4592  feat: SIEM webhook + 4 hardening fixes
-- 27a63d6  docs: continuation prompt updated
-- 8eb739e  feat: H10 hash_chain_valid in /health
-- 27ad9e8  docs: I4 NIST AI RMF mapping
-- 14820e7  docs: 11X-2 APEX Laws → ATP/ATG mapping
-- 31fab16  docs: H2 scoring model + ATP state mapping
-- 037711f  docs: MASTER_LEARNINGS v2.1 delta
-- 1ae5326  docs: 11X-1 reason_object_v1.json schema
-- 30959e9  docs: APEX TEST expert panel protocol
 - eb4c488  security: enforcement_decisions INSERT-only at DB
 - df4b58a  security: SCORING_API_KEY default + prereqs warning
 - cba161f  security: JWKS endpoint live at /jwks
@@ -61,8 +56,68 @@ Kong RS256 verification: WORKING ✅ — X-Gateway-Verified=true confirmed
 | T5 5 YAML policy packs | ✅ Done — 5 OWASP packs |
 | T6 Explainability engine | ✅ Done — G-EXPLAIN passed |
 | T7 Replay / forensics | ✅ Done — SOC2 export |
-| T8 First enterprise deploy | 🟡 IN PROGRESS — Lloyd email sent |
+| T8 First enterprise deploy | 🟡 IN PROGRESS — Lloyd email sent, 5 LinkedIn messages sent |
 | T9 Open header spec draft | ✅ Done — internal draft |
+
+---
+
+## HARDENING SCORE TRACKER
+
+Baseline: 67/100 → Current: 94/100 ✅
+
+| Fix | Points | Status |
+|-----|--------|--------|
+| V2 Fail-open narrative | +3 | ✅ |
+| H8 Prerequisites checklist | +2 | ✅ |
+| V7 Maturity score + GDPR | +2 | ✅ |
+| H5 SIEM webhook wired | +3 | ✅ |
+| V6 Auto-rollback ModeController | +4 | ✅ |
+| H10 hash_chain_valid in /health | +1 | ✅ |
+| I4 NIST AI RMF mapping | +2 | ✅ |
+| 11X-2 APEX Laws mapping | +2 | ✅ |
+| H2 Scoring model mapping | +1 | ✅ |
+| Kong RS256 verification | +1 | ✅ |
+| V4 Slow-walk evasion corpus | +3 | ✅ |
+| 11X-5 Call vs agent benchmark | +2 | ✅ |
+
+Remaining to 95/100:
+- V1 FP external validation +1 (pilot mein milega — automatic)
+- V3 GDPR tombstone legal review +1 (lawyer chahiye — Phase 2)
+
+---
+
+## V4 SLOW-WALK CORPUS — MARCH 22, 2026
+
+Status: COMPLETE ✅
+- 10 scenarios: 3/5/7-day windows
+- Detection rate: 100% (10/10)
+- Score-based detection: 2/10
+- HIGH_RISK VERIFY: 10/10 (primary defense)
+- OWASP coverage: LLM04 LLM06 LLM07 LLM08
+- Baseline drift documented: slow-walk evades score-only detection
+- Commit: already in repo
+
+Talking point:
+"Low-and-slow attack over 7 days — detected on day 7 via HIGH_RISK VERIFY.
+Score-independent policy threshold fires regardless of agent trust level."
+
+---
+
+## 11X-5 BENCHMARK — MARCH 22, 2026
+
+Status: COMPLETE ✅ — Commit: 44b26c0
+
+| Component | Latency | Allocations |
+|-----------|---------|-------------|
+| Call-level overhead | 0.3 ns | 0 B/op |
+| Score band decision | 0.4 ns | 0 B/op |
+| Z-score computation | 0.5 ns | 0 B/op |
+| ComputeScore formula | 9.0 ns | 0 B/op |
+| Full agent scoring | 28.9 ns | 0 B/op |
+
+Talking point:
+"Call-level gateway overhead: 0.3 nanoseconds. Zero memory allocations.
+p99 10ms gateway budget: scoring uses less than 0.001% of budget."
 
 ---
 
@@ -70,10 +125,10 @@ Kong RS256 verification: WORKING ✅ — X-Gateway-Verified=true confirmed
 
 Status: WORKING ✅
 - verifyHandler returns lineage_hash in response ✅
-- Kong plugin verify_token() passes lineage_hash through cache and return ✅
+- Kong plugin passes lineage_hash through cache and return ✅
 - Valid RS256 token: X-Gateway-Verified=true, score=700 ✅
 - Invalid token: X-Agent-Invalid-Jwt=true, score=500 ✅
-- Replay detection: confirmed working correctly ✅
+- Replay detection: confirmed working ✅
 - Commit: 501257d
 
 ---
@@ -81,12 +136,11 @@ Status: WORKING ✅
 ## SYNTHETIC DEMO STATUS — March 22, 2026
 
 Status: WORKING ✅
-- Feature vector pipeline verified: pii_field_access_rate 0.85 in queue ✅
-- Finserv agent detected at request 15 of bulk PII phase ✅
+- pii_field_access_rate 0.85 confirmed in queue ✅
+- Finserv agent detected at request 15 ✅
 - Score: 850 → 400 (RESTRICTED) ✅
-- Reason object: structured, non-null, worst_feature: pii_field_access_rate ✅
-- Hash chain: VERIFIED tamper-evident ✅
-- Observe mode: confirmed correct — enforce mode NOT yet enabled
+- Reason object: non-null, worst_feature: pii_field_access_rate ✅
+- Hash chain: VERIFIED ✅
 - Demo runtime: 12 seconds ✅
 
 Demo narrative:
@@ -96,29 +150,20 @@ Audit trail tamper-evident. Install time under 4 hours."
 
 ---
 
-## APEX TEST RESULTS — March 22, 2026
+## OUTREACH STATUS — MARCH 22, 2026
 
-Composite: 84/100 ENTERPRISE-READY ✅
+| Person | Company | Title | Status |
+|--------|---------|-------|--------|
+| Lloyd Lemish | — | Technical Solutions Architect | Email sent March 22 |
+| Sri Rajan | JPMorganChase | ED AI Platform | LinkedIn message sent |
+| Gideon Mann | Millennium | Global Head of AI | LinkedIn message sent |
+| Brad Murtha | Wells Fargo | Executive Director | LinkedIn message sent |
+| Amila Ranasinghe | — | Enterprise AI Assurance Architect | LinkedIn message sent |
+| John Hyatt | Charles Schwab | Sr Manager Cyber Risk | LinkedIn message sent |
 
-| Expert | Score | Verdict |
-|--------|-------|---------|
-| E1 Security | 82/100 | CONDITIONAL SECURE |
-| E2 Infrastructure | 71/100 | NEEDS TUNING (Windows latency) |
-| E3 ML/Scoring | 91/100 | ML-SOUND ✅ |
-| E4 Compliance | 89/100 | AUDIT-READY ✅ |
-| E5 Product | 87/100 | INVESTABLE ✅ |
+87 additional high-value targets identified from LinkedIn CSV export.
 
-### Bugs found and fixed
-- eb4c488: enforcement_decisions INSERT-only enforced at DB ✅
-- df4b58a: SCORING_API_KEY default set ✅
-- cba161f: JWKS endpoint live at /jwks ✅
-- 6593467: BlockedDecisionsTotal metric label fixed ✅
-- b9eaffe: pilot-letter-of-understanding.md recovered ✅
-- 501257d: Kong RS256 verification wired end-to-end ✅
-
-### Remaining vulnerabilities
-- Private key in git history: commit 3048bbc (disclosed, key rotated, documented)
-- Slow-walk evasion corpus: V4 gap, not in test suite
+50 Q&A prepared for any call — Roman Urdu version available.
 
 ---
 
@@ -146,18 +191,6 @@ Location: docs/specs/
 
 ---
 
-## HARDENING SCORE TRACKER
-
-Baseline: 67/100 → Current: 89/100 FAANG-GRADE ✅
-
-Remaining to 95/100 (acquisition-ready):
-- V4  Slow-walk evasion corpus           ☐ +3
-- V1  FP external validation             ☐ +2
-- V3  GDPR tombstone legal review        ☐ +1
-- 11X-5 Call-level vs agent-level bench  ☐ +2
-
----
-
 ## ENVIRONMENT
 
 Scoring language : Go
@@ -173,14 +206,17 @@ GitHub           : https://github.com/Rehanrana11/AgentRepEngine.git
 
 ## METRICS
 
-FP rate           : 0.00% on 100-scenario internal corpus
-TP rate           : 86.67%
-Blocked incidents : 0 real enterprise (demo confirmed passing)
-Paying customers  : 0
-Security gaps open: 1 (git history key — disclosed, rotated, documented)
-Hardening score   : 89/100 FAANG-GRADE ✅
-APEX TEST score   : 84/100 ENTERPRISE-READY ✅
-Demo time         : 12 seconds ✅
+FP rate              : 0.00% on 100-scenario internal corpus
+TP rate              : 86.67%
+Slow-walk detection  : 100% (10/10 scenarios)
+Call overhead        : 0.3ns — zero allocations
+Blocked incidents    : 0 real enterprise (demo confirmed passing)
+Paying customers     : 0
+Security gaps open   : 1 (git history key — disclosed, rotated, documented)
+Hardening score      : 94/100 ✅
+APEX TEST score      : 84/100 ENTERPRISE-READY ✅
+Demo time            : 12 seconds ✅
+LinkedIn targets     : 87 high-value identified, 5 messaged
 
 ---
 
@@ -188,8 +224,8 @@ Demo time         : 12 seconds ✅
 
 11 months 25 days remaining as of March 22, 2026
 Lloyd email sent: March 22, 2026
-Lloyd text message: DRAFTED — ready to send if no email response by March 25
-Expected response: March 25-29, 2026
+5 LinkedIn messages sent: March 22, 2026
+Expected responses: March 25-29, 2026
 Lloyd conversation target: April 4, 2026
 Hard deadline: April 18, 2026
 
@@ -197,15 +233,21 @@ Hard deadline: April 18, 2026
 
 ## NEXT SESSION FIRST ACTION
 
-STEP 1: Check email — did Lloyd respond?
+STEP 1: Check email + LinkedIn — did anyone respond?
 
 IF Lloyd responded:
   APEX BUYER — prepare for security team conversation
   Do not open VS Code until buyer prep is done
 
-IF no response yet:
-  Send the text message drafted March 22
-  Then wait — do not open VS Code
-  If still no response by April 1: identify second design partner target
+IF LinkedIn responded (Sri Rajan / Gideon Mann / Brad Murtha / Amila / John Hyatt):
+  APEX BUYER — prepare for that specific person's conversation
+  Use the 50 Q&A prepared March 22
 
-NEVER start a session with code before checking Lloyd email status.
+IF Rohan Adat call scheduled:
+  Review partnership angle — compliance evidence + channel partner framing
+
+IF no responses yet:
+  Message next 5 targets from the 87-person LinkedIn list
+  Then wait — do not open VS Code
+
+NEVER start a session with code before checking responses.
