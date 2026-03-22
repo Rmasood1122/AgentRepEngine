@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://agentrepengine.io/schemas/reason_object_v1.json",
   "title": "AgentRepEngine Reason Object v1",
-  "description": "Structured enforcement decision explanation. Every BLOCKED or AUDIT decision produces exactly one reason object. No enforcement decision ships without this schema populated.",
+  "description": "Structured enforcement decision explanation. Every BLOCKED or AUDIT decision produces exactly one reason object.",
   "version": "1.0.0",
   "type": "object",
   "required": [
@@ -23,25 +23,24 @@
     "decision": {
       "type": "string",
       "enum": ["BLOCKED", "AUDIT", "THROTTLE", "ALLOW"],
-      "description": "Final enforcement decision. BLOCKED = synthetic response returned. AUDIT = logged only. THROTTLE = rate limited."
+      "description": "Final enforcement decision."
     },
     "agent_did": {
       "type": "string",
       "pattern": "^did:jwt:[a-z0-9-]+:[a-z0-9-]+:[a-z0-9-]+$",
-      "description": "Cryptographic agent identity. Format: did:jwt:{org_id}:{service}:{uuid}",
-      "example": "did:jwt:acme-corp:data-pipeline-agent:7f3a9b2c"
+      "description": "Cryptographic agent identity. Format: did:jwt:{org_id}:{service}:{uuid}"
     },
     "score": {
       "type": "integer",
       "minimum": 0,
       "maximum": 1000,
-      "description": "Current reputation score at time of decision. 0-199=BLOCKED, 200-499=RESTRICTED, 500-699=MONITORED, 700-1000=TRUSTED."
+      "description": "Current reputation score. 0-199=BLOCKED, 200-499=RESTRICTED, 500-699=MONITORED, 700-1000=TRUSTED."
     },
     "score_delta": {
       "type": "integer",
       "minimum": -1000,
       "maximum": 1000,
-      "description": "Score change that triggered this decision. Negative = score decreased. Example: -556 means score dropped by 556 points."
+      "description": "Score change that triggered this decision. Negative = score decreased."
     },
     "score_period_hours": {
       "type": "number",
@@ -54,13 +53,7 @@
       "description": "Behavioral events that triggered this enforcement decision.",
       "items": {
         "type": "object",
-        "required": [
-          "event_type",
-          "count",
-          "window_minutes",
-          "baseline_per_hour",
-          "deviation_sigma"
-        ],
+        "required": ["event_type", "count", "window_minutes", "baseline_per_hour", "deviation_sigma"],
         "properties": {
           "event_type": {
             "type": "string",
@@ -75,50 +68,30 @@
               "lateral_movement_attempt",
               "prompt_injection_detected",
               "token_refresh_anomaly"
-            ],
-            "description": "OWASP LLM Top 10 aligned event type."
+            ]
           },
-          "count": {
-            "type": "integer",
-            "minimum": 0,
-            "description": "Number of events observed in the window."
-          },
-          "window_minutes": {
-            "type": "integer",
-            "minimum": 1,
-            "description": "Time window over which events were counted."
-          },
-          "baseline_per_hour": {
-            "type": "number",
-            "minimum": 0,
-            "description": "Agent's individual baseline rate per hour for this event type."
-          },
-          "deviation_sigma": {
-            "type": "number",
-            "description": "Standard deviations above individual baseline. >3.0 is anomalous."
-          }
+          "count": { "type": "integer", "minimum": 0 },
+          "window_minutes": { "type": "integer", "minimum": 1 },
+          "baseline_per_hour": { "type": "number", "minimum": 0 },
+          "deviation_sigma": { "type": "number" }
         }
       }
     },
     "policy_fired": {
       "type": "string",
-      "description": "Name and version of the YAML policy pack that triggered this decision.",
-      "example": "bulk_pii_access_prevention_v1"
+      "description": "Name and version of the YAML policy pack that triggered this decision."
     },
     "policy_threshold": {
       "type": "string",
-      "description": "Human-readable threshold description from the policy pack.",
-      "example": "PII access >500 records in 2h window"
+      "description": "Human-readable threshold description from the policy pack."
     },
     "recommended_action": {
       "type": "string",
-      "description": "Recommended human action for the security team.",
-      "example": "Human review before re-authorization"
+      "description": "Recommended human action for the security team."
     },
     "peer_cluster": {
       "type": "string",
-      "description": "Behavioral archetype cluster this agent belongs to.",
-      "example": "data-analyst-agents"
+      "description": "Behavioral archetype cluster this agent belongs to."
     },
     "peer_cluster_avg_score": {
       "type": "integer",
@@ -130,7 +103,7 @@
       "type": "integer",
       "minimum": -1000,
       "maximum": 1000,
-      "description": "This agent's score minus the peer cluster average. Negative = below cluster average."
+      "description": "This agent score minus peer cluster average. Negative = below cluster average."
     }
   },
   "examples": [
