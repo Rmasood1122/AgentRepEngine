@@ -85,8 +85,16 @@ CREATE TABLE IF NOT EXISTS daily_fp_metrics (
     fp_rate   NUMERIC(5,2) DEFAULT 0
 );
 
--- Revoke UPDATE and DELETE on enforcement_decisions
-REVOKE UPDATE, DELETE ON enforcement_decisions FROM PUBLIC;
+-- E1-6 FIX: enforcement_decisions is INSERT-only at DB level
+-- Tamper-evident audit log — no modifications permitted after write
+-- Revoke from PUBLIC and from application user
+REVOKE UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER
+  ON enforcement_decisions FROM PUBLIC;
+REVOKE UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER
+  ON enforcement_decisions FROM are;
+-- Verify: only INSERT and SELECT remain
+-- SELECT privilege_type FROM information_schema.role_table_grants
+-- WHERE table_name='enforcement_decisions' AND grantee='are';
 -- Agent behavioral baselines (Task 4)
 CREATE TABLE IF NOT EXISTS agent_baselines (
     id              BIGSERIAL PRIMARY KEY,
