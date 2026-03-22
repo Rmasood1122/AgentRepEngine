@@ -10,7 +10,9 @@ First command: APEX ACTIVATE — check Lloyd + 5 LinkedIn messages first
 ## REPO
 https://github.com/Rehanrana11/AgentRepEngine
 Branch: main
-HEAD: bd327ad — chore: pycache gitignore clean
+HEAD: 35a02aa — docs: Zenodo DOI added to README
+Zenodo DOI: 10.5281/zenodo.19169185 — PUBLISHED March 22, 2026
+IP chain: ATP (Dec 2025) → ATG (Dec 2025) → AgentRepEngine (Mar 2026)
 
 ---
 
