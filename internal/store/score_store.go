@@ -147,7 +147,10 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 	}
 
 	// Instrument enforcement decision metrics
-	metrics.BlockedDecisionsTotal.WithLabelValues(band, policyName).Inc()
+	// BlockedDecisionsTotal: only increment on actual BLOCKED decisions
+	if band == "BLOCKED" {
+		metrics.BlockedDecisionsTotal.WithLabelValues("BLOCKED", policyName).Inc()
+	}
 	metrics.ScoreUpdatesTotal.WithLabelValues(band, policyName).Inc()
 
 	// PostgreSQL first — source of truth
