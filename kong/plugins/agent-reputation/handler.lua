@@ -111,6 +111,7 @@ local function verify_token(token, scoring_url)
             agent_did = claims.agent_did,
             org_id = claims.org_id,
             instance_id = claims.instance_id,
+            lineage_hash = claims.lineage_hash,
         }), 60)
     end
 
@@ -118,6 +119,7 @@ local function verify_token(token, scoring_url)
         agent_did = claims.agent_did,
         org_id = claims.org_id,
         instance_id = claims.instance_id,
+        lineage_hash = claims.lineage_hash,
     }, nil
 end
 

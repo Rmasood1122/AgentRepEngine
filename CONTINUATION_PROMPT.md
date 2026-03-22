@@ -2,7 +2,7 @@
 # Next session starts here
 
 ## APEX VERSION
-APEX v5.2 + ZROS v2.6 + MASTER_LEARNINGS v2.0 + v2.1 DELTA
+APEX v5.2 + ZROS v2.7 + MASTER_LEARNINGS v2.1 DELTA
 First command: APEX ACTIVATE — check Lloyd response first
 
 ---
@@ -10,7 +10,7 @@ First command: APEX ACTIVATE — check Lloyd response first
 ## REPO
 https://github.com/Rehanrana11/AgentRepEngine
 Branch: main
-HEAD: b9eaffe — pilot LOU recovered, APEX TEST complete
+HEAD: feat: feature vector pipeline verified — synthetic demo detection confirmed
 
 ---
 
@@ -20,8 +20,11 @@ Phase 1: COMPLETE — all 10 tasks done
 Score: 88/100 FAANG-GRADE ✅
 Lloyd email: SENT ✅
 APEX TEST: COMPLETE — 84/100 composite, 5 bugs fixed
+Synthetic demo: WORKING ✅ — detection confirmed, reason object confirmed
+Feature vector pipeline: VERIFIED ✅ — pii_field_access_rate 0.85 confirmed in queue
 
 ### All commits today (March 22)
+- feat: feature vector pipeline verified — synthetic demo detection confirmed
 - 570c41e  security: JWT replay + Redis ACL
 - 69f9ea3  gtm: maturity statement
 - accf9c7  docs: continuation prompt
@@ -58,6 +61,24 @@ APEX TEST: COMPLETE — 84/100 composite, 5 bugs fixed
 | T7 Replay / forensics | ✅ Done — SOC2 export |
 | T8 First enterprise deploy | 🟡 IN PROGRESS — Lloyd email sent |
 | T9 Open header spec draft | ✅ Done — internal draft |
+
+---
+
+## SYNTHETIC DEMO STATUS — March 22, 2026
+
+Status: WORKING ✅
+- Feature vector pipeline verified: pii_field_access_rate 0.85 in queue ✅
+- Finserv agent detected at request 15 of bulk PII phase ✅
+- Score: 850 → 400 (RESTRICTED) ✅
+- Reason object: structured, non-null, worst_feature: pii_field_access_rate ✅
+- Hash chain: VERIFIED tamper-evident ✅
+- Observe mode: confirmed correct — enforce mode NOT yet enabled
+- Demo runtime: 12 seconds ✅
+
+Demo narrative:
+"Agent looked clean for 3 days. Day 4 bulk PII extraction began.
+Detected at request 15. Reason object shipped to SIEM.
+Audit trail tamper-evident. Install time under 4 hours."
 
 ---
 
@@ -150,7 +171,7 @@ Demo time         : 12 seconds ✅
 
 ## COMPETITIVE CLOCK
 
-11 months 27 days remaining from March 21, 2026
+11 months 25 days remaining as of March 22, 2026
 Lloyd email sent: March 22, 2026
 Expected response: March 25-29, 2026
 Lloyd conversation target: April 4, 2026

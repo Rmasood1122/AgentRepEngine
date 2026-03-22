@@ -255,8 +255,8 @@ func verifyHandler(s *store.ScoreStore) http.HandlerFunc {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, `{"valid":true,"agent_did":%q,"org_id":%q,"instance_id":%q}`,
-			claims.AgentDID, claims.OrgID, claims.InstanceID)
+		fmt.Fprintf(w, `{"valid":true,"agent_did":%q,"org_id":%q,"instance_id":%q,"lineage_hash":%q}`,
+		claims.AgentDID, claims.OrgID, claims.InstanceID, claims.LineageHash)
 	}
 }
 
