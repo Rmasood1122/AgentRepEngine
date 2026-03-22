@@ -70,10 +70,6 @@ func main() {
 	}
 	slog.Info("redis connected")
 
-	// V6 FIX: ModeController — runtime enforcement mode + auto-rollback
-	// Stores mode in Redis — changes take effect without restart
-	// Auto-rolls back to observe if FP rate exceeds 2%
-	// Never auto-escalates to enforce — human decision only
 	modeCtrl := enforcement.NewModeController(
 		scoreStore.GetRedisClient(), db, enforcementMode)
 	modeCtrl.StartFPMonitor()
@@ -86,7 +82,6 @@ func main() {
 	go consumer.Start()
 	slog.Info("event consumer started")
 
-	// Background metrics collector
 	go func() {
 		for {
 			var agentCount float64
@@ -109,7 +104,6 @@ func main() {
 	}()
 
 	mux := http.NewServeMux()
-	// Health endpoint returns live enforcement mode from Redis
 	mux.HandleFunc("/health", healthHandler(db, scoreStore, modeCtrl))
 	mux.HandleFunc("/jwks", jwksHandler())
 	mux.HandleFunc("/verify", verifyHandler(scoreStore))
@@ -184,8 +178,13 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-// healthHandler returns live enforcement mode from Redis via ModeController.
-// Mode reflects auto-rollback state instantly — no restart needed.
+func coalesceF(val, fallback float64) float64 {
+	if val != 0 {
+		return val
+	}
+	return fallback
+}
+
 func healthHandler(db *sql.DB, s *store.ScoreStore, mc *enforcement.ModeController) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		dbStatus := "ok"
@@ -196,9 +195,7 @@ func healthHandler(db *sql.DB, s *store.ScoreStore, mc *enforcement.ModeControll
 		if err := s.Ping(); err != nil {
 			redisStatus = "error"
 		}
-		// Live mode from Redis — reflects auto-rollback instantly
 		currentMode := mc.GetMode()
-		// H10 FIX: verify hash chain on every health check
 		hashChainValid := "true"
 		var chainResult bool
 		var chainErr error
@@ -220,20 +217,12 @@ func healthHandler(db *sql.DB, s *store.ScoreStore, mc *enforcement.ModeControll
 	}
 }
 
-// jwksHandler returns the RS256 public key in JWKS format.
-// Used by Kong plugin to verify JWT signatures at gateway layer.
-// Public key — no authentication required.
-// verifyHandler validates a JWT token using full RS256 + replay detection.
-// Called by Kong plugin to verify agent tokens at gateway layer.
-// Returns: {"valid": true, "agent_did": "...", "org_id": "..."}
-// No authentication required — public endpoint (token is the credential).
 func verifyHandler(s *store.ScoreStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
-
 		var body struct {
 			Token string `json:"token"`
 		}
@@ -243,14 +232,12 @@ func verifyHandler(s *store.ScoreStore) http.HandlerFunc {
 			fmt.Fprintf(w, `{"valid":false,"error":"invalid request body"}`)
 			return
 		}
-
 		if body.Token == "" {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintf(w, `{"valid":false,"error":"token required"}`)
 			return
 		}
-
 		keys, err := identity.LoadOrGenerateKeys()
 		if err != nil {
 			slog.Error("verify_keys_load_failed", "error", err)
@@ -259,17 +246,14 @@ func verifyHandler(s *store.ScoreStore) http.HandlerFunc {
 			fmt.Fprintf(w, `{"valid":false,"error":"key load failed"}`)
 			return
 		}
-
 		claims, err := identity.VerifyToken(body.Token, keys, s.GetRedisClient())
 		if err != nil {
-			slog.Warn("verify_token_rejected",
-				"error", err)
+			slog.Warn("verify_token_rejected", "error", err)
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
 			fmt.Fprintf(w, `{"valid":false,"error":%q}`, err.Error())
 			return
 		}
-
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, `{"valid":true,"agent_did":%q,"org_id":%q,"instance_id":%q}`,
 			claims.AgentDID, claims.OrgID, claims.InstanceID)
@@ -284,12 +268,10 @@ func jwksHandler() http.HandlerFunc {
 			http.Error(w, "key load failed", http.StatusInternalServerError)
 			return
 		}
-
 		pubKey := keys.Public
 		n := base64.RawURLEncoding.EncodeToString(pubKey.N.Bytes())
 		e := base64.RawURLEncoding.EncodeToString(
 			[]byte{byte(pubKey.E >> 16), byte(pubKey.E >> 8), byte(pubKey.E)})
-
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, `{
   "keys": [
@@ -305,6 +287,7 @@ func jwksHandler() http.HandlerFunc {
 }`, n, e)
 	}
 }
+
 func scoreHandler(s *store.ScoreStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		did := r.URL.Path[len("/score/"):]
@@ -351,11 +334,21 @@ func eventHandler(db *sql.DB, s *store.ScoreStore) http.HandlerFunc {
 		}
 
 		var body struct {
-			AgentDID    string `json:"agent_did"`
-			OrgID       string `json:"org_id"`
-			EventType   string `json:"event_type"`
-			PrivacyTier int    `json:"privacy_tier"`
-			Payload     struct {
+			AgentDID      string `json:"agent_did"`
+			OrgID         string `json:"org_id"`
+			EventType     string `json:"event_type"`
+			PrivacyTier   int    `json:"privacy_tier"`
+			FeatureVector struct {
+				ToolCallRatePerHour       float64 `json:"tool_call_rate_per_hour"`
+				UniqueEndpointsPerHour    float64 `json:"unique_endpoints_per_hour"`
+				BulkAccessCountPerSession float64 `json:"bulk_access_count_per_session"`
+				PIIFieldAccessRate        float64 `json:"pii_field_access_rate"`
+				CrossTenantProbeCount     float64 `json:"cross_tenant_probe_count"`
+				PermissionEscalationCount float64 `json:"permission_escalation_count"`
+				SubAgentSpawnDepth        float64 `json:"sub_agent_spawn_depth"`
+				TokenRefreshRate          float64 `json:"token_refresh_rate"`
+			} `json:"feature_vector"`
+			Payload struct {
 				Method         string  `json:"method"`
 				Path           string  `json:"path"`
 				StatusCode     int     `json:"status_code"`
@@ -378,15 +371,18 @@ func eventHandler(db *sql.DB, s *store.ScoreStore) http.HandlerFunc {
 			privacyTier = 1
 		}
 
+		// Use feature vector from request body if provided (agent SDK).
+		// Fall back to gateway-observable defaults if not provided.
+		fv := body.FeatureVector
 		vector := scoring.FeatureVector{
-			ToolCallRatePerHour:       1.0,
-			UniqueEndpointsPerHour:    1.0,
-			BulkAccessCountPerSession: 0,
-			PIIFieldAccessRate:        0,
-			CrossTenantProbeCount:     0,
-			PermissionEscalationCount: 0,
-			SubAgentSpawnDepth:        0,
-			TokenRefreshRate:          0,
+			ToolCallRatePerHour:       coalesceF(fv.ToolCallRatePerHour, 1.0),
+			UniqueEndpointsPerHour:    coalesceF(fv.UniqueEndpointsPerHour, 1.0),
+			BulkAccessCountPerSession: fv.BulkAccessCountPerSession,
+			PIIFieldAccessRate:        fv.PIIFieldAccessRate,
+			CrossTenantProbeCount:     fv.CrossTenantProbeCount,
+			PermissionEscalationCount: fv.PermissionEscalationCount,
+			SubAgentSpawnDepth:        fv.SubAgentSpawnDepth,
+			TokenRefreshRate:          fv.TokenRefreshRate,
 		}
 
 		if err := s.EnqueueEvent(body.AgentDID, body.EventType,
