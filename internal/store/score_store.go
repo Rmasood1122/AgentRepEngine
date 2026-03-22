@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/agentrepengine/are/internal/audit"
 	"github.com/agentrepengine/are/internal/metrics"
 	"github.com/agentrepengine/are/internal/scoring"
 	"github.com/redis/go-redis/v9"
@@ -25,6 +26,7 @@ type ScoreStore struct {
 	redisURL string
 	rdb      *redis.Client
 	ctx      context.Context
+	siem     *audit.SIEMWebhook
 }
 
 func NewScoreStore(db *sql.DB, redisURL string) *ScoreStore {
@@ -32,6 +34,7 @@ func NewScoreStore(db *sql.DB, redisURL string) *ScoreStore {
 		db:       db,
 		redisURL: redisURL,
 		ctx:      context.Background(),
+		siem:     audit.NewSIEMWebhook(),
 	}
 }
 
@@ -55,7 +58,6 @@ func (s *ScoreStore) GetScore(agentDID string) (*ScoreResult, error) {
 
 	vals, err := s.rdb.HGetAll(s.ctx, key).Result()
 	if err == nil && len(vals) > 0 {
-		// Cache HIT — instrument metric
 		metrics.RedisCacheHits.WithLabelValues("hit").Inc()
 
 		score := 700
@@ -76,7 +78,6 @@ func (s *ScoreStore) GetScore(agentDID string) (*ScoreResult, error) {
 		}, nil
 	}
 
-	// Cache MISS — instrument metric
 	metrics.RedisCacheHits.WithLabelValues("miss").Inc()
 
 	var currentScore int
@@ -103,7 +104,6 @@ func (s *ScoreStore) GetScore(agentDID string) (*ScoreResult, error) {
 	reason := fmt.Sprintf(`{"score":%d,"band":"%s","source":"db","status":"%s"}`,
 		currentScore, band, status)
 
-	// Backfill Redis cache (only for non-blocked agents)
 	if band != "BLOCKED" {
 		s.rdb.HSet(s.ctx, key,
 			"score", currentScore,
@@ -123,6 +123,7 @@ func (s *ScoreStore) GetScore(agentDID string) (*ScoreResult, error) {
 }
 
 // WriteScore writes score to PostgreSQL first, then Redis.
+// Fires SIEM webhook on every BLOCKED decision.
 // Instruments blocked decisions and score update metrics.
 func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{}) error {
 	band := scoring.ScoreBand(score)
@@ -165,6 +166,14 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 			slog.Info("cache_invalidated_on_block",
 				"agent_did", agentDID, "score", score)
 		}
+		// H5 FIX: Fire SIEM webhook on every BLOCKED decision
+		// Fire-and-forget — SIEM delivery never blocks enforcement
+		// scoreDelta=0 placeholder — Phase 2 tracks previous score in WriteScore
+		s.siem.SendBlocked(agentDID, score, 0, policyName, reasonJSON)
+		slog.Info("siem_webhook_fired",
+			"agent_did", agentDID,
+			"score", score,
+			"policy", policyName)
 	} else {
 		if err := s.rdb.HSet(s.ctx, key,
 			"score", score,
