@@ -1,0 +1,160 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agentrepengine.io/schemas/reason_object_v1.json",
+  "title": "AgentRepEngine Reason Object v1",
+  "description": "Structured enforcement decision explanation. Every BLOCKED or AUDIT decision produces exactly one reason object. No enforcement decision ships without this schema populated.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "decision",
+    "agent_did",
+    "score",
+    "score_delta",
+    "score_period_hours",
+    "trigger_events",
+    "policy_fired",
+    "policy_threshold",
+    "recommended_action",
+    "peer_cluster",
+    "peer_cluster_avg_score",
+    "deviation_from_cluster"
+  ],
+  "properties": {
+    "decision": {
+      "type": "string",
+      "enum": ["BLOCKED", "AUDIT", "THROTTLE", "ALLOW"],
+      "description": "Final enforcement decision. BLOCKED = synthetic response returned. AUDIT = logged only. THROTTLE = rate limited."
+    },
+    "agent_did": {
+      "type": "string",
+      "pattern": "^did:jwt:[a-z0-9-]+:[a-z0-9-]+:[a-z0-9-]+$",
+      "description": "Cryptographic agent identity. Format: did:jwt:{org_id}:{service}:{uuid}",
+      "example": "did:jwt:acme-corp:data-pipeline-agent:7f3a9b2c"
+    },
+    "score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000,
+      "description": "Current reputation score at time of decision. 0-199=BLOCKED, 200-499=RESTRICTED, 500-699=MONITORED, 700-1000=TRUSTED."
+    },
+    "score_delta": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 1000,
+      "description": "Score change that triggered this decision. Negative = score decreased. Example: -556 means score dropped by 556 points."
+    },
+    "score_period_hours": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Hours of behavioral history used to compute this score."
+    },
+    "trigger_events": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Behavioral events that triggered this enforcement decision.",
+      "items": {
+        "type": "object",
+        "required": [
+          "event_type",
+          "count",
+          "window_minutes",
+          "baseline_per_hour",
+          "deviation_sigma"
+        ],
+        "properties": {
+          "event_type": {
+            "type": "string",
+            "enum": [
+              "bulk_pii_access",
+              "permission_escalation_request",
+              "cross_tenant_access_attempt",
+              "recursive_agent_spawn",
+              "high_frequency_tool_call",
+              "credential_access_attempt",
+              "mass_deletion_attempt",
+              "lateral_movement_attempt",
+              "prompt_injection_detected",
+              "token_refresh_anomaly"
+            ],
+            "description": "OWASP LLM Top 10 aligned event type."
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of events observed in the window."
+          },
+          "window_minutes": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Time window over which events were counted."
+          },
+          "baseline_per_hour": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Agent's individual baseline rate per hour for this event type."
+          },
+          "deviation_sigma": {
+            "type": "number",
+            "description": "Standard deviations above individual baseline. >3.0 is anomalous."
+          }
+        }
+      }
+    },
+    "policy_fired": {
+      "type": "string",
+      "description": "Name and version of the YAML policy pack that triggered this decision.",
+      "example": "bulk_pii_access_prevention_v1"
+    },
+    "policy_threshold": {
+      "type": "string",
+      "description": "Human-readable threshold description from the policy pack.",
+      "example": "PII access >500 records in 2h window"
+    },
+    "recommended_action": {
+      "type": "string",
+      "description": "Recommended human action for the security team.",
+      "example": "Human review before re-authorization"
+    },
+    "peer_cluster": {
+      "type": "string",
+      "description": "Behavioral archetype cluster this agent belongs to.",
+      "example": "data-analyst-agents"
+    },
+    "peer_cluster_avg_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000,
+      "description": "Average reputation score of agents in the same behavioral cluster."
+    },
+    "deviation_from_cluster": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 1000,
+      "description": "This agent's score minus the peer cluster average. Negative = below cluster average."
+    }
+  },
+  "examples": [
+    {
+      "decision": "BLOCKED",
+      "agent_did": "did:jwt:finserv-demo:trading-agent:001",
+      "score": 187,
+      "score_delta": -556,
+      "score_period_hours": 6,
+      "trigger_events": [
+        {
+          "event_type": "bulk_pii_access",
+          "count": 847,
+          "window_minutes": 90,
+          "baseline_per_hour": 12,
+          "deviation_sigma": 4.2
+        }
+      ],
+      "policy_fired": "bulk_pii_access_prevention_v1",
+      "policy_threshold": "PII access >500 records in 2h window",
+      "recommended_action": "Human review before re-authorization",
+      "peer_cluster": "data-analyst-agents",
+      "peer_cluster_avg_score": 700,
+      "deviation_from_cluster": -513
+    }
+  ]
+}
