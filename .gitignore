@@ -5,3 +5,6 @@ coverage.out
 keys/
 bootstrap.go
 main
+sdk/python/__pycache__/
+sdk/python/**/__pycache__/
+**/*.pyc
