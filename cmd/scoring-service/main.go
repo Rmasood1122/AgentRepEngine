@@ -194,14 +194,25 @@ func healthHandler(db *sql.DB, s *store.ScoreStore, mc *enforcement.ModeControll
 		}
 		// Live mode from Redis — reflects auto-rollback instantly
 		currentMode := mc.GetMode()
+		// H10 FIX: verify hash chain on every health check
+		hashChainValid := "true"
+		var chainResult bool
+		var chainErr error
+		chainErr = db.QueryRowContext(r.Context(),
+			`SELECT verify_hash_chain('enforcement_decisions') AS valid`,
+		).Scan(&chainResult)
+		if chainErr != nil || !chainResult {
+			hashChainValid = "false"
+		}
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, `{
   "status": "ok",
   "redis": "%s",
   "postgres": "%s",
   "enforcement_mode": "%s",
+  "hash_chain_valid": %s,
   "log_format": "json"
-}`, redisStatus, dbStatus, currentMode)
+}`, redisStatus, dbStatus, currentMode, hashChainValid)
 	}
 }
 
