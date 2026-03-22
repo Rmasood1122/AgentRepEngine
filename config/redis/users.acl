@@ -1,0 +1,3 @@
+user default off nopass nocommands
+user are_admin on >are_redis_dev ~* &* +@all
+user scoring_service on >are_scoring_dev ~score:* ~used_token:* &* +GET +SET +SETEX +HSET +HGETALL +HGET +EXPIRE +EXISTS +DEL +KEYS +PING

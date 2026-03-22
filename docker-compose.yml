@@ -3,9 +3,16 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
-    command: redis-server --save "" --appendonly no
+    command: >
+      redis-server
+      --save ""
+      --appendonly no
+      --requirepass are_redis_dev
+      --aclfile /etc/redis/users.acl
+    volumes:
+      - ./config/redis/users.acl:/etc/redis/users.acl:ro
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "are_redis_dev", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -26,7 +33,6 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./migrations/001_initial.sql:/docker-entrypoint-initdb.d/001_initial.sql:ro
-    
 
   scoring-service:
     build: .
@@ -34,7 +40,7 @@ services:
       - "8080:8080"
     environment:
       DATABASE_URL: postgres://are:are_dev@postgres:5432/agentrepengine?sslmode=disable
-      REDIS_URL: redis://redis:6379
+      REDIS_URL: redis://are_admin:are_redis_dev@redis:6379
       ENFORCEMENT_MODE: observe
       PORT: "8080"
       SIEM_WEBHOOK_URL: ""
