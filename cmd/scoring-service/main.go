@@ -112,6 +112,7 @@ func main() {
 	// Health endpoint returns live enforcement mode from Redis
 	mux.HandleFunc("/health", healthHandler(db, scoreStore, modeCtrl))
 	mux.HandleFunc("/jwks", jwksHandler())
+	mux.HandleFunc("/verify", verifyHandler(scoreStore))
 	_ = metrics.ActiveAgentCount
 	mux.Handle("/metrics", promhttp.Handler())
 	mux.HandleFunc("/score/", requireAPIKey(scoreHandler(scoreStore)))
@@ -222,6 +223,59 @@ func healthHandler(db *sql.DB, s *store.ScoreStore, mc *enforcement.ModeControll
 // jwksHandler returns the RS256 public key in JWKS format.
 // Used by Kong plugin to verify JWT signatures at gateway layer.
 // Public key — no authentication required.
+// verifyHandler validates a JWT token using full RS256 + replay detection.
+// Called by Kong plugin to verify agent tokens at gateway layer.
+// Returns: {"valid": true, "agent_did": "...", "org_id": "..."}
+// No authentication required — public endpoint (token is the credential).
+func verifyHandler(s *store.ScoreStore) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		var body struct {
+			Token string `json:"token"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(w, `{"valid":false,"error":"invalid request body"}`)
+			return
+		}
+
+		if body.Token == "" {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(w, `{"valid":false,"error":"token required"}`)
+			return
+		}
+
+		keys, err := identity.LoadOrGenerateKeys()
+		if err != nil {
+			slog.Error("verify_keys_load_failed", "error", err)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, `{"valid":false,"error":"key load failed"}`)
+			return
+		}
+
+		claims, err := identity.VerifyToken(body.Token, keys, s.GetRedisClient())
+		if err != nil {
+			slog.Warn("verify_token_rejected",
+				"error", err)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			fmt.Fprintf(w, `{"valid":false,"error":%q}`, err.Error())
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"valid":true,"agent_did":%q,"org_id":%q,"instance_id":%q}`,
+			claims.AgentDID, claims.OrgID, claims.InstanceID)
+	}
+}
+
 func jwksHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		keys, err := identity.LoadOrGenerateKeys()

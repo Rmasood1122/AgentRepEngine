@@ -45,7 +45,9 @@ services:
       PORT: "8080"
       SIEM_WEBHOOK_URL: ""
       SCORING_API_KEY: "are-internal-key-change-in-production"
-    depends_on:
+    volumes:
+      - ./keys:/app/keys:ro
+    depends_on: 
       postgres:
         condition: service_healthy
       redis:

@@ -48,7 +48,82 @@ local function synthetic_response()
     })
 end
 
-local function extract_jwt_claims(token)
+-- Shared dict for verify cache — declared in nginx.conf
+-- Key: token hash, Value: JSON claims, TTL: 60 seconds
+local verify_cache = ngx.shared.are_verify_cache
+
+local function hash_token(token)
+    -- Use first 32 chars as cache key (unique enough, avoids storing full token)
+    return string.sub(token, 1, 32)
+end
+
+-- verify_token calls scoring service /verify endpoint with full RS256 validation.
+-- Caches result for 60 seconds to avoid per-request verification latency.
+-- Falls back to claims extraction if scoring service unavailable (fail-open).
+local function verify_token(token, scoring_url)
+    if not token or token == "" then return nil, "empty token" end
+
+    -- Check cache first
+    local cache_key = hash_token(token)
+    if verify_cache then
+        local cached = verify_cache:get(cache_key)
+        if cached then
+            local ok, claims = pcall(cjson.decode, cached)
+            if ok then return claims, nil end
+        end
+    end
+
+    -- Call /verify endpoint
+    local http = require("resty.http")
+    local httpc = http.new()
+    httpc:set_timeout(500) -- 500ms timeout — fail-open if slow
+
+    local res, err = httpc:request_uri(scoring_url .. "/verify", {
+        method = "POST",
+        body = cjson.encode({token = token}),
+        headers = {["Content-Type"] = "application/json"},
+    })
+
+    if not res or err then
+        kong.log.warn("verify_service_unavailable: ", err, " — falling back to unverified claims")
+        return extract_jwt_claims_unverified(token), nil
+    end
+
+    if res.status == 401 then
+        local body_ok, body = pcall(cjson.decode, res.body)
+        local error_msg = (body_ok and body.error) or "signature verification failed"
+        return nil, error_msg
+    end
+
+    if res.status ~= 200 then
+        kong.log.warn("verify_unexpected_status: ", res.status, " — falling back")
+        return extract_jwt_claims_unverified(token), nil
+    end
+
+    local ok, claims = pcall(cjson.decode, res.body)
+    if not ok or not claims.valid then
+        return nil, "invalid response from verify service"
+    end
+
+    -- Cache successful verification for 60 seconds
+    if verify_cache then
+        verify_cache:set(cache_key, cjson.encode({
+            agent_did = claims.agent_did,
+            org_id = claims.org_id,
+            instance_id = claims.instance_id,
+        }), 60)
+    end
+
+    return {
+        agent_did = claims.agent_did,
+        org_id = claims.org_id,
+        instance_id = claims.instance_id,
+    }, nil
+end
+
+-- Fallback: extract claims without signature verification
+-- Used when verify service is unavailable (fail-open on infrastructure)
+local function extract_jwt_claims_unverified(token)
     if not token or token == "" then return nil end
     local parts = {}
     for part in token:gmatch("[^.]+") do
@@ -67,6 +142,9 @@ local function extract_jwt_claims(token)
     return claims
 end
 
+local function extract_jwt_claims(token)
+    return extract_jwt_claims_unverified(token)
+end
 local function validate_claims(claims)
     if not claims then return false, "no claims" end
     if not claims.agent_did or claims.agent_did == "" then
@@ -95,11 +173,25 @@ function AgentReputationHandler:access(conf)
         return
     end
 
-    local claims = extract_jwt_claims(token)
-    local valid, reason = validate_claims(claims)
+  local scoring_url = conf.scoring_service_url or "http://scoring-service:8080"
+    local claims, verify_err = verify_token(token, scoring_url)
 
+    if not claims then
+        kong.log.warn("JWT verification failed: ", verify_err or "unknown")
+        kong.service.request.set_header("X-Agent-Score", "500")
+        kong.service.request.set_header("X-Agent-Band", "MONITORED")
+        kong.service.request.set_header("X-Agent-Invalid-JWT", "true")
+        -- In enforce mode: reject forged tokens with synthetic response
+        if conf.enforcement_mode == "enforce" then
+            return synthetic_response()
+        end
+        return
+    end
+
+    -- Validate claims structure
+    local valid, reason = validate_claims(claims)
     if not valid then
-        kong.log.warn("Invalid JWT: ", reason, " — treating as orphan")
+        kong.log.warn("Invalid JWT claims: ", reason, " — treating as orphan")
         kong.service.request.set_header("X-Agent-Score", "500")
         kong.service.request.set_header("X-Agent-Band", "MONITORED")
         kong.service.request.set_header("X-Agent-Invalid-JWT", "true")
