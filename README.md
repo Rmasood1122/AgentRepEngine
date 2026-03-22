@@ -67,6 +67,8 @@ and
 [Agentic Trust Graph (ATG)](https://doi.org/10.5281/zenodo.17917659)
 published by Rehan Masood, Naseem A2A Research Lab, December 2025.
 
+**AgentRepEngine DOI:** https://doi.org/10.5281/zenodo.19169185
+
 ## License
 
 © 2026 Rehan Masood. All Rights Reserved.
