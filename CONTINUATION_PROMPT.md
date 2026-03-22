@@ -10,7 +10,7 @@ First command: APEX ACTIVATE — check Lloyd + 5 LinkedIn messages first
 ## REPO
 https://github.com/Rehanrana11/AgentRepEngine
 Branch: main
-HEAD: 44b26c0 — eval: 11X-5 call-level vs agent-level benchmark confirmed
+HEAD: bd327ad — chore: pycache gitignore clean
 
 ---
 
@@ -23,24 +23,27 @@ Lloyd email: SENT ✅
 Synthetic demo: WORKING ✅
 Kong RS256 verification: WORKING ✅
 V4 slow-walk corpus: COMPLETE ✅ — 100% detection
-11X-5 benchmark: COMPLETE ✅ — 0.3ns call overhead
+11X-5 benchmark: COMPLETE ✅ — 0.25ns Linux confirmed
+Python SDK: COMPLETE ✅ — sdk/python/agentrepengine.py
+LangChain demo: WORKING ✅ — sdk/python/examples/langchain_demo.py
+Competitor one-pager: COMPLETE ✅ — docs/enterprise/competitive-positioning.md
 
 ### All commits March 22
-- 44b26c0  eval: 11X-5 call-level vs agent-level benchmark confirmed
-- 23844b6  docs: continuation prompt updated
-- 501257d  security: wire Kong RS256 signature verification via /verify endpoint
-- feat:    feature vector pipeline verified — synthetic demo detection confirmed
+- bd327ad  chore: pycache gitignore clean
+- 9ab2718  feat: LangChain integration demo — detection confirmed
+- 34b3ca6  gtm: competitive positioning one-pager
+- 200af3d  feat: Python SDK — automatic behavioral telemetry
+- e6944c4  eval: Linux benchmark confirmed — 0.25ns call overhead
+- e9197fd  docs: continuation prompt updated
+- 44b26c0  eval: 11X-5 call-level vs agent-level benchmark
+- 23844b6  docs: continuation prompt
+- 501257d  security: Kong RS256 verification wired end-to-end
+- feat:    feature vector pipeline verified — synthetic demo confirmed
 - 570c41e  security: JWT replay + Redis ACL
-- 69f9ea3  gtm: maturity statement
-- accf9c7  docs: continuation prompt
-- 1ecb011  docs: 72-question FAANG audit
-- dbd7d48  docs: hardening meta-prompt v1.0
-- a2e4592  feat: SIEM webhook + 4 hardening fixes
 - eb4c488  security: enforcement_decisions INSERT-only at DB
-- df4b58a  security: SCORING_API_KEY default + prereqs warning
-- cba161f  security: JWKS endpoint live at /jwks
-- 6593467  fix: BlockedDecisionsTotal metric label corrected
-- b9eaffe  docs: pilot-letter-of-understanding.md recovered
+- df4b58a  security: SCORING_API_KEY default
+- cba161f  security: JWKS endpoint live
+- 6593467  fix: BlockedDecisionsTotal metric label
 
 ---
 
@@ -65,105 +68,38 @@ V4 slow-walk corpus: COMPLETE ✅ — 100% detection
 
 Baseline: 67/100 → Current: 94/100 ✅
 
-| Fix | Points | Status |
-|-----|--------|--------|
-| V2 Fail-open narrative | +3 | ✅ |
-| H8 Prerequisites checklist | +2 | ✅ |
-| V7 Maturity score + GDPR | +2 | ✅ |
-| H5 SIEM webhook wired | +3 | ✅ |
-| V6 Auto-rollback ModeController | +4 | ✅ |
-| H10 hash_chain_valid in /health | +1 | ✅ |
-| I4 NIST AI RMF mapping | +2 | ✅ |
-| 11X-2 APEX Laws mapping | +2 | ✅ |
-| H2 Scoring model mapping | +1 | ✅ |
-| Kong RS256 verification | +1 | ✅ |
-| V4 Slow-walk evasion corpus | +3 | ✅ |
-| 11X-5 Call vs agent benchmark | +2 | ✅ |
-
 Remaining to 95/100:
 - V1 FP external validation +1 (pilot mein milega — automatic)
-- V3 GDPR tombstone legal review +1 (lawyer chahiye — Phase 2)
+- V3 GDPR tombstone legal review +1 (lawyer — Phase 2)
 
 ---
 
-## V4 SLOW-WALK CORPUS — MARCH 22, 2026
+## DEMO ASSETS — ALL WORKING ✅
 
-Status: COMPLETE ✅
-- 10 scenarios: 3/5/7-day windows
-- Detection rate: 100% (10/10)
-- Score-based detection: 2/10
-- HIGH_RISK VERIFY: 10/10 (primary defense)
-- OWASP coverage: LLM04 LLM06 LLM07 LLM08
-- Baseline drift documented: slow-walk evades score-only detection
-- Commit: already in repo
+| Demo | File | Status |
+|------|------|--------|
+| Synthetic finserv demo | scripts/synthetic-agent-demo.sh | ✅ 12 seconds |
+| LangChain integration | sdk/python/examples/langchain_demo.py | ✅ detection confirmed |
 
-Talking point:
-"Low-and-slow attack over 7 days — detected on day 7 via HIGH_RISK VERIFY.
-Score-independent policy threshold fires regardless of agent trust level."
-
----
-
-## 11X-5 BENCHMARK — MARCH 22, 2026
-
-Status: COMPLETE ✅ — Commit: 44b26c0
-
-| Component | Latency | Allocations |
-|-----------|---------|-------------|
-| Call-level overhead | 0.3 ns | 0 B/op |
-| Score band decision | 0.4 ns | 0 B/op |
-| Z-score computation | 0.5 ns | 0 B/op |
-| ComputeScore formula | 9.0 ns | 0 B/op |
-| Full agent scoring | 28.9 ns | 0 B/op |
-
-Talking point:
-"Call-level gateway overhead: 0.3 nanoseconds. Zero memory allocations.
-p99 10ms gateway budget: scoring uses less than 0.001% of budget."
+LangChain demo results:
+- Normal behavior: score 850 TRUSTED
+- Bulk PII extraction: detected at request 2
+- Final score: 400 RESTRICTED
+- worst_feature: pii_field_access_rate, z-score: 7.50
+- No OpenAI key needed
 
 ---
 
-## KONG RS256 VERIFICATION — MARCH 22, 2026
+## BENCHMARK — LINUX CONFIRMED
 
-Status: WORKING ✅
-- verifyHandler returns lineage_hash in response ✅
-- Kong plugin passes lineage_hash through cache and return ✅
-- Valid RS256 token: X-Gateway-Verified=true, score=700 ✅
-- Invalid token: X-Agent-Invalid-Jwt=true, score=500 ✅
-- Replay detection: confirmed working ✅
-- Commit: 501257d
+| Component | Linux | Windows |
+|-----------|-------|---------|
+| Call-level overhead | 0.25 ns | 0.3 ns |
+| ComputeScore | 5.2 ns | 9.0 ns |
+| Full agent scoring | 22.8 ns | 28.9 ns |
+| Memory allocations | 0 B/op | 0 B/op |
 
----
-
-## SYNTHETIC DEMO STATUS — March 22, 2026
-
-Status: WORKING ✅
-- pii_field_access_rate 0.85 confirmed in queue ✅
-- Finserv agent detected at request 15 ✅
-- Score: 850 → 400 (RESTRICTED) ✅
-- Reason object: non-null, worst_feature: pii_field_access_rate ✅
-- Hash chain: VERIFIED ✅
-- Demo runtime: 12 seconds ✅
-
-Demo narrative:
-"Agent looked clean for 3 days. Day 4 bulk PII extraction began.
-Detected at request 15. Reason object shipped to SIEM.
-Audit trail tamper-evident. Install time under 4 hours."
-
----
-
-## OUTREACH STATUS — MARCH 22, 2026
-
-| Person | Company | Title | Status |
-|--------|---------|-------|--------|
-| Lloyd Lemish | — | Technical Solutions Architect | Email sent March 22 |
-| Sri Rajan | JPMorganChase | ED AI Platform | LinkedIn message sent |
-| Gideon Mann | Millennium | Global Head of AI | LinkedIn message sent |
-| Brad Murtha | Wells Fargo | Executive Director | LinkedIn message sent |
-| Amila Ranasinghe | — | Enterprise AI Assurance Architect | LinkedIn message sent |
-| John Hyatt | Charles Schwab | Sr Manager Cyber Risk | LinkedIn message sent |
-
-87 additional high-value targets identified from LinkedIn CSV export.
-
-50 Q&A prepared for any call — Roman Urdu version available.
+Talking point: "0.25 nanoseconds. Zero allocations. Uses 0.0025% of p99 budget."
 
 ---
 
@@ -176,18 +112,39 @@ Location: docs/enterprise/
 - prerequisites-checklist.md ✅
 - gdpr-position.md ✅
 - faang-enterprise-audit-72q.md ✅
+- competitive-positioning.md ✅ NEW
 - hardening-meta-prompt-v1.md ✅
 - expert-panel-test-protocol-v1.md ✅
 
-Location: docs/compliance/
-- nist-ai-rmf-mapping.md ✅
+---
 
-Location: docs/architecture/
-- apex-laws-to-atp-atg-mapping.md ✅
-- scoring-model.md ✅
+## SDK — COMPLETE ✅
 
-Location: docs/specs/
-- reason_object_v1.json ✅
+Location: sdk/python/
+- agentrepengine.py — main SDK
+- README.md — integration guide
+- examples/langchain_demo.py — LangChain demo
+
+3 integration patterns:
+1. @are.track decorator
+2. Context manager
+3. Manual emit
+
+---
+
+## OUTREACH STATUS — MARCH 22, 2026
+
+| Person | Company | Title | Status |
+|--------|---------|-------|--------|
+| Lloyd Lemish | NWN | Technical Solutions Architect | Email sent March 22 |
+| Sri Rajan | JPMorganChase | ED AI Platform | LinkedIn message sent |
+| Gideon Mann | Millennium | Global Head of AI | LinkedIn message sent |
+| Brad Murtha | Wells Fargo | Executive Director | LinkedIn message sent |
+| Amila Ranasinghe | — | Enterprise AI Assurance Architect | LinkedIn message sent |
+| John Hyatt | Charles Schwab | Sr Manager Cyber Risk | LinkedIn message sent |
+
+87 additional high-value targets identified from LinkedIn CSV.
+50 Q&A prepared — Roman Urdu version available.
 
 ---
 
@@ -197,6 +154,7 @@ Scoring language : Go
 Gateway          : Kong (Lua)
 Shell            : Git Bash on Windows
 Runtime          : Docker Desktop on Windows
+Python           : 3.13.5 installed ✅
 Redis            : Password protected + ACL hardened ✅
 JWKS endpoint    : http://localhost:8080/jwks ✅
 Kong verify      : http://scoring-service:8080/verify ✅
@@ -209,7 +167,7 @@ GitHub           : https://github.com/Rehanrana11/AgentRepEngine.git
 FP rate              : 0.00% on 100-scenario internal corpus
 TP rate              : 86.67%
 Slow-walk detection  : 100% (10/10 scenarios)
-Call overhead        : 0.3ns — zero allocations
+Call overhead        : 0.25ns Linux — zero allocations
 Blocked incidents    : 0 real enterprise (demo confirmed passing)
 Paying customers     : 0
 Security gaps open   : 1 (git history key — disclosed, rotated, documented)
@@ -239,15 +197,12 @@ IF Lloyd responded:
   APEX BUYER — prepare for security team conversation
   Do not open VS Code until buyer prep is done
 
-IF LinkedIn responded (Sri Rajan / Gideon Mann / Brad Murtha / Amila / John Hyatt):
-  APEX BUYER — prepare for that specific person's conversation
-  Use the 50 Q&A prepared March 22
-
-IF Rohan Adat call scheduled:
-  Review partnership angle — compliance evidence + channel partner framing
+IF LinkedIn responded:
+  APEX BUYER — prepare for that specific person
+  Use 50 Q&A prepared March 22
 
 IF no responses yet:
-  Message next 5 targets from the 87-person LinkedIn list
-  Then wait — do not open VS Code
+  Send LinkedIn post drafted March 22
+  Then message next 5 targets from 87-person list
 
 NEVER start a session with code before checking responses.
