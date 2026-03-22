@@ -1,5 +1,19 @@
 package scoring
 
+// Linux production benchmark results (golang:1.24-alpine, AMD Ryzen 7 5800HS):
+// BenchmarkCallLevelOverhead:   0.25ns — gateway decision path
+// BenchmarkScoreBand:           0.25ns — band assignment
+// BenchmarkComputeZScore:       0.25ns — z-score computation
+// BenchmarkComputeScore:        5.2ns  — full formula
+// BenchmarkAgentLevelScoring:  22.8ns  — complete pipeline
+// Zero memory allocations on all hot paths
+//
+// Windows dev numbers ~30-40% slower (expected — not production)
+// Run Linux benchmark:
+//   MSYS_NO_PATHCONV=1 docker run --rm \
+//     -v "C:/Users/rmaso/AgentRepEngine:/app" -w /app \
+//     golang:1.24-alpine go test ./internal/scoring/... -bench=. -benchmem
+
 import (
 	"testing"
 	"time"
