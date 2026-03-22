@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -15,6 +16,7 @@ import (
 
 	"github.com/agentrepengine/are/internal/audit"
 	"github.com/agentrepengine/are/internal/enforcement"
+	"github.com/agentrepengine/are/internal/identity"
 	"github.com/agentrepengine/are/internal/metrics"
 	"github.com/agentrepengine/are/internal/scoring"
 	"github.com/agentrepengine/are/internal/store"
@@ -109,6 +111,7 @@ func main() {
 	mux := http.NewServeMux()
 	// Health endpoint returns live enforcement mode from Redis
 	mux.HandleFunc("/health", healthHandler(db, scoreStore, modeCtrl))
+	mux.HandleFunc("/jwks", jwksHandler())
 	_ = metrics.ActiveAgentCount
 	mux.Handle("/metrics", promhttp.Handler())
 	mux.HandleFunc("/score/", requireAPIKey(scoreHandler(scoreStore)))
@@ -216,6 +219,38 @@ func healthHandler(db *sql.DB, s *store.ScoreStore, mc *enforcement.ModeControll
 	}
 }
 
+// jwksHandler returns the RS256 public key in JWKS format.
+// Used by Kong plugin to verify JWT signatures at gateway layer.
+// Public key — no authentication required.
+func jwksHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		keys, err := identity.LoadOrGenerateKeys()
+		if err != nil {
+			slog.Error("jwks_load_failed", "error", err)
+			http.Error(w, "key load failed", http.StatusInternalServerError)
+			return
+		}
+
+		pubKey := keys.Public
+		n := base64.RawURLEncoding.EncodeToString(pubKey.N.Bytes())
+		e := base64.RawURLEncoding.EncodeToString(
+			[]byte{byte(pubKey.E >> 16), byte(pubKey.E >> 8), byte(pubKey.E)})
+
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{
+  "keys": [
+    {
+      "kty": "RSA",
+      "use": "sig",
+      "alg": "RS256",
+      "kid": "are-v1",
+      "n": "%s",
+      "e": "%s"
+    }
+  ]
+}`, n, e)
+	}
+}
 func scoreHandler(s *store.ScoreStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		did := r.URL.Path[len("/score/"):]
