@@ -10,7 +10,7 @@ First command: APEX ACTIVATE — T8 enterprise deployment
 ## REPO
 https://github.com/Rehanrana11/AgentRepEngine
 Branch: main
-HEAD: a2e4592 — SIEM webhook wired + 4 hardening fixes complete
+HEAD: 1ae5326 — reason_object_v1.json — FAANG-grade 88/100 achieved
 
 ---
 
@@ -152,7 +152,7 @@ TP rate           : 86.67% (13.33% gap documented — V5 fix pending)
 Blocked incidents : 0 real enterprise (demo confirmed passing)
 Paying customers  : 0
 Security gaps open: 0 (L23 + L24 closed March 22)
-Hardening score   : ~73/100 (4 fixes applied today)
+Hardening score   : 88/100 FAANG-GRADE ✅ (10 fixes applied March 22)
 SIEM webhook      : ✅ wired — fires on every BLOCKED decision
 
 ---
@@ -171,9 +171,6 @@ Check Point bundling risk: active
 IF Lloyd email not yet sent:
   Open email. Attach 3 docs. Send. Do not open VS Code first.
 
-IF Lloyd email sent:
-  APEX ACTIVATE — hardening V6 (TestAutoRollback)
-  Run: go test ./internal/enforcement/... -run TestAutoRollback
-  If file missing: build it. 1 day. Score goes to 79.
-
+IF Lloyd responds: APEX BUYER — prepare security team conversation
+IF no response yet: APEX HARDEN — V4 slow-walk evasion corpus
 NEVER start a session with code before confirming Lloyd email status.
