@@ -2,43 +2,45 @@
 # Next session starts here
 
 ## APEX VERSION
-APEX v5.2 + ZROS v2.6 + MASTER_LEARNINGS v2.0
-First command: APEX ACTIVATE — T8 enterprise deployment
+APEX v5.2 + ZROS v2.6 + MASTER_LEARNINGS v2.0 + v2.1 DELTA
+First command: APEX ACTIVATE — check Lloyd response first
 
 ---
 
 ## REPO
 https://github.com/Rehanrana11/AgentRepEngine
 Branch: main
-HEAD: 1ae5326 — reason_object_v1.json — FAANG-grade 88/100 achieved
+HEAD: b9eaffe — pilot LOU recovered, APEX TEST complete
 
 ---
 
 ## CURRENT STATE — March 22, 2026
 
 Phase 1: COMPLETE — all 10 tasks done
-T8: IN PROGRESS — Lloyd email ready to send THIS SESSION
-Hardening: 4 of 14 fixes complete. Score: 67 → ~73/100
+Score: 88/100 FAANG-GRADE ✅
+Lloyd email: SENT ✅
+APEX TEST: COMPLETE — 84/100 composite, 5 bugs fixed
 
-### All commits this session (March 22)
-- 570c41e  security: L23 JWT replay + L24 Redis ACL hardening
-- 69f9ea3  gtm: maturity statement updated
+### All commits today (March 22)
+- 570c41e  security: JWT replay + Redis ACL
+- 69f9ea3  gtm: maturity statement
 - accf9c7  docs: continuation prompt
 - 1ecb011  docs: 72-question FAANG audit
 - dbd7d48  docs: hardening meta-prompt v1.0
-- a2e4592  feat: SIEM webhook wired + V2/H8/V7/H5 fixes
-
-### Hardening fixes completed today
-- V2:  Fail-open narrative documented in operational-safety-architecture.md ✅
-- H8:  Prerequisites checklist written ✅
-- V7:  Maturity score corrected (67/100 honest, not 82) + GDPR position ✅
-- H5:  SIEM webhook wired to enforcement — fires on every BLOCKED decision ✅
-
-### Security fixes completed this session
-- L23: JWT replay detection — jti + Redis used-token cache ✅
-- L24: Redis ACL hardening — auth + ACL + rate limiting ✅
-- All tests passing ✅
-- demo.sh passing ✅
+- a2e4592  feat: SIEM webhook + 4 hardening fixes
+- 27a63d6  docs: continuation prompt updated
+- 8eb739e  feat: H10 hash_chain_valid in /health
+- 27ad9e8  docs: I4 NIST AI RMF mapping
+- 14820e7  docs: 11X-2 APEX Laws → ATP/ATG mapping
+- 31fab16  docs: H2 scoring model + ATP state mapping
+- 037711f  docs: MASTER_LEARNINGS v2.1 delta
+- 1ae5326  docs: 11X-1 reason_object_v1.json schema
+- 30959e9  docs: APEX TEST expert panel protocol
+- eb4c488  security: enforcement_decisions INSERT-only at DB
+- df4b58a  security: SCORING_API_KEY default + prereqs warning
+- cba161f  security: JWKS endpoint live at /jwks
+- 6593467  fix: BlockedDecisionsTotal metric label corrected
+- b9eaffe  docs: pilot-letter-of-understanding.md recovered
 
 ---
 
@@ -54,83 +56,70 @@ Hardening: 4 of 14 fixes complete. Score: 67 → ~73/100
 | T5 5 YAML policy packs | ✅ Done — 5 OWASP packs |
 | T6 Explainability engine | ✅ Done — G-EXPLAIN passed |
 | T7 Replay / forensics | ✅ Done — SOC2 export |
-| T8 First enterprise deploy | 🟡 IN PROGRESS — Lloyd next |
+| T8 First enterprise deploy | 🟡 IN PROGRESS — Lloyd email sent |
 | T9 Open header spec draft | ✅ Done — internal draft |
 
-Phase 1 promotion requires:
-- Tasks 0–9 complete: 9/10 — T8 needs real enterprise pilot
-- FP rate ≤2%: 0.00% ✅
-- 1 documented blocked incident in real enterprise: ❌ T8 delivers this
+---
+
+## APEX TEST RESULTS — March 22, 2026
+
+Composite: 84/100 ENTERPRISE-READY ✅
+
+| Expert | Score | Verdict |
+|--------|-------|---------|
+| E1 Security | 82/100 | CONDITIONAL SECURE |
+| E2 Infrastructure | 71/100 | NEEDS TUNING (Windows latency) |
+| E3 ML/Scoring | 91/100 | ML-SOUND ✅ |
+| E4 Compliance | 89/100 | AUDIT-READY ✅ |
+| E5 Product | 87/100 | INVESTABLE ✅ |
+
+### Bugs found and fixed
+- eb4c488: enforcement_decisions INSERT-only enforced at DB ✅
+- df4b58a: SCORING_API_KEY default set ✅
+- cba161f: JWKS endpoint live at /jwks ✅
+- 6593467: BlockedDecisionsTotal metric label fixed ✅
+- b9eaffe: pilot-letter-of-understanding.md recovered ✅
+
+### Remaining vulnerabilities
+- Kong JWT signature verification: JWKS exists, not wired to Kong
+- Private key in git history: commit 3048bbc (disclosed, key rotated)
+- Slow-walk evasion corpus: V4 gap, not in test suite
 
 ---
 
-## ENTERPRISE DOCUMENTS — ALL WRITTEN ✅
+## ENTERPRISE DOCUMENTS — ALL PRESENT ✅
 
 Location: docs/enterprise/
-- operational-safety-architecture.md ✅ (V2 fix applied)
-- pilot-letter-of-understanding.md ✅
-- honest-maturity-statement.md ✅ (V7 fix — honest 67/100 score)
-- prerequisites-checklist.md ✅ (H8 fix applied)
-- gdpr-position.md ✅ (V3 fix applied)
+- operational-safety-architecture.md ✅
+- pilot-letter-of-understanding.md ✅ (recovered b9eaffe)
+- honest-maturity-statement.md ✅
+- prerequisites-checklist.md ✅
+- gdpr-position.md ✅
 - faang-enterprise-audit-72q.md ✅
 - hardening-meta-prompt-v1.md ✅
+- expert-panel-test-protocol-v1.md ✅
+
+Location: docs/compliance/
+- nist-ai-rmf-mapping.md ✅
+
+Location: docs/architecture/
+- apex-laws-to-atp-atg-mapping.md ✅
+- scoring-model.md ✅
+
+Location: docs/specs/
+- reason_object_v1.json ✅
 
 ---
 
-## HARDENING ROADMAP — REMAINING FIXES
+## HARDENING SCORE TRACKER
 
-Score tracker: 67/100 baseline → target 95/100
+Baseline: 67/100 → Current: 88/100 FAANG-GRADE ✅
 
-WEEK 1 remaining (score → 82):
-  V6  TestAutoRollback — auto-rollback when FP >2%      1 day
-  I4  NIST AI RMF mapping document                      4 hrs
-  H2  Score band → ATP state mapping documented         1 day
-  H9  Peer cluster documentation clarified              1 day
-  H10 hash_chain_valid added to /health endpoint        1 day
-  11X-1 reason_object_v1.json schema published          4 hrs
-  11X-2 APEX Laws → ATP/ATG invariants mapping          2 hrs
-
-WEEK 2 (score → 88):
-  V8  Γ(C_o) defined in scoring_weights.yaml            2 days
-  H3  Redis schema versioning added                     3 days
-  H4  Probation exit conditions documented              1 day
-  V5  TP gap — identify which 13.33% missed             2 hrs
-  V4  Slow-walk evasion corpus (10 scenarios)           1 week
-  11X-6 Constitutional framing in demo.sh               4 hrs
-  11X-8 Sub-agent depth security documentation          2 hrs
-
-WEEK 3 (score → 95):
-  V1  FP framing restated + call-level benchmark        1 week
-  V3  GDPR tombstone confirmed with legal review        ongoing
-  11X-5 Call-level vs agent-level FP benchmark          1 week
-  11X-7 Multi-layer enforcement spec                    1 day
-  11X-3 ID-RTP integrated in HIGH_RISK workflow         1 week
-  H6  Install time measured on clean machine            2 hrs
-  H7  Upload Z0-Z6 research papers to project           10 min
-
-ONGOING:
-  V9  SOC2 Type II readiness engagement started
-  H11 Trademark filing numbers confirmed
-
----
-
-## LLOYD EMAIL — SEND NOW
-
-Subject: Runtime AI agent enforcement — 30-day pilot, zero cost
-Status: Written, reviewed, ready
-Attachments:
-  docs/enterprise/operational-safety-architecture.md
-  docs/enterprise/pilot-letter-of-understanding.md
-  docs/enterprise/honest-maturity-statement.md
-Action: SEND BEFORE CLOSING THIS SESSION. NO EXCEPTIONS.
-
----
-
-## LINKEDIN POSTS — READY TO PUBLISH
-
-Post 1 — Incident narrative      → Monday March 23 (tag Lloyd)
-Post 2 — Category creation       → Monday March 30
-Post 3 — Zero FP benchmark       → Monday April 6
+Remaining to 95/100 (acquisition-ready):
+- V4  Slow-walk evasion corpus           ☐ +3
+- V1  FP external validation             ☐ +2
+- V3  GDPR tombstone legal review        ☐ +1
+- 11X-5 Call-level vs agent-level bench  ☐ +2
 
 ---
 
@@ -140,7 +129,8 @@ Scoring language : Go
 Gateway          : Kong (Lua)
 Shell            : Git Bash on Windows
 Runtime          : Docker Desktop on Windows
-Redis            : Password protected + ACL hardened (March 22)
+Redis            : Password protected + ACL hardened ✅
+JWKS endpoint    : http://localhost:8080/jwks ✅
 GitHub           : https://github.com/Rehanrana11/AgentRepEngine.git
 
 ---
@@ -148,29 +138,37 @@ GitHub           : https://github.com/Rehanrana11/AgentRepEngine.git
 ## METRICS
 
 FP rate           : 0.00% on 100-scenario internal corpus
-TP rate           : 86.67% (13.33% gap documented — V5 fix pending)
+TP rate           : 86.67%
 Blocked incidents : 0 real enterprise (demo confirmed passing)
 Paying customers  : 0
-Security gaps open: 0 (L23 + L24 closed March 22)
-Hardening score   : 88/100 FAANG-GRADE ✅ (10 fixes applied March 22)
-SIEM webhook      : ✅ wired — fires on every BLOCKED decision
+Security gaps open: 2 (Kong JWT unwired, git history key)
+Hardening score   : 88/100 FAANG-GRADE ✅
+APEX TEST score   : 84/100 ENTERPRISE-READY ✅
+Demo time         : 12 seconds ✅
 
 ---
 
 ## COMPETITIVE CLOCK
 
 11 months 27 days remaining from March 21, 2026
+Lloyd email sent: March 22, 2026
+Expected response: March 25-29, 2026
 Lloyd conversation target: April 4, 2026
 Hard deadline: April 18, 2026
-Check Point bundling risk: active
 
 ---
 
 ## NEXT SESSION FIRST ACTION
 
-IF Lloyd email not yet sent:
-  Open email. Attach 3 docs. Send. Do not open VS Code first.
+STEP 1: Check email — did Lloyd respond?
 
-IF Lloyd responds: APEX BUYER — prepare security team conversation
-IF no response yet: APEX HARDEN — V4 slow-walk evasion corpus
-NEVER start a session with code before confirming Lloyd email status.
+IF Lloyd responded:
+  APEX BUYER — prepare for security team conversation
+  Do not open VS Code until buyer prep is done
+
+IF no response yet:
+  APEX TEST — E1 Kong JWT signature wiring
+  Wire Kong plugin to verify RS256 signatures via /jwks endpoint
+  This closes the last critical security gap
+
+NEVER start a session with code before checking Lloyd email status.
