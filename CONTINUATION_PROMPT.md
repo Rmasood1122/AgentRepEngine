@@ -15,7 +15,13 @@ I'm building **Hireinstein** — an AI-powered recruitment/visibility tool that 
 ---
 
 ## WHAT'S BEEN COMPLETED
-
+- M1: Language upgrade complete — all 7 enterprise docs + README ✅ commit 6849412
+- M8: Hackathon demo built, tested, color bug fixed ✅ commit b1496d2
+  - scripts/hackathon-demo.sh — 456 lines, 90s runtime, 7 phases
+  - Agent A: 848 TRUSTED, Agent B: BLOCKED at request 11
+  - Hash chain verified, 0.00% FP rate confirmed
+- 24x Strategy Plan committed to repo ✅ commit cc40932
+- Permanent workflow: Claude Code for all file writes, no browser downloads needed
 ### Development Environment (DONE)
 - Node.js, PostgreSQL installed and configured
 - Database "hireinstein" created, Prisma schema pushed
