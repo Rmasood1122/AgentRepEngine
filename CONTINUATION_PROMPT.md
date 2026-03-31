@@ -1,217 +1,141 @@
-# AgentRepEngine — CONTINUATION PROMPT
-# Next session starts here
-
-## APEX VERSION
-APEX v5.2 + ZROS v2.7 + MASTER_LEARNINGS v2.1 DELTA
-First command: APEX ACTIVATE — check Lloyd + 5 LinkedIn messages first
+# HIREINSTEIN — CONTINUATION PROMPT
+# Paste this entire document into a new Claude chat to resume exactly where we left off.
+# Date: February 23, 2026
 
 ---
 
-## REPO
-https://github.com/Rehanrana11/AgentRepEngine
-Branch: main
-HEAD: 35a02aa — docs: Zenodo DOI added to README
-Zenodo DOI: 10.5281/zenodo.19169185 — PUBLISHED March 22, 2026
-IP chain: ATP (Dec 2025) → ATG (Dec 2025) → AgentRepEngine (Mar 2026)
+## PROJECT CONTEXT
+
+I'm building **Hireinstein** — an AI-powered recruitment/visibility tool that tracks how AI models (OpenAI GPT, Anthropic Claude, Google Gemini, xAI) rank and mention domains in real-time. Users enter a domain and query, and get a composite visibility score showing how AI perceives their brand.
+
+**Tech Stack:** Next.js App Router + Express API + Prisma + PostgreSQL + TypeScript
+**Repository:** C:\Users\rmaso\Hireinstein
+**Local Setup:** API on localhost:3001, Frontend on localhost:3000, PostgreSQL on localhost:5432
 
 ---
 
-## CURRENT STATE — March 22, 2026
+## WHAT'S BEEN COMPLETED
 
-Phase 1: COMPLETE — all 10 tasks done
-Hardening score: 94/100 ✅
-Lloyd email: SENT ✅
-5 LinkedIn messages sent: Sri Rajan, Gideon Mann, Brad Murtha, Amila Ranasinghe, John Hyatt
-Synthetic demo: WORKING ✅
-Kong RS256 verification: WORKING ✅
-V4 slow-walk corpus: COMPLETE ✅ — 100% detection
-11X-5 benchmark: COMPLETE ✅ — 0.25ns Linux confirmed
-Python SDK: COMPLETE ✅ — sdk/python/agentrepengine.py
-LangChain demo: WORKING ✅ — sdk/python/examples/langchain_demo.py
-Competitor one-pager: COMPLETE ✅ — docs/enterprise/competitive-positioning.md
+### Development Environment (DONE)
+- Node.js, PostgreSQL installed and configured
+- Database "hireinstein" created, Prisma schema pushed
+- API server running with auth (signup/login/logout) and ranking endpoints
+- Frontend running with basic pages
+- OpenAI and Anthropic API keys configured and tested
+- Critical dotenv module loading order bug diagnosed and fixed (requires NODE_OPTIONS preload)
 
-### All commits March 22
-- bd327ad  chore: pycache gitignore clean
-- 9ab2718  feat: LangChain integration demo — detection confirmed
-- 34b3ca6  gtm: competitive positioning one-pager
-- 200af3d  feat: Python SDK — automatic behavioral telemetry
-- e6944c4  eval: Linux benchmark confirmed — 0.25ns call overhead
-- e9197fd  docs: continuation prompt updated
-- 44b26c0  eval: 11X-5 call-level vs agent-level benchmark
-- 23844b6  docs: continuation prompt
-- 501257d  security: Kong RS256 verification wired end-to-end
-- feat:    feature vector pipeline verified — synthetic demo confirmed
-- 570c41e  security: JWT replay + Redis ACL
-- eb4c488  security: enforcement_decisions INSERT-only at DB
-- df4b58a  security: SCORING_API_KEY default
-- cba161f  security: JWKS endpoint live
-- 6593467  fix: BlockedDecisionsTotal metric label
+### Starting Servers
+**Terminal 1 (API):**
+```powershell
+cd C:\Users\rmaso\Hireinstein\apps\api
+$env:NODE_OPTIONS="-r dotenv/config"
+$env:DOTENV_CONFIG_PATH="../../.env.local"
+npm run dev
+```
+
+**Terminal 2 (Frontend):**
+```powershell
+cd C:\Users\rmaso\Hireinstein\apps\web
+$env:NODE_OPTIONS=""
+$env:DOTENV_CONFIG_PATH=""
+npm run dev
+```
 
 ---
 
-## PHASE 1 STATUS
+## UI/UX SPECIFICATION STATUS
 
-| Task | Status |
-|------|--------|
-| T0 Evaluation harness | ✅ Done — 0.00% FP / 86.67% TP |
-| T1 JWT identity library | ✅ Done — G-IDENTITY passed |
-| T2 Kong gateway plugin | ✅ Done — RS256 verified end-to-end ✅ |
-| T3 Redis + Postgres store | ✅ Done — health ok |
-| T4 Velocity + z-score | ✅ Done — G-SCORE passed |
-| T5 5 YAML policy packs | ✅ Done — 5 OWASP packs |
-| T6 Explainability engine | ✅ Done — G-EXPLAIN passed |
-| T7 Replay / forensics | ✅ Done — SOC2 export |
-| T8 First enterprise deploy | 🟡 IN PROGRESS — Lloyd email sent, 5 LinkedIn messages sent |
-| T9 Open header spec draft | ✅ Done — internal draft |
+We followed a strict 5-step process to build an enterprise-grade UI specification that is 11x better than competitors (RankGPT and UANDI). Each step was audited at FAANG/Stanford++ level before locking.
 
----
+### Step 1: Interface Philosophy — LOCKED + SAVED
+- File: `C:\Users\rmaso\Hireinstein\docs\ui\STEP_1_INTERFACE_PHILOSOPHY.md`
+- "Structured Intelligence 2.0" — 6 principles: authority through restraint, intelligence demonstrated early, mathematical hierarchy, progressive commitment, executive tone, controlled signal density
 
-## HARDENING SCORE TRACKER
+### Step 2: Token System v2 — LOCKED + SAVED
+- File: `C:\Users\rmaso\Hireinstein\docs\ui\STEP_2_TOKEN_SYSTEM.md`
+- Typography: Satoshi (headings), DM Sans (body), JetBrains Mono (dynamic metrics only)
+- Scale: 64/36/24/16/14/12px
+- Spacing: 8px base grid (12px exception only for compact control vertical padding)
+- Color: dark instrument theme, single accent (#10b981 emerald green), no second accent
+- Includes: enforcement/governance rules, accessibility acceptance tests, semantic state tokens (overlay, focus-ring, disabled-surface, disabled-text, success, info), reduced motion summary, border token binding, changelog
 
-Baseline: 67/100 → Current: 94/100 ✅
+### Step 3: Plain Text Wireframe v2 — LOCKED + SAVED
+- File: `C:\Users\rmaso\Hireinstein\docs\ui\STEP_3_WIREFRAME.md`
+- 4 pages: Homepage, Login, Signup, Dashboard
+- Governance rules: icon governance, nav taxonomy (4 links + 1 CTA), JetBrains Mono dynamic-only rule, CTA budget (4 max per page), model differentiation (label only, no color)
+- Hero badge: low-emphasis (text-muted, no pulse, no accent)
+- Pricing: text links not buttons (preserves CTA budget)
+- Mobile behavior specified for all pages
+- CTA budget table for homepage
 
-Remaining to 95/100:
-- V1 FP external validation +1 (pilot mein milega — automatic)
-- V3 GDPR tombstone legal review +1 (lawyer — Phase 2)
-
----
-
-## DEMO ASSETS — ALL WORKING ✅
-
-| Demo | File | Status |
-|------|------|--------|
-| Synthetic finserv demo | scripts/synthetic-agent-demo.sh | ✅ 12 seconds |
-| LangChain integration | sdk/python/examples/langchain_demo.py | ✅ detection confirmed |
-
-LangChain demo results:
-- Normal behavior: score 850 TRUSTED
-- Bulk PII extraction: detected at request 2
-- Final score: 400 RESTRICTED
-- worst_feature: pii_field_access_rate, z-score: 7.50
-- No OpenAI key needed
-
----
-
-## BENCHMARK — LINUX CONFIRMED
-
-| Component | Linux | Windows |
-|-----------|-------|---------|
-| Call-level overhead | 0.25 ns | 0.3 ns |
-| ComputeScore | 5.2 ns | 9.0 ns |
-| Full agent scoring | 22.8 ns | 28.9 ns |
-| Memory allocations | 0 B/op | 0 B/op |
-
-Talking point: "0.25 nanoseconds. Zero allocations. Uses 0.0025% of p99 budget."
+### Step 4: Interaction Design v2 — ENTERPRISE AUDIT PASSED, NEEDS TO BE SAVED
+- File should go to: `C:\Users\rmaso\Hireinstein\docs\ui\STEP_4_INTERACTION_DESIGN.md`
+- **THIS FILE HAS NOT BEEN SAVED YET — it was the last thing we were working on**
+- Contains: 9 page-level states, state precedence/cancellation (6 rules), token alias mapping, sections 4A-4L (page load, nav, hero, inputs, submit flow, result reveal, edge states, finding cards, scroll triggers, dashboard, auth, global rules, reduced motion)
+- Edge state matrix: auth expired, timeout, 429, 5xx, offline, partial, invalid domain, empty query
+- 14 global interaction rules
+- The file was generated and downloaded but user needs to run:
+```powershell
+copy "$HOME\Downloads\STEP_4_INTERACTION_DESIGN_v2.md" "C:\Users\rmaso\Hireinstein\docs\ui\STEP_4_INTERACTION_DESIGN.md"
+```
+Then verify with:
+```powershell
+Get-Content "C:\Users\rmaso\Hireinstein\docs\ui\STEP_4_INTERACTION_DESIGN.md" -Tail 25
+```
 
 ---
 
-## ENTERPRISE DOCUMENTS — ALL PRESENT ✅
+## WHAT'S NEXT
 
-Location: docs/enterprise/
-- operational-safety-architecture.md ✅
-- pilot-letter-of-understanding.md ✅
-- honest-maturity-statement.md ✅
-- prerequisites-checklist.md ✅
-- gdpr-position.md ✅
-- faang-enterprise-audit-72q.md ✅
-- competitive-positioning.md ✅ NEW
-- hardening-meta-prompt-v1.md ✅
-- expert-panel-test-protocol-v1.md ✅
+### Immediate Next Action
+1. Verify Step 4 is saved (user needs to confirm last 25 lines show changelog + guardrail with 10 points)
+2. Once Step 4 is verified and locked, proceed to **Step 5: Implementation**
 
----
+### Step 5: Implementation Plan
+Per the original audit document, the build order for Figma/code is:
+1. Create color styles first (CSS variables from token system)
+2. Create text styles second (typography scale)
+3. Create button components third
+4. Create card components fourth
+5. Build layout last
 
-## SDK — COMPLETE ✅
+Since build target is React/Next.js, we skip Figma and go straight to code using the locked specifications. All 4 spec documents serve as the implementation contract.
 
-Location: sdk/python/
-- agentrepengine.py — main SDK
-- README.md — integration guide
-- examples/langchain_demo.py — LangChain demo
-
-3 integration patterns:
-1. @are.track decorator
-2. Context manager
-3. Manual emit
-
----
-
-## OUTREACH STATUS — MARCH 22, 2026
-
-| Person | Company | Title | Status |
-|--------|---------|-------|--------|
-| Lloyd Lemish | NWN | Technical Solutions Architect | Email sent March 22 |
-| Sri Rajan | JPMorganChase | ED AI Platform | LinkedIn message sent |
-| Gideon Mann | Millennium | Global Head of AI | LinkedIn message sent |
-| Brad Murtha | Wells Fargo | Executive Director | LinkedIn message sent |
-| Amila Ranasinghe | — | Enterprise AI Assurance Architect | LinkedIn message sent |
-| John Hyatt | Charles Schwab | Sr Manager Cyber Risk | LinkedIn message sent |
-
-87 additional high-value targets identified from LinkedIn CSV.
-50 Q&A prepared — Roman Urdu version available.
+### Remaining Project Work (from doctor.js roadmap)
+- Stripe billing integration (Step 60)
+- Rate limiting (Step 56)
+- Redis caching (Step 57)
+- Sentry error logging (Step 58)
+- ESLint + Prettier + Husky (Step 13)
+- SEO strategy (Step 10)
+- Analytics schema (Step 9)
+- Deploy to production
 
 ---
 
-## ENVIRONMENT
+## IMPORTANT RULES WE ESTABLISHED
 
-Scoring language : Go
-Gateway          : Kong (Lua)
-Shell            : Git Bash on Windows
-Runtime          : Docker Desktop on Windows
-Python           : 3.13.5 installed ✅
-Redis            : Password protected + ACL hardened ✅
-JWKS endpoint    : http://localhost:8080/jwks ✅
-Kong verify      : http://scoring-service:8080/verify ✅
-GitHub           : https://github.com/Rehanrana11/AgentRepEngine.git
-
----
-
-## METRICS
-
-FP rate              : 0.00% on 100-scenario internal corpus
-TP rate              : 86.67%
-Slow-walk detection  : 100% (10/10 scenarios)
-Call overhead        : 0.25ns Linux — zero allocations
-Blocked incidents    : 0 real enterprise (demo confirmed passing)
-Paying customers     : 0
-Security gaps open   : 1 (git history key — disclosed, rotated, documented)
-Hardening score      : 94/100 ✅
-APEX TEST score      : 84/100 ENTERPRISE-READY ✅
-Demo time            : 12 seconds ✅
-LinkedIn targets     : 87 high-value identified, 5 messaged
+1. **Never move to next step until current step is saved and verified** — always check last 15-25 lines of saved file
+2. **Every step gets audited at FAANG/Stanford++ enterprise grade** before locking
+3. **All spec files live in** `C:\Users\rmaso\Hireinstein\docs\ui\`
+4. **Token system is the source of truth** — no raw hex, no arbitrary spacing, no unlisted radii
+5. **Single accent color** (emerald #10b981) — no cyan, no blue, no second accent family
+6. **JetBrains Mono only for dynamic metrics** — static marketing claims use DM Sans
+7. **4 CTAs max per page** — pricing uses text links, not buttons
+8. **Model differentiation by label only** — GPT/CL/GEM/xAI, no color coding
 
 ---
 
-## COMPETITIVE CLOCK
+## HOW TO REFERENCE THE SPECS
 
-11 months 25 days remaining as of March 22, 2026
-Lloyd email sent: March 22, 2026
-5 LinkedIn messages sent: March 22, 2026
-Expected responses: March 25-29, 2026
-Lloyd conversation target: April 4, 2026
-Hard deadline: April 18, 2026
+If you need to read any spec file during implementation, the user can show contents with:
+```powershell
+Get-Content "C:\Users\rmaso\Hireinstein\docs\ui\STEP_1_INTERFACE_PHILOSOPHY.md"
+Get-Content "C:\Users\rmaso\Hireinstein\docs\ui\STEP_2_TOKEN_SYSTEM.md"
+Get-Content "C:\Users\rmaso\Hireinstein\docs\ui\STEP_3_WIREFRAME.md"
+Get-Content "C:\Users\rmaso\Hireinstein\docs\ui\STEP_4_INTERACTION_DESIGN.md"
+```
 
 ---
 
-## NEXT SESSION FIRST ACTION
-
-STEP 1: Check email + LinkedIn — did anyone respond?
-
-IF Lloyd responded:
-  APEX BUYER — prepare for security team conversation
-  Do not open VS Code until buyer prep is done
-
-IF LinkedIn responded:
-  APEX BUYER — prepare for that specific person
-  Use 50 Q&A prepared March 22
-
-IF no responses yet:
-  Send LinkedIn post drafted March 22
-  Then message next 5 targets from 87-person list
-
-NEVER start a session with code before checking responses.
-
-- LEARNING_INTELLIGENCE_v3.md created — L36-L73 extracted ✅
-- 46 tasks captured across 3 tiers ✅
-- 12 MASTER_LEARNINGS entries (L81-L92) ✅
-- Committed 62ce216, pushed to main ✅
-- Next learning: L74
-- Next MASTER_LEARNINGS: L93
+Please confirm you understand the full context above, then help me continue from where we left off. The immediate task is to verify Step 4 was saved, and then proceed to Step 5 (Implementation).
