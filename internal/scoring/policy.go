@@ -1,11 +1,29 @@
 package scoring
 
 import (
+	"database/sql"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
+)
+
+// Variance growth rate monitoring constants.
+// Slow-walk attacks require multiple days to shift an agent's baseline.
+// A 2x variance increase in one window is statistically anomalous —
+// it indicates the baseline is being actively trained by an attacker.
+// This fires as an early warning before the attack score recovers to
+// a normal range, because the mean may look stable while variance grows.
+const (
+	// VarianceWindowDays is the lookback window for variance growth monitoring.
+	VarianceWindowDays = 7
+
+	// VarianceGrowthThreshold is the multiplier above which variance growth
+	// is flagged as HIGH_RISK. A value of 2.0 means "variance doubled in
+	// one window period" — statistically anomalous for established agents.
+	VarianceGrowthThreshold = 2.0
 )
 
 // PolicyThreshold defines warning/throttle/block levels for one feature.
@@ -189,4 +207,90 @@ func WorstViolation(violations []PolicyViolation) *PolicyViolation {
 		}
 	}
 	return worst
+}
+
+// VarianceGrowthResult holds the outcome of a variance growth rate check.
+type VarianceGrowthResult struct {
+	Feature      string
+	GrowthRate   float64 // ratio of current variance to previous variance
+	HighRisk     bool    // true if growth rate exceeds VarianceGrowthThreshold
+	PrevVariance float64
+	CurrVariance float64
+}
+
+// CheckVarianceGrowthRate queries the agent_baselines table for the current
+// std_dev and compares it against a snapshot from VarianceWindowDays ago.
+// If any feature's variance has grown by more than VarianceGrowthThreshold,
+// it returns HIGH_RISK results for those features.
+//
+// This is the early-warning layer for slow-walk baseline poisoning:
+// even as an attacker shifts the baseline mean toward attack behavior,
+// the variance of the baseline grows because the new observations are
+// further from the original distribution. A 2x variance increase in one
+// 7-day window is statistically anomalous for an established agent.
+func CheckVarianceGrowthRate(db *sql.DB, orgID, agentDID string) ([]VarianceGrowthResult, error) {
+	rows, err := db.Query(`
+		SELECT
+			ab.feature_name,
+			ab.std_dev AS current_std_dev,
+			COALESCE(snap.std_dev, ab.std_dev) AS previous_std_dev
+		FROM agent_baselines ab
+		LEFT JOIN agent_baseline_snapshots snap
+			ON snap.org_id = ab.org_id
+			AND snap.agent_did = ab.agent_did
+			AND snap.feature_name = ab.feature_name
+			AND snap.snapshot_date >= NOW() - INTERVAL '1 day' * $3
+		WHERE ab.org_id = $1
+			AND ab.agent_did = $2
+			AND ab.sample_count >= 100
+		ORDER BY ab.feature_name`,
+		orgID, agentDID, VarianceWindowDays,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("query variance growth: %w", err)
+	}
+	defer rows.Close()
+
+	var results []VarianceGrowthResult
+	for rows.Next() {
+		var feature string
+		var currStdDev, prevStdDev float64
+		if err := rows.Scan(&feature, &currStdDev, &prevStdDev); err != nil {
+			return nil, fmt.Errorf("scan variance row: %w", err)
+		}
+
+		// Variance = std_dev^2
+		currVariance := currStdDev * currStdDev
+		prevVariance := prevStdDev * prevStdDev
+
+		// Avoid division by zero for features with no prior variance
+		if prevVariance < 0.001 {
+			continue
+		}
+
+		growthRate := currVariance / prevVariance
+		highRisk := growthRate >= VarianceGrowthThreshold
+
+		if highRisk {
+			slog.Warn("variance_growth_high_risk",
+				"agent_did", agentDID,
+				"feature", feature,
+				"growth_rate", fmt.Sprintf("%.2f", growthRate),
+				"current_variance", fmt.Sprintf("%.4f", currVariance),
+				"previous_variance", fmt.Sprintf("%.4f", prevVariance),
+				"window_days", VarianceWindowDays,
+				"threshold", VarianceGrowthThreshold,
+			)
+		}
+
+		results = append(results, VarianceGrowthResult{
+			Feature:      feature,
+			GrowthRate:   growthRate,
+			HighRisk:     highRisk,
+			PrevVariance: prevVariance,
+			CurrVariance: currVariance,
+		})
+	}
+
+	return results, rows.Err()
 }

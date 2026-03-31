@@ -73,6 +73,45 @@ func TestPolicyCleanOnLegitimate(t *testing.T) {
 	t.Logf("✅ Legitimate agent: %d violations (0 blocks)", len(violations))
 }
 
+func TestVarianceGrowthConstants(t *testing.T) {
+	if VarianceWindowDays != 7 {
+		t.Errorf("VarianceWindowDays = %d, want 7", VarianceWindowDays)
+	}
+	if VarianceGrowthThreshold != 2.0 {
+		t.Errorf("VarianceGrowthThreshold = %f, want 2.0", VarianceGrowthThreshold)
+	}
+	t.Logf("✅ Variance growth constants: window=%d days, threshold=%.1fx",
+		VarianceWindowDays, VarianceGrowthThreshold)
+}
+
+func TestVarianceGrowthResultHighRisk(t *testing.T) {
+	// Simulate a feature where variance doubled (slow-walk indicator)
+	result := VarianceGrowthResult{
+		Feature:      "tool_call_rate_per_hour",
+		PrevVariance: 100.0,
+		CurrVariance: 250.0,
+		GrowthRate:   2.5,
+		HighRisk:     2.5 >= VarianceGrowthThreshold,
+	}
+	if !result.HighRisk {
+		t.Error("expected HIGH_RISK for 2.5x variance growth")
+	}
+	t.Logf("✅ Variance growth 2.5x → HIGH_RISK=true for %s", result.Feature)
+
+	// Simulate normal variance — should not trigger
+	normal := VarianceGrowthResult{
+		Feature:      "unique_endpoints_per_hour",
+		PrevVariance: 100.0,
+		CurrVariance: 130.0,
+		GrowthRate:   1.3,
+		HighRisk:     1.3 >= VarianceGrowthThreshold,
+	}
+	if normal.HighRisk {
+		t.Error("expected no HIGH_RISK for 1.3x variance growth")
+	}
+	t.Logf("✅ Variance growth 1.3x → HIGH_RISK=false for %s", normal.Feature)
+}
+
 func TestZeroTolerancePolicies(t *testing.T) {
 	engine, err := NewPolicyEngine("../../config/policy_packs")
 	if err != nil {
