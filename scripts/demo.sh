@@ -10,7 +10,7 @@ SCORING="http://localhost:8080"
 KONG="http://localhost:8000"
 AGENT_DID="did:jwt:finserv-demo:trading-agent:001"
 ORG_ID="11111111-1111-1111-1111-111111111111"
-# Reset demo state for clean hash chain on each run
+
 docker exec -i agentrepengine-postgres-1 psql -U are -d agentrepengine \
   -c "DELETE FROM enforcement_decisions; DELETE FROM agent_identities WHERE did = '$AGENT_DID';" \
   > /dev/null 2>&1
@@ -22,9 +22,10 @@ echo "║  AgentRepEngine — Live Demo                                 ║"
 echo "║  Runtime Trust & Enforcement for AI Agents                  ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
+sleep 0.5
 
-# ── STEP 1: Generate signed JWT token ─────────────────────────────
 echo "STEP 1 — Generating signed agent JWT..."
+sleep 0.5
 TOKEN=$(go run ./cmd/gentoken/main.go 2>/dev/null)
 if [ -z "$TOKEN" ]; then
     echo "ERROR: Token generation failed. Is Go installed?"
@@ -33,9 +34,10 @@ fi
 echo "  Agent DID : $AGENT_DID"
 echo "  Token     : ${TOKEN:0:40}...[truncated]"
 echo ""
+sleep 0.5
 
-# ── STEP 2: Register agent identity ───────────────────────────────
 echo "STEP 2 — Registering agent identity (score 700, probation)..."
+sleep 0.5
 $PG -c "
 INSERT INTO agent_identities
     (did, org_id, instance_id, lineage_hash, current_score,
@@ -53,21 +55,22 @@ ON CONFLICT (did) DO UPDATE SET current_score = 700, status = 'probation';" \
 > /dev/null 2>&1
 echo "  Agent registered at score 700 (MONITORED band)"
 echo ""
+sleep 0.5
 
-# ── STEP 3: Send legitimate request through Kong ──────────────────
 echo "STEP 3 — Legitimate request through Kong gateway..."
+sleep 0.5
 RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
     -H "X-Agent-DID: $TOKEN" \
     "$KONG/test")
 echo "  HTTP status: $RESPONSE"
 echo "  Kong decision: OBSERVE (score=700, band=MONITORED)"
 echo ""
+sleep 0.5
 
-# ── STEP 4: Inject anomalous behavior via event API ───────────────
 echo "STEP 4 — Injecting anomalous behavioral events..."
+sleep 0.5
 echo "  Simulating bulk PII exfiltration pattern..."
 echo "  (847 PII field accesses in 90 minutes — 4.2 sigma above baseline)"
-
 for i in 1 2 3; do
     curl -s -X POST "$SCORING/event" \
         -H "Content-Type: application/json" \
@@ -85,18 +88,19 @@ for i in 1 2 3; do
                 \"band_at_request\": \"MONITORED\"
             }
         }" > /dev/null 2>&1
+    echo "  Event $i/3 sent"
+    sleep 0.5
 done
 echo "  3 anomalous events enqueued"
 echo ""
+sleep 0.5
 
-# ── STEP 5: Force score update with BLOCKED decision ──────────────
 echo "STEP 5 — Writing enforcement decision (BLOCKED)..."
+sleep 0.5
 $PG -c "
 UPDATE agent_identities
 SET current_score = 187, status = 'blocked', last_seen = NOW()
 WHERE did = '$AGENT_DID';" > /dev/null 2>&1
-
-# Write enforcement decision with full reason object + hash chain
 $PG -c "
 INSERT INTO enforcement_decisions
     (agent_did, decision, score, score_delta, policy_fired,
@@ -141,15 +145,14 @@ VALUES (
     md5(random()::text),
     NOW()
 );" > /dev/null 2>&1
-
-# Invalidate Redis cache immediately
 $REDIS DEL "score:$AGENT_DID" > /dev/null 2>&1
 echo "  Score updated: 700 → 187 (BLOCKED)"
 echo "  Redis cache invalidated"
 echo ""
+sleep 0.5
 
-# ── STEP 6: Show the reason object ────────────────────────────────
 echo "STEP 6 — Enforcement decision with full reason object:"
+sleep 0.5
 echo "─────────────────────────────────────────────────────"
 $PG -t -c "
 SELECT jsonb_pretty(reason_object)
@@ -159,18 +162,20 @@ ORDER BY created_at DESC
 LIMIT 1;" 2>/dev/null
 echo "─────────────────────────────────────────────────────"
 echo ""
+sleep 0.5
 
-# ── STEP 7: Show blocked request through Kong ─────────────────────
 echo "STEP 7 — Blocked agent attempts request through Kong..."
+sleep 0.5
 BLOCKED_RESPONSE=$(curl -s \
     -H "X-Agent-DID: $TOKEN" \
     "$KONG/test" 2>/dev/null)
 echo "  Kong response (synthetic — not a 403):"
 echo "  $BLOCKED_RESPONSE" | head -3
 echo ""
+sleep 0.5
 
-# ── STEP 8: FP rate check ─────────────────────────────────────────
 echo "STEP 8 — False positive rate:"
+sleep 0.5
 $PG -c "
 SELECT
     COUNT(*) FILTER (WHERE override=true) as false_positives,
@@ -180,13 +185,14 @@ SELECT
 FROM enforcement_decisions
 WHERE created_at > NOW() - INTERVAL '7 days';"
 echo ""
+sleep 0.5
 
-# ── STEP 9: Hash chain verification ───────────────────────────────
 echo "STEP 9 — Tamper-evident audit log verification:"
+sleep 0.5
 $PG -c "SELECT verify_hash_chain('enforcement_decisions') AS chain_valid;"
 echo ""
+sleep 0.5
 
-# ── SUMMARY ───────────────────────────────────────────────────────
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║  DEMO COMPLETE                                              ║"
 echo "║                                                              ║"
