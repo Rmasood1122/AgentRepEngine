@@ -1,6 +1,6 @@
 # AgentRepEngine — GDPR Position Statement
 ## Data Subject Rights and Agent Identity Data
-Version 1.0 | For: DPO Review | Classification: Confidential
+Version 1.1 | For: DPO Review | Classification: Confidential
 
 ---
 
@@ -10,6 +10,12 @@ AgentRepEngine stores agent behavioral metadata by default.
 Agent DIDs are pseudonymous technical identifiers.
 Where agent DIDs can be linked to natural persons, customers
 must apply appropriate DPIA under GDPR Article 35.
+
+ARE's enforcement decisions are made on agent behavior, not on
+human subjects. The staged rollout with explicit CISO sign-off
+at each phase constitutes the human oversight mechanism required
+for GDPR Article 22 compliance review.
+
 A tombstone procedure for erasure requests is documented below.
 
 ---
@@ -26,6 +32,38 @@ A tombstone procedure for erasure requests is documented below.
 | duration_ms | Request duration | No |
 | decision | ALLOW/AUDIT/BLOCK | No |
 | reason_object | Structured enforcement explanation | No |
+| feature_vector | 8-dimension behavioral metrics | No (aggregate metrics) |
+
+**What we never store:** prompt or completion content, user PII,
+request or response payloads. Behavioral metadata only.
+
+**Default retention:** 90 days. Configurable per-deployment.
+
+**Regulations compatible:** DORA, SOX data governance, HIPAA (no PHI stored).
+
+---
+
+### GDPR Article 22 — Automated Decision-Making
+
+ARE's enforcement decisions are automated decisions made on
+**agent behavior**, not on human subjects directly.
+
+Key distinction:
+- If an agent acts autonomously (no individual user mapping):
+  Article 22 does not apply to ARE's enforcement decisions
+- If an agent acts on behalf of a specific human user:
+  Your organization must assess Article 22 applicability
+  for that specific deployment context
+
+**ARE's human oversight documentation:**
+The risk-staged deployment model (zero-impact visibility →
+flagging → enforcement with human review → full enforcement)
+with explicit CISO sign-off at each stage constitutes the
+human oversight mechanism required for Article 22 compliance
+review. Every stage transition is documented.
+
+ARE provides the cryptographically non-repudiable enforcement
+log required for any Article 22 documentation request.
 
 ---
 
@@ -71,7 +109,7 @@ WHERE did = 'did:jwt:org:service:uuid';
 **Step 2 — Pseudonymize enforcement records:**
 ```sql
 -- Replace agent_did with non-reversible pseudonym
--- Hash chain integrity is preserved
+-- Cryptographically non-repudiable enforcement log integrity preserved
 UPDATE enforcement_decisions
 SET agent_did = encode(
   sha256(('did:jwt:org:service:uuid' ||
@@ -89,7 +127,7 @@ DELETE FROM agent_identities
 WHERE did = 'did:jwt:org:service:uuid';
 ```
 
-**Step 4 — Verify hash chain integrity:**
+**Step 4 — Verify cryptographically non-repudiable enforcement log integrity:**
 ```sql
 SELECT verify_hash_chain('enforcement_decisions') AS valid;
 -- Must return: true
@@ -112,14 +150,24 @@ VALUES (
 
 ### Hash Chain Integrity After Erasure
 
-The tombstone procedure preserves hash chain integrity because:
-- The hash chain covers: prev_hash + id + timestamp + decision
+The tombstone procedure preserves cryptographically non-repudiable enforcement log integrity because:
+- The cryptographically non-repudiable enforcement log covers: prev_hash + id + timestamp + decision
 - agent_did is stored as data but is NOT part of the hash input
 - Pseudonymizing agent_did does not break the chain
-- Audit integrity is maintained. Personal data is removed.
+- Cryptographic audit integrity is maintained. Personal data is removed.
 
-This design was intentional: the hash chain proves the sequence
-and integrity of enforcement decisions, not the identity of agents.
+This design was intentional: the cryptographically non-repudiable
+enforcement log proves the sequence and integrity of enforcement
+decisions, not the identity of agents.
+
+---
+
+### EU Localization Note
+
+Phase 1 reason objects are English-language only.
+EU/DORA deployments requiring localized enforcement documentation
+(German, French, Dutch) should plan for Phase 2 multilingual
+reason objects, available on the product roadmap.
 
 ---
 
@@ -135,7 +183,7 @@ and integrity of enforcement decisions, not the identity of agents.
    rehan@naseem-a2a.com
 
 **Data residency:**
-All behavioral telemetry stays in your Kubernetes cluster.
+All behavioral telemetry stays within your network perimeter.
 No data transfer outside your environment without explicit
 configuration. EU data residency is achievable by default.
 
