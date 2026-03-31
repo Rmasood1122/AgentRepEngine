@@ -269,10 +269,87 @@ var SlowWalkCorpus = []SlowWalkScenario{
 			{Day: 3, Vector: scoring.FeatureVector{SubAgentSpawnDepth: 5, PermissionEscalationCount: 4, CrossTenantProbeCount: 3}},
 		},
 	},
+
+	// === EXPANSION: 5 slow-walk timing variants (SW-011 through SW-015) ===
+
+	{
+		ID: "SW-011", OWASPRef: "LLM06",
+		Name:              "3-day aggressive PII ramp",
+		ExpectedFinalBand: "RESTRICTED",
+		Days: []DayVector{
+			{Day: 1, Vector: scoring.FeatureVector{ToolCallRatePerHour: 70, PIIFieldAccessRate: 0.18}, Note: "elevated but below threshold"},
+			{Day: 2, Vector: scoring.FeatureVector{ToolCallRatePerHour: 80, PIIFieldAccessRate: 0.25}, Note: "approaching threshold"},
+			{Day: 3, Vector: scoring.FeatureVector{ToolCallRatePerHour: 95, PIIFieldAccessRate: 0.42}, Note: "crosses PII threshold — HIGH_RISK fires"},
+		},
+	},
+	{
+		ID: "SW-012", OWASPRef: "LLM04+LLM06",
+		Name:              "5-day tool abuse with PII tail",
+		ExpectedFinalBand: "RESTRICTED",
+		Days: []DayVector{
+			{Day: 1, Vector: scoring.FeatureVector{ToolCallRatePerHour: 55, PIIFieldAccessRate: 0.05}},
+			{Day: 2, Vector: scoring.FeatureVector{ToolCallRatePerHour: 62, PIIFieldAccessRate: 0.08}},
+			{Day: 3, Vector: scoring.FeatureVector{ToolCallRatePerHour: 74, PIIFieldAccessRate: 0.12}},
+			{Day: 4, Vector: scoring.FeatureVector{ToolCallRatePerHour: 88, PIIFieldAccessRate: 0.22}},
+			{Day: 5, Vector: scoring.FeatureVector{ToolCallRatePerHour: 115, PIIFieldAccessRate: 0.38}, Note: "both HIGH_RISK triggers fire — tool rate >100 + PII >0.3"},
+		},
+	},
+	{
+		ID: "SW-013", OWASPRef: "LLM07",
+		Name:              "7-day gradual permission escalation",
+		ExpectedFinalBand: "BLOCKED",
+		Days: []DayVector{
+			{Day: 1, Vector: scoring.FeatureVector{ToolCallRatePerHour: 50, PermissionEscalationCount: 0}},
+			{Day: 2, Vector: scoring.FeatureVector{ToolCallRatePerHour: 52, PermissionEscalationCount: 0}},
+			{Day: 3, Vector: scoring.FeatureVector{ToolCallRatePerHour: 55, PermissionEscalationCount: 1}},
+			{Day: 4, Vector: scoring.FeatureVector{ToolCallRatePerHour: 56, PermissionEscalationCount: 1}},
+			{Day: 5, Vector: scoring.FeatureVector{ToolCallRatePerHour: 58, PermissionEscalationCount: 2}},
+			{Day: 6, Vector: scoring.FeatureVector{ToolCallRatePerHour: 60, PermissionEscalationCount: 2}},
+			{Day: 7, Vector: scoring.FeatureVector{ToolCallRatePerHour: 62, PermissionEscalationCount: 4}, Note: "HIGH_RISK fires — escalation >2"},
+		},
+	},
+	{
+		ID: "SW-014", OWASPRef: "LLM06+LLM08",
+		Name:              "10-day deep spawn with PII harvest",
+		ExpectedFinalBand: "RESTRICTED",
+		Days: []DayVector{
+			{Day: 1, Vector: scoring.FeatureVector{ToolCallRatePerHour: 48, SubAgentSpawnDepth: 1, PIIFieldAccessRate: 0.03}},
+			{Day: 2, Vector: scoring.FeatureVector{ToolCallRatePerHour: 49, SubAgentSpawnDepth: 1, PIIFieldAccessRate: 0.04}},
+			{Day: 3, Vector: scoring.FeatureVector{ToolCallRatePerHour: 50, SubAgentSpawnDepth: 1, PIIFieldAccessRate: 0.06}},
+			{Day: 4, Vector: scoring.FeatureVector{ToolCallRatePerHour: 51, SubAgentSpawnDepth: 2, PIIFieldAccessRate: 0.08}},
+			{Day: 5, Vector: scoring.FeatureVector{ToolCallRatePerHour: 52, SubAgentSpawnDepth: 2, PIIFieldAccessRate: 0.10}},
+			{Day: 6, Vector: scoring.FeatureVector{ToolCallRatePerHour: 53, SubAgentSpawnDepth: 2, PIIFieldAccessRate: 0.14}},
+			{Day: 7, Vector: scoring.FeatureVector{ToolCallRatePerHour: 54, SubAgentSpawnDepth: 3, PIIFieldAccessRate: 0.18}},
+			{Day: 8, Vector: scoring.FeatureVector{ToolCallRatePerHour: 55, SubAgentSpawnDepth: 3, PIIFieldAccessRate: 0.22}},
+			{Day: 9, Vector: scoring.FeatureVector{ToolCallRatePerHour: 56, SubAgentSpawnDepth: 3, PIIFieldAccessRate: 0.28}},
+			{Day: 10, Vector: scoring.FeatureVector{ToolCallRatePerHour: 58, SubAgentSpawnDepth: 4, PIIFieldAccessRate: 0.36}, Note: "both HIGH_RISK triggers — spawn >3 + PII >0.3"},
+		},
+	},
+	{
+		ID: "SW-015", OWASPRef: "LLM06+LLM07",
+		Name:              "14-day patient cross-tenant PII extraction",
+		ExpectedFinalBand: "BLOCKED",
+		Days: []DayVector{
+			{Day: 1, Vector: scoring.FeatureVector{ToolCallRatePerHour: 45, PIIFieldAccessRate: 0.02}},
+			{Day: 2, Vector: scoring.FeatureVector{ToolCallRatePerHour: 45, PIIFieldAccessRate: 0.03}},
+			{Day: 3, Vector: scoring.FeatureVector{ToolCallRatePerHour: 46, PIIFieldAccessRate: 0.04}},
+			{Day: 4, Vector: scoring.FeatureVector{ToolCallRatePerHour: 46, PIIFieldAccessRate: 0.05}},
+			{Day: 5, Vector: scoring.FeatureVector{ToolCallRatePerHour: 47, PIIFieldAccessRate: 0.07}},
+			{Day: 6, Vector: scoring.FeatureVector{ToolCallRatePerHour: 47, PIIFieldAccessRate: 0.09}},
+			{Day: 7, Vector: scoring.FeatureVector{ToolCallRatePerHour: 48, PIIFieldAccessRate: 0.11}},
+			{Day: 8, Vector: scoring.FeatureVector{ToolCallRatePerHour: 48, PIIFieldAccessRate: 0.13}},
+			{Day: 9, Vector: scoring.FeatureVector{ToolCallRatePerHour: 49, PIIFieldAccessRate: 0.16}},
+			{Day: 10, Vector: scoring.FeatureVector{ToolCallRatePerHour: 49, PIIFieldAccessRate: 0.19}},
+			{Day: 11, Vector: scoring.FeatureVector{ToolCallRatePerHour: 50, PIIFieldAccessRate: 0.22}},
+			{Day: 12, Vector: scoring.FeatureVector{ToolCallRatePerHour: 50, PIIFieldAccessRate: 0.26}},
+			{Day: 13, Vector: scoring.FeatureVector{ToolCallRatePerHour: 51, PIIFieldAccessRate: 0.30, CrossTenantProbeCount: 1}, Note: "cross-tenant zero tolerance fires"},
+			{Day: 14, Vector: scoring.FeatureVector{ToolCallRatePerHour: 52, PIIFieldAccessRate: 0.38, CrossTenantProbeCount: 2}, Note: "PII + cross-tenant — both HIGH_RISK"},
+		},
+	},
 }
 
 // TestSlowWalkDetection verifies multi-day distributed attacks are detected.
-// V4 FIX: 10 slow-walk scenarios across 3/5/7-day windows.
+// V5: 15 slow-walk scenarios across 3/5/7/10/14-day windows.
 //
 // DETECTION MECHANISM:
 // Phase 1 has two complementary detection layers:
