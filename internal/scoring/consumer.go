@@ -117,18 +117,13 @@ func (c *EventConsumer) processEvent(id int64, agentDID,
 		return err
 	}
 
-	// FIX 1: Correct baselines — pii_field_access_rate is a ratio (0.0-1.0)
-	// not a count. Normal analyst: ~5% PII rate. Anomalous: >30%.
-	baselines := map[string]struct{ mean, std float64 }{
-		"tool_call_rate_per_hour":       {80, 60},
-		"unique_endpoints_per_hour":     {25, 30},
-		"bulk_access_count_per_session": {400, 400},
-		"pii_field_access_rate":         {0.05, 0.08}, // FIX: was {20, 25}
-		"cross_tenant_probe_count":      {0, 0.1},
-		"permission_escalation_count":   {0, 0.5},
-		"sub_agent_spawn_depth":         {0, 0.3},
-		"token_refresh_rate":            {1, 1},
-	}
+	// Fetch org_id + current score together — single DB round trip.
+	// org_id required for org-scoped baseline isolation (TW-PRE-2).
+	H, orgID := c.getAgentContext(agentDID)
+
+	// Live org-scoped baselines via BaselineStore.
+	// Falls back to cluster → hardcoded if agent has <100 samples.
+	bs := NewBaselineStore(c.db)
 
 	v := data.FeatureVector
 	features := map[string]float64{
@@ -145,17 +140,28 @@ func (c *EventConsumer) processEvent(id int64, agentDID,
 	worstZ := 0.0
 	worstFeature := ""
 	for feature, value := range features {
-		if b, ok := baselines[feature]; ok {
-			std := b.std
-			if std == 0 {
-				std = 0.1
-			}
-			z := (value - b.mean) / std
-			if z > worstZ {
-				worstZ = z
-				worstFeature = feature
-			}
+		// Org-scoped baseline lookup — prevents cross-tenant contamination.
+		baseline := bs.GetBaseline(orgID, agentDID, feature)
+		std := baseline.StdDev
+		if std < 0.01 {
+			std = 0.1
 		}
+		z := (value - baseline.Mean) / std
+		if z > worstZ {
+			worstZ = z
+			worstFeature = feature
+		}
+		// Update agent baseline with this observation (Welford's online).
+		if err := bs.UpdateAgentBaseline(orgID, agentDID, feature, value); err != nil {
+			slog.Warn("baseline update failed",
+				"org_id", orgID,
+				"agent_did", agentDID,
+				"feature", feature,
+				"error", err,
+			)
+		}
+		// Update cluster baseline.
+		bs.UpdateClusterBaseline("default", feature, value)
 	}
 
 	penalty := 0.0
@@ -164,17 +170,13 @@ func (c *EventConsumer) processEvent(id int64, agentDID,
 	}
 	V := max(0, 1000-penalty*3)
 
-	// FIX 2: Use actual agent score from DB as H component.
-	// Preserves behavioral history across events.
-	// Falls back to 700 bootstrap only for unknown agents.
-	H := c.getAgentScore(agentDID)
-
 	newScore := ComputeScore(H, V, DefaultWeights)
 	band := ScoreBand(newScore)
 
 	reason := map[string]interface{}{
 		"decision":      band,
 		"agent_did":     agentDID,
+		"org_id":        orgID,
 		"score":         newScore,
 		"event_type":    eventType,
 		"worst_z":       worstZ,
@@ -187,6 +189,7 @@ func (c *EventConsumer) processEvent(id int64, agentDID,
 
 	slog.Info("score_computed",
 		"agent_did", agentDID,
+		"org_id", orgID,
 		"event_type", eventType,
 		"score", newScore,
 		"band", band,
@@ -197,17 +200,20 @@ func (c *EventConsumer) processEvent(id int64, agentDID,
 	return c.scoreWriter.WriteScore(agentDID, newScore, reason)
 }
 
-// getAgentScore fetches current agent score from DB for H component.
-// Returns 700 (bootstrap) if agent not found or error.
-func (c *EventConsumer) getAgentScore(agentDID string) float64 {
+// getAgentContext fetches current score and org_id from agent_identities.
+// Returns (700, "default") bootstrap values if agent not found.
+// org_id is required for org-scoped baseline isolation.
+func (c *EventConsumer) getAgentContext(agentDID string) (float64, string) {
 	var score int
+	var orgID string
 	err := c.db.QueryRow(`
-		SELECT current_score FROM agent_identities
-		WHERE did = $1`, agentDID).Scan(&score)
+		SELECT current_score, org_id::text
+		FROM agent_identities
+		WHERE did = $1`, agentDID).Scan(&score, &orgID)
 	if err != nil {
-		return 700.0
+		return 700.0, "default"
 	}
-	return float64(score)
+	return float64(score), orgID
 }
 
 func min(a, b float64) float64 {

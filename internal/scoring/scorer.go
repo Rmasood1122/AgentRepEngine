@@ -35,7 +35,7 @@ func NewScorer(baselines *BaselineStore, config *ScoringConfig) *Scorer {
 
 // Score computes a new score for an agent given a feature vector.
 // Uses live baselines from DB — updates agent baselines after scoring.
-func (s *Scorer) Score(agentDID string, vector FeatureVector,
+func (s *Scorer) Score(orgID, agentDID string, vector FeatureVector,
 	previousScore int, lastSeen time.Time) (*ScoredResult, error) {
 
 	features := map[string]float64{
@@ -59,7 +59,7 @@ func (s *Scorer) Score(agentDID string, vector FeatureVector,
 	featureZScores := map[string]float64{}
 
 	for feature, value := range features {
-		baseline := s.baselines.GetBaseline(agentDID, feature)
+		baseline := s.baselines.GetBaseline(orgID, agentDID, feature)
 		z := ComputeZScore(value, baseline)
 		featureZScores[feature] = z
 
@@ -69,7 +69,7 @@ func (s *Scorer) Score(agentDID string, vector FeatureVector,
 		}
 
 		// Update agent baseline with this observation
-		if err := s.baselines.UpdateAgentBaseline(agentDID, feature, value); err != nil {
+		if err := s.baselines.UpdateAgentBaseline(orgID, agentDID, feature, value); err != nil {
 			slog.Warn("baseline update failed",
 				"agent_did", agentDID,
 				"feature", feature,

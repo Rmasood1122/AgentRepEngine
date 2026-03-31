@@ -29,17 +29,18 @@ func NewBaselineStore(db *sql.DB) *BaselineStore {
 }
 
 // GetBaseline returns the best available baseline for an agent+feature.
+// Keyed on (org_id, agent_did, feature_name) — org-scoped isolation.
 // Priority: agent-level (if >=100 samples) → cluster-level → hardcoded.
 // FM1 prevention: never use agent baseline with <100 samples.
-func (s *BaselineStore) GetBaseline(agentDID, featureName string) Baseline {
-	// Try agent-level baseline first
+func (s *BaselineStore) GetBaseline(orgID, agentDID, featureName string) Baseline {
+	// Try agent-level baseline first — scoped to org_id + agent_did
 	var mean, stdDev float64
 	var sampleCount int
 	err := s.db.QueryRow(`
 		SELECT mean, std_dev, sample_count
 		FROM agent_baselines
-		WHERE agent_did = $1 AND feature_name = $2`,
-		agentDID, featureName,
+		WHERE org_id = $1 AND agent_did = $2 AND feature_name = $3`,
+		orgID, agentDID, featureName,
 	).Scan(&mean, &stdDev, &sampleCount)
 
 	if err == nil && sampleCount >= 100 {
@@ -63,19 +64,19 @@ func (s *BaselineStore) GetBaseline(agentDID, featureName string) Baseline {
 }
 
 // UpdateAgentBaseline updates the running mean and std dev for an agent.
+// Keyed on (org_id, agent_did, feature_name) — org-scoped isolation.
 // Uses Welford's online algorithm — no need to store all historical values.
-func (s *BaselineStore) UpdateAgentBaseline(agentDID, featureName string,
+func (s *BaselineStore) UpdateAgentBaseline(orgID, agentDID, featureName string,
 	newValue float64) error {
 
-	// Upsert with Welford's online update
 	_, err := s.db.Exec(`
 		INSERT INTO agent_baselines
-			(agent_did, feature_name, mean, std_dev, sample_count, last_updated)
-		VALUES ($1, $2, $3, 1.0, 1, NOW())
-		ON CONFLICT (agent_did, feature_name) DO UPDATE SET
+			(org_id, agent_did, feature_name, mean, std_dev, sample_count, last_updated)
+		VALUES ($1, $2, $3, $4, 1.0, 1, NOW())
+		ON CONFLICT (org_id, agent_did, feature_name) DO UPDATE SET
 			sample_count = agent_baselines.sample_count + 1,
 			mean = agent_baselines.mean +
-				($3 - agent_baselines.mean) /
+				($4 - agent_baselines.mean) /
 				(agent_baselines.sample_count + 1),
 			std_dev = CASE
 				WHEN agent_baselines.sample_count < 2 THEN 1.0
@@ -84,13 +85,13 @@ func (s *BaselineStore) UpdateAgentBaseline(agentDID, featureName string,
 						(agent_baselines.sample_count - 1) *
 						POWER(agent_baselines.std_dev, 2) /
 						agent_baselines.sample_count +
-						POWER($3 - agent_baselines.mean, 2) /
+						POWER($4 - agent_baselines.mean, 2) /
 						agent_baselines.sample_count
 					), 0.1
 				)
 			END,
 			last_updated = NOW()`,
-		agentDID, featureName, newValue,
+		orgID, agentDID, featureName, newValue,
 	)
 	if err != nil {
 		return fmt.Errorf("update agent baseline: %w", err)
