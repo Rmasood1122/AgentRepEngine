@@ -17,6 +17,80 @@ local BANDS = {
     BLOCKED    = 0,
 }
 
+-- Allowed event types for payload validation
+local ALLOWED_EVENT_TYPES = {
+    http_request     = true,
+    tool_call        = true,
+    bulk_access      = true,
+    pii_access       = true,
+    auth_event       = true,
+    spawn_event      = true,
+    scope_change     = true,
+    token_refresh    = true,
+}
+
+-- Validate agent_did format: must start with "did:jwt:" or "agt_"
+local function validate_agent_did(agent_did)
+    if not agent_did or type(agent_did) ~= "string" then
+        return false, "agent_did is nil or not a string"
+    end
+    if #agent_did < 5 or #agent_did > 256 then
+        return false, "agent_did length out of range (5-256): " .. #agent_did
+    end
+    if agent_did:sub(1, 8) == "did:jwt:" then
+        return true, nil
+    end
+    if agent_did:sub(1, 4) == "agt_" then
+        return true, nil
+    end
+    return false, "agent_did must start with 'did:jwt:' or 'agt_', got: " .. agent_did:sub(1, 10)
+end
+
+-- Validate event_type is in allowed enum list
+local function validate_event_type(event_type)
+    if not event_type or type(event_type) ~= "string" then
+        return false, "event_type is nil or not a string"
+    end
+    if not ALLOWED_EVENT_TYPES[event_type] then
+        return false, "event_type not in allowed list: " .. event_type
+    end
+    return true, nil
+end
+
+-- Sanitize a string field: strip control characters, limit length
+local function sanitize_string(value, max_len)
+    if type(value) ~= "string" then return tostring(value) end
+    -- Strip control characters (except newline/tab) to prevent log injection
+    local clean = value:gsub("[%c]", "")
+    if max_len and #clean > max_len then
+        clean = clean:sub(1, max_len)
+    end
+    return clean
+end
+
+-- Sanitize all payload fields before they reach scoring engine
+local function sanitize_payload(payload)
+    if type(payload) ~= "table" then return {} end
+    local clean = {}
+    for k, v in pairs(payload) do
+        local key = sanitize_string(k, 64)
+        if type(v) == "string" then
+            clean[key] = sanitize_string(v, 1024)
+        elseif type(v) == "number" then
+            -- Reject NaN and Inf
+            if v ~= v or v == math.huge or v == -math.huge then
+                clean[key] = 0
+            else
+                clean[key] = v
+            end
+        elseif type(v) == "boolean" then
+            clean[key] = v
+        end
+        -- Drop tables, functions, userdata — only primitives pass through
+    end
+    return clean
+end
+
 local function get_redis_client(conf)
     local red = redis:new()
     red:set_timeout(conf.redis_timeout_ms)
@@ -205,6 +279,19 @@ function AgentReputationHandler:access(conf)
 
     local agent_did = claims.agent_did
 
+    -- Validate agent_did format before scoring
+    local did_valid, did_err = validate_agent_did(agent_did)
+    if not did_valid then
+        kong.log.warn("MALFORMED agent_did: ", did_err)
+        kong.service.request.set_header("X-Agent-Score", "500")
+        kong.service.request.set_header("X-Agent-Band", "MONITORED")
+        kong.service.request.set_header("X-Agent-Malformed", "true")
+        if conf.enforcement_mode == "enforce" then
+            return synthetic_response()
+        end
+        return
+    end
+
     kong.service.request.set_header("X-Gateway-Verified", "true")
     kong.service.request.set_header("X-Agent-DID-Verified", agent_did)
     kong.service.request.set_header("X-Agent-Org", claims.org_id)
@@ -274,17 +361,36 @@ function AgentReputationHandler:log(conf)
     local score     = kong.request.get_header("X-Agent-Score") or "700"
     local band      = kong.request.get_header("X-Agent-Band") or "MONITORED"
 
+    -- Validate agent_did format before emitting event
+    local did_valid, did_err = validate_agent_did(agent_did)
+    if not did_valid then
+        kong.log.warn("MALFORMED event agent_did: ", did_err, " — event dropped")
+        return
+    end
+
+    -- Validate event type
+    local event_type = "http_request"
+    local et_valid, et_err = validate_event_type(event_type)
+    if not et_valid then
+        kong.log.warn("MALFORMED event_type: ", et_err, " — event dropped")
+        return
+    end
+
+    -- Sanitize payload fields before they reach scoring engine
+    local raw_payload = {
+        method           = method,
+        path             = path,
+        status_code      = status,
+        score_at_request = tonumber(score),
+        band_at_request  = band,
+    }
+    local clean_payload = sanitize_payload(raw_payload)
+
     local event_payload = cjson.encode({
-        agent_did    = agent_did,
-        org_id       = org_id,
-        event_type   = "http_request",
-        payload      = {
-            method           = method,
-            path             = path,
-            status_code      = status,
-            score_at_request = tonumber(score),
-            band_at_request  = band,
-        },
+        agent_did    = sanitize_string(agent_did, 256),
+        org_id       = sanitize_string(org_id, 128),
+        event_type   = event_type,
+        payload      = clean_payload,
         privacy_tier   = 1,
         schema_version = "v1",
     })
