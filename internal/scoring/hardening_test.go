@@ -92,6 +92,7 @@ func TestSecurityInvariant_NeverBlockWithoutExplanation(t *testing.T) {
 			"did:jwt:test-org:attack-agent:001",
 			"BLOCKED", 150, 700,
 			vector, violations, baselines, 2.0,
+			2.5,
 		)
 
 		if err != nil {
@@ -156,7 +157,8 @@ func TestGAP2_IdentityValidationInScoring(t *testing.T) {
 	}
 
 	_, err = ExplainDecision("", "BLOCKED", 150, 700,
-		vector, violations, baselines, 1.0)
+		vector, violations, baselines, 1.0,
+		0.0)
 	if err == nil {
 		t.Error("empty agent_did must be rejected — identity required for explanation")
 	}

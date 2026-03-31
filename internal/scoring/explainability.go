@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"time"
 )
 
@@ -23,6 +24,7 @@ type ReasonObject struct {
 	PeerCluster          string         `json:"peer_cluster"`
 	PeerClusterAvgScore  int            `json:"peer_cluster_avg_score"`
 	DeviationFromCluster int            `json:"deviation_from_cluster"`
+	ConfidencePct        int            `json:"confidence_pct"`
 	ComputedAt           int64          `json:"computed_at"`
 }
 
@@ -38,6 +40,8 @@ type TriggerEvent struct {
 // ExplainDecision builds a complete ReasonObject from scoring inputs.
 // FM2 prevention: returns error if any required field cannot be populated.
 // Caller must default to AUDIT if this returns error.
+// worstZScore: highest z-score across all features — used to compute confidence_pct.
+// confidence_pct: 100 = normal behavior, 0 = certain anomaly (z >= 3.0 sigma).
 func ExplainDecision(
 	agentDID string,
 	decision string,
@@ -47,6 +51,7 @@ func ExplainDecision(
 	violations []PolicyViolation,
 	baselines map[string]Baseline,
 	scorePeriodHours float64,
+	worstZScore float64,
 ) (*ReasonObject, error) {
 
 	if agentDID == "" {
@@ -83,6 +88,13 @@ func ExplainDecision(
 	peerClusterAvg := 700
 	deviationFromCluster := newScore - peerClusterAvg
 
+	// confidence_pct: inverse of anomaly confidence.
+	// At z=0.0 → 100% (behavior is normal, high confidence agent is legitimate).
+	// At z=3.0+ → 0% (behavior is 3+ sigma anomalous, high confidence it is malicious).
+	// Formula: confidence_pct = clamp(0, 100, (1 - worstZ/3.0) * 100)
+	const maxExpectedZ = 3.0
+	confidencePct := int(math.Max(0, math.Min(100, (1.0-(worstZScore/maxExpectedZ))*100)))
+
 	reason := &ReasonObject{
 		Decision:             decision,
 		AgentDID:             agentDID,
@@ -96,6 +108,7 @@ func ExplainDecision(
 		PeerCluster:          "default",
 		PeerClusterAvgScore:  peerClusterAvg,
 		DeviationFromCluster: deviationFromCluster,
+		ConfidencePct:        confidencePct,
 		ComputedAt:           time.Now().Unix(),
 	}
 
@@ -181,8 +194,8 @@ func (r *ReasonObject) ToJSON() string {
 	data, err := json.Marshal(r)
 	if err != nil {
 		return fmt.Sprintf(
-			`{"decision":"%s","agent_did":"%s","score":%d,"error":"serialization_failed"}`,
-			r.Decision, r.AgentDID, r.Score,
+			`{"decision":"%s","agent_did":"%s","score":%d,"confidence_pct":%d,"error":"serialization_failed"}`,
+			r.Decision, r.AgentDID, r.Score, r.ConfidencePct,
 		)
 	}
 	return string(data)

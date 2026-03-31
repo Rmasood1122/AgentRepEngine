@@ -35,6 +35,7 @@ func TestExplainDecisionComplete(t *testing.T) {
 		187, 743,
 		vector, violations, baselines,
 		6.0,
+		2.5, // worstZScore — high anomaly, blocked agent
 	)
 	if err != nil {
 		t.Fatalf("★ G-EXPLAIN HARD STOP: ExplainDecision failed: %v", err)
@@ -63,12 +64,18 @@ func TestExplainDecisionComplete(t *testing.T) {
 		t.Error("computed_at is zero")
 	}
 
+	// Verify confidence_pct is computed and in valid range
+	if reason.ConfidencePct < 0 || reason.ConfidencePct > 100 {
+		t.Errorf("confidence_pct out of range: %d", reason.ConfidencePct)
+	}
+
 	t.Logf("✅ Decision: %s", reason.Decision)
 	t.Logf("✅ Agent: %s", reason.AgentDID)
 	t.Logf("✅ Score: %d (delta: %d)", reason.Score, reason.ScoreDelta)
 	t.Logf("✅ Policy fired: %s", reason.PolicyFired)
 	t.Logf("✅ Trigger events: %d", len(reason.TriggerEvents))
 	t.Logf("✅ Recommended action: %s", reason.RecommendedAction)
+	t.Logf("✅ Confidence: %d%%", reason.ConfidencePct)
 }
 
 // TestExplainRejectsEmptyAgentDID verifies FM2 prevention.
@@ -78,7 +85,7 @@ func TestExplainRejectsInvalidInput(t *testing.T) {
 	baselines := map[string]Baseline{}
 
 	_, err := ExplainDecision("", "BLOCKED", 100, 700,
-		vector, nil, baselines, 1.0)
+		vector, nil, baselines, 1.0, 0.0)
 	if err == nil {
 		t.Error("expected error for empty agent_did, got nil")
 	} else {
@@ -86,7 +93,7 @@ func TestExplainRejectsInvalidInput(t *testing.T) {
 	}
 
 	_, err = ExplainDecision("did:jwt:org:agent:001", "", 100, 700,
-		vector, nil, baselines, 1.0)
+		vector, nil, baselines, 1.0, 0.0)
 	if err == nil {
 		t.Error("expected error for empty decision, got nil")
 	} else {
@@ -107,6 +114,7 @@ func TestExplainJSONSerializes(t *testing.T) {
 	reason, err := ExplainDecision(
 		"did:jwt:org:agent:001", "BLOCKED",
 		150, 700, vector, violations, baselines, 2.0,
+		2.5, // worstZScore — blocked agent
 	)
 	if err != nil {
 		t.Fatalf("ExplainDecision failed: %v", err)
@@ -123,10 +131,11 @@ func TestExplainJSONSerializes(t *testing.T) {
 		t.Errorf("reason object is not valid JSON: %v", err)
 	}
 
-	// Verify required top-level keys
+	// Verify required top-level keys including confidence_pct
 	required := []string{
 		"decision", "agent_did", "score", "score_delta",
 		"policy_fired", "recommended_action", "computed_at",
+		"confidence_pct",
 	}
 	for _, key := range required {
 		if _, ok := parsed[key]; !ok {
@@ -135,7 +144,7 @@ func TestExplainJSONSerializes(t *testing.T) {
 	}
 
 	t.Logf("✅ Valid JSON produced: %d bytes", len(jsonStr))
-	t.Logf("✅ All required keys present")
+	t.Logf("✅ All required keys present including confidence_pct")
 }
 
 // TestExplainCleanDecision verifies reason object on ALLOW decision.
@@ -153,6 +162,7 @@ func TestExplainCleanDecision(t *testing.T) {
 	reason, err := ExplainDecision(
 		"did:jwt:org:clean-agent:001", "ALLOW",
 		750, 700, vector, nil, baselines, 1.0,
+		0.3, // worstZScore — normal agent, low anomaly
 	)
 	if err != nil {
 		t.Fatalf("ExplainDecision failed for ALLOW: %v", err)
@@ -165,7 +175,45 @@ func TestExplainCleanDecision(t *testing.T) {
 		t.Errorf("clean agent should have 0 trigger events, got %d",
 			len(reason.TriggerEvents))
 	}
+	// Clean agent should have high confidence (low z-score → high confidence_pct)
+	if reason.ConfidencePct < 80 {
+		t.Errorf("clean agent confidence_pct too low: %d (expected ≥80)", reason.ConfidencePct)
+	}
 
-	t.Logf("✅ ALLOW decision explained: score=%d policy=%s",
-		reason.Score, reason.PolicyFired)
+	t.Logf("✅ ALLOW decision explained: score=%d policy=%s confidence=%d%%",
+		reason.Score, reason.PolicyFired, reason.ConfidencePct)
+}
+
+// TestConfidencePctRange verifies confidence_pct is always 0-100.
+func TestConfidencePctRange(t *testing.T) {
+	baselines := map[string]Baseline{}
+	vector := FeatureVector{}
+
+	cases := []struct {
+		worstZ float64
+		minPct int
+		maxPct int
+		label  string
+	}{
+		{0.0, 100, 100, "z=0 normal"},
+		{1.5, 40, 60, "z=1.5 moderate"},
+		{3.0, 0, 0, "z=3.0 certain anomaly"},
+		{5.0, 0, 0, "z=5.0 extreme — clamps to 0"},
+	}
+
+	for _, tc := range cases {
+		reason, err := ExplainDecision(
+			"did:jwt:org:test:001", "BLOCKED",
+			150, 700, vector, nil, baselines, 1.0,
+			tc.worstZ,
+		)
+		if err != nil {
+			t.Fatalf("ExplainDecision failed for %s: %v", tc.label, err)
+		}
+		if reason.ConfidencePct < tc.minPct || reason.ConfidencePct > tc.maxPct {
+			t.Errorf("%s: confidence_pct=%d, want [%d,%d]",
+				tc.label, reason.ConfidencePct, tc.minPct, tc.maxPct)
+		}
+		t.Logf("✅ %s: confidence_pct=%d%%", tc.label, reason.ConfidencePct)
+	}
 }
