@@ -80,13 +80,17 @@ In order of business consequence. Not technical elegance.
    CrossTenantProbeCount > 0, SubAgentSpawnDepth > 3 — all HIGH_RISK.
    File: internal/scoring/policy.go
 
-5. THE 12-SECOND DEMO
-   scripts/demo.sh runs end-to-end in 12 seconds.
+5. THE ~60-SECOND STREAMING DEMO
+   scripts/demo.sh runs end-to-end in ~60 seconds with streaming output.
    Shows: JWT identity → behavioral scoring → BLOCKED → reason object
           → hash chain verified → FP rate 0.00%
-   This is the entire sales motion in 12 seconds.
+   Each step prints live with sleep 0.5 pacing — the viewer sees progress.
+   This is the entire sales motion in ~60 seconds.
    Every claim is demonstrated live. Nothing is asserted.
    If this breaks, nothing else matters.
+   March 31, 2026: Rewritten from batch output (12s) to streaming (60s).
+   A demo that prints nothing for 12 seconds feels broken.
+   A demo that streams results for 60 seconds feels fast.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 SECTION 3 — THE 5 THINGS THAT LOOK IMPORTANT BUT AREN'T (YET)
@@ -331,7 +335,7 @@ If you are picking this up for the first time:
 
 1. Run this first:
    docker compose up -d && sleep 20 && bash scripts/demo.sh
-   If the demo passes in 12 seconds, the product works.
+   If the demo passes with streaming output (~60 seconds), the product works.
    If it fails, start with: docker compose logs scoring-service
 
 2. The most dangerous file to touch:
@@ -386,7 +390,7 @@ SECTION 9 — THE FOUR NUMBERS THAT MATTER
 0.00%   FP rate on 100-scenario internal corpus
 86.67%  TP rate on 30-scenario attack corpus
 100%    Slow-walk detection via score + HIGH_RISK VERIFY (10 scenarios)
-12      Seconds for the full demo end-to-end
+~60     Seconds for the full demo end-to-end (streaming output)
 
 These are the four numbers you defend in every technical conversation.
 Know how to reproduce each with a single command.

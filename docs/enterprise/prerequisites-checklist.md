@@ -170,5 +170,42 @@ externally accessible.
 
 ---
 
+### Load Testing — API Rate Limits
+
+The `/score` endpoint has a soft ceiling of **500 requests per second
+per org**, enforced via Kong rate limiting. Requests above this
+threshold receive a `429 Too Many Requests` response with a
+`Retry-After` header indicating when the caller may retry.
+
+**Do not run load tests above 500 RPS without coordinating with
+ARE support first** (rehan@naseem-a2a.com). Unannounced high-volume
+traffic may trigger rate limiting alerts and is indistinguishable
+from abusive traffic patterns.
+
+**Recommended load test parameters:**
+
+| Parameter       | Value                                         |
+|-----------------|-----------------------------------------------|
+| Ramp-up period  | 60 seconds (linear ramp from 0 to target RPS) |
+| Steady-state    | 200 RPS                                       |
+| Duration        | 5–10 minutes at steady state                  |
+| Watch for       | 429 responses — any at 200 RPS indicates a configuration issue |
+| Tool            | k6, Locust, or equivalent                     |
+
+**What to expect at 200 RPS steady state:**
+- Zero 429 responses (well within the 500 RPS ceiling)
+- p99 latency on `/score` under 50ms
+- If you observe 429 responses below 500 RPS, contact ARE support —
+  this likely indicates a misconfigured rate limit or resource
+  constraint in your environment
+
+**If you need more than 500 RPS:**
+Enterprise teams with higher throughput requirements can request
+a rate limit increase. This requires a brief capacity review to
+ensure your scoring service deployment is sized appropriately.
+Contact ARE support to schedule.
+
+---
+
 *Prerequisites current as of March 2026.
 Updated when stack versions change.*

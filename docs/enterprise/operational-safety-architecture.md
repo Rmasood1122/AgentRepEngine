@@ -137,6 +137,39 @@ Maps directly to:
 
 ---
 
+### Kong JWT Verification — Retry Policy
+
+The Kong `/verify` endpoint does not implement retry logic.
+This is a deliberate design decision, not an oversight.
+
+When Kong calls `/verify` to validate an agent's JWT, the call
+either succeeds within the 500ms timeout or it fails. On failure,
+the request is treated as unscored and passes through (fail-open),
+consistent with the infrastructure failure behavior documented above.
+
+**Why no retries:**
+- The `/verify` endpoint sits in the hot path of every agent request.
+  Adding retry logic would compound latency — a single retry with
+  backoff could push verification past 1 second, violating the
+  latency budget for real-time agent traffic.
+- The 500ms timeout already provides a generous window for a
+  lightweight JWT validation call. If the scoring service cannot
+  respond within 500ms, it is experiencing an infrastructure failure,
+  and the correct behavior is fail-open — not retry-and-block.
+- Retries under load can amplify failure. A degraded scoring service
+  receiving retried requests risks cascading into full unavailability.
+
+**Phase 2 plan:**
+Phase 2 will introduce retry with exponential backoff for the
+`/verify` endpoint, gated behind a feature flag. This will be
+configurable per-deployment and will include a maximum retry
+budget (default: 1 retry, max additional latency: 250ms) to
+ensure the total verification window does not exceed 750ms.
+Until Phase 2 ships, the no-retry policy preserves availability
+by keeping verification fast and predictable.
+
+---
+
 ### Contact for Security Review
 
 Technical questions: rehan@naseem-a2a.com

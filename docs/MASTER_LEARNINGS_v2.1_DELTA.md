@@ -1,7 +1,7 @@
 ═══════════════════════════════════════════════════════════════════
 MASTER_LEARNINGS_v2.1_DELTA — AGENTREPENGINE STRATEGIC INTELLIGENCE
 Addendum to MASTER_LEARNINGS_v2.0
-Version: 2.1 Delta (5 new learnings: L75–L79)
+Version: 2.1 Delta (6 new learnings: L75–L80)
 Source: March 22, 2026 build + adversarial meta-audit findings
 Date: March 22, 2026
 Apply to: All sessions. Supersedes conflicting assumptions in v2.0.
@@ -85,6 +85,20 @@ conversation. Paste prior audit answers into a new session
 with instruction: "Challenge every [F] label and find
 internal contradictions." Fix what surfaces.
 
+L80 — STREAMING OUTPUT AND PRODUCTION API PRINCIPLES [F]
+Demo output must stream — not batch-print at the end.
+A 60-second demo that prints results live feels fast.
+A 12-second demo that prints nothing until the end feels broken.
+Production API principles that apply to all user-facing endpoints:
+  1. Stream output as it becomes available (SSE or chunked response)
+  2. Show progress indicators for operations > 1 second
+  3. Fail fast with actionable error messages — never hang silently
+  4. Every endpoint must have a timeout (500ms for /verify, 5s for /score)
+Implementation: scripts/demo.sh rewritten with per-step streaming
+and sleep 0.5 between steps for readable pacing.
+Commit: 90de1f6 — March 31, 2026
+Action: Apply streaming principle to all future CLI and API output.
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 STATUS UPDATES TO v2.0 LEARNINGS
 Changes to prior learnings based on March 22 work
@@ -121,7 +135,8 @@ Current product score against FAANG enterprise rubric
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Baseline (adversarial meta-audit, March 21): 67/100
-Current (March 22, 8 fixes applied):         87/100
+Post-hardening (March 22, 8 fixes):          87/100
+Current (March 31, 11 fixes applied):        94/100
 
 Fixes applied:
   V2  Fail-open narrative documented              ✅ +3
@@ -138,14 +153,14 @@ Remaining to FAANG-grade (88):
   11X-1 reason_object_v1.json schema              ☐ +1
 
 Remaining to acquisition-ready (95):
-  V4  Slow-walk evasion corpus                    ☐ +3
+  V4  Slow-walk evasion corpus                    ✅ +3
   V3  GDPR tombstone legal review                 ☐ +1
-  V1  FP external validation                      ☐ +2
-  11X-5 Call-level vs agent-level benchmark       ☐ +2
+  V1  FP external validation                      ✅ +2
+  11X-5 Call-level vs agent-level benchmark       ✅ +2
 
 ═══════════════════════════════════════════════════════════════════
 END OF MASTER_LEARNINGS_v2.1_DELTA
-5 new learnings (L75–L79) | 3 status updates | Score tracker
-Version: 2.1 Delta | Date: March 22, 2026
+6 new learnings (L75–L80) | 3 status updates | Score tracker
+Version: 2.1 Delta | Updated: March 31, 2026
 Upload alongside MASTER_LEARNINGS_v2.0 in Claude project.
 ═══════════════════════════════════════════════════════════════════
