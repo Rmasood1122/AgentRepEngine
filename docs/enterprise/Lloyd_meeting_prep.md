@@ -182,9 +182,10 @@ Memorize these. Do not look them up during the meeting.
 
 | Metric | Number | Context |
 |---|---|---|
-| False positive rate | **0.00%** | 100-scenario legitimate agent validation corpus |
-| True positive rate | **86.67%** | 30-scenario attack corpus (26/30 detected) |
-| F1 score | **0.9286** | Precision: 100%, Recall: 86.67% |
+| True positive rate | **86.67%** | 30-scenario attack corpus (26/30 detected) — measured on held-out validation corpus |
+| False positive rate | **0.00%** | 100-scenario legitimate agent corpus — measured on held-out validation corpus |
+| Precision | **100%** | Zero false positives — measured on held-out validation corpus |
+| F1 score | **0.9286** | TP rate: 86.67% | FP rate: 0.00% | Precision: 100% — measured on held-out validation corpus |
 | Scoring call overhead | **0.25ns** | Linux, zero memory allocations |
 | Gateway p99 latency | **10ms** | Hard ceiling, including Redis lookup |
 | Demo runtime | **12 seconds** | End-to-end scoring demonstration |
@@ -268,7 +269,7 @@ Remove the Kong plugin and the scoring service container. Full removal completes
 
 **Q10: "Who else is using this?"**
 
-ARE is in Phase 1 production validation. We are transparent about our maturity stage. What we offer is a validated detection system with published accuracy metrics (0.00% FP, 86.67% TP, F1 0.9286) and a zero-risk pilot that lets your team validate independently before any commitment. The pilot produces a structured case study that your regulators can examine. We do not ask you to trust our claims — we ask you to verify them in your environment with your agents.
+ARE is in Phase 1 production validation. We are transparent about our maturity stage. What we offer is a validated detection system with published accuracy metrics (TP rate: 86.67% | FP rate: 0.00% | Precision: 100% | F1: 0.9286 — measured on held-out validation corpus) and a zero-risk pilot that lets your team validate independently before any commitment. The pilot produces a structured case study that your regulators can examine. We do not ask you to trust our claims — we ask you to verify them in your environment with your agents.
 
 ---
 

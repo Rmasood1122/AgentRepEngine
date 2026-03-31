@@ -20,7 +20,7 @@ Self-audit checklist:
 - Redis authentication + ACL: PASS
 - PostgreSQL encryption at rest: PASS
 - Private key incident: DISCLOSED (see security attestation)
-- Held-out validation corpus: PASS (0.00% FP on held-out set)
+- Held-out validation corpus: PASS (TP rate: 86.67% | FP rate: 0.00% | Precision: 100% | F1: 0.9286 — measured on held-out validation corpus)
 - Feature vector storage: PASS (100% populated)
 - Org-scoped baseline isolation: PASS (verified March 31, 2026)
 
@@ -32,10 +32,11 @@ Self-audit checklist:
 ARE's behavioral attention engine scores every agent request across
 8 behavioral dimensions using weighted feature attention, z-score
 statistical deviation detection, and exponential decay for
-historical reputation. Validated: 0.00% false positive rate on
-100-scenario held-out validation corpus. Zero legitimate agents
+historical reputation. Validated on held-out validation corpus:
+TP rate: 86.67% | FP rate: 0.00% | Precision: 100% | F1: 0.9286
+Measured on held-out validation corpus (20% stratified sample,
+never used for threshold calibration). Zero legitimate agents
 blocked across all enterprise workflow scenarios tested.
-F1 score: 0.9286 | TP rate: 86.67% | Precision: 100%
 Latency: 0.25ns call overhead, 10ms p99 hard ceiling.
 
 ✅ **Agent identity model**

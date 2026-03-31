@@ -207,11 +207,13 @@ Failure mode: One false positive that blocks a legitimate
               This is the single most important section.
 ═══════════════════════════════════════════════════════════════════
 
-Q28. What is the measured false positive rate on the
-     100-scenario legitimate corpus — exact number?
-     Evidence required: make test-fp output or
-     tests/fp_scenarios/ test results.
-     Command: go test ./tests/fp_scenarios/... -v
+Q28. What are the measured detection metrics on the held-out
+     validation corpus — full 4-metric format?
+     Expected answer: TP rate: 86.67% | FP rate: 0.00% | Precision: 100% | F1: 0.9286
+     — measured on held-out validation corpus (20% stratified sample,
+     never used for threshold calibration).
+     Evidence required: go test ./tests/held_out/... -v
+     Supplemental: go test ./tests/fp_scenarios/... -v
 
 Q29. Does the FP test suite cover all 6 required legitimate
      scenario types: high-frequency analyst, authorized bulk

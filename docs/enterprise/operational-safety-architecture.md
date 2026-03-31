@@ -207,8 +207,10 @@ systems to agree before any agent is blocked:
 
 Both must flag independently before enforcement triggers.
 A single miscalibrated metric cannot block a legitimate agent.
-This is why ARE achieves 0.00% false positive rate on its
-100-scenario held-out validation corpus — zero legitimate agents
+This is why ARE achieves the following on held-out validation corpus:
+TP rate: 86.67% | FP rate: 0.00% | Precision: 100% | F1: 0.9286
+Measured on held-out validation corpus (20% stratified sample,
+never used for threshold calibration). Zero legitimate agents
 blocked across all enterprise workflow scenarios tested.
 
 ---

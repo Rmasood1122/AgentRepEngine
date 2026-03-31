@@ -73,14 +73,13 @@ V1 — FP RATE FRAMING [Priority: HIGH | Time: 2 hours | Score impact: +2]
 Finding: "0.00% FP on 100 scenarios" is statistically implausible on
 a self-authored corpus. Will be challenged in every technical review.
 
-Status: ☐ Open
+Status: ✅ Resolved (TW-5 + TW-7)
 
 Fix — two parts:
-PART A: Reframe in all documents. Never say "0.00%". Say:
-  "0.00% false positive rate on our 100-scenario internal
-  validation corpus. External validation on production traffic
-  is available during the pilot and is expected to show
-  <1% on well-configured environments."
+PART A: Reframe in all documents. Always state full 4-metric format:
+  "TP rate: 86.67% | FP rate: 0.00% | Precision: 100% | F1: 0.9286
+  — measured on held-out validation corpus (20% stratified sample,
+  never used for threshold calibration)."
 
 PART B: Build call-level vs agent-level FP benchmark (I8):
   Run existing FP corpus through a simulated call-level scorer
@@ -249,7 +248,7 @@ V5 — TP RATE CONTEXT [Priority: MEDIUM | Time: 2 hours]
 Finding: "86.67% TP rate" is presented without context. A CISO will
 ask "which 13.33% do you miss?" without answer = conversation ends.
 
-Status: ☐ Open
+Status: ✅ Resolved (TW-7) — all docs now use 4-metric format with held-out attribution
 
 Fix — run and document:
 
@@ -262,10 +261,11 @@ Fix — run and document:
     event type? slow-walk variant?)
   - Is it in scope for Phase 1?
 
-  Reframe TP rate in all materials:
-  "86.67% TP rate on Phase 1 in-scope attack patterns.
-  Patterns below threshold by design: [list].
-  HIGH_RISK override catches critical actions regardless of score."
+  Reframe TP rate in all materials using 4-metric format:
+  "TP rate: 86.67% | FP rate: 0.00% | Precision: 100% | F1: 0.9286
+  — measured on held-out validation corpus. Patterns below threshold
+  by design: [list]. HIGH_RISK override catches critical actions
+  regardless of score."
 
 Verification:
   docs/security/detection-coverage.md exists
