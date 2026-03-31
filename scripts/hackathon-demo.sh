@@ -272,6 +272,8 @@ for i in $(seq 1 15); do
     if [ "$BAND_B" = "BLOCKED" ] && [ -z "$BLOCKED_AT" ]; then
         BLOCKED_AT=$i
         echo -e "  Req $i/15  ${GREEN}Agent A: $SCORE_A $BAND_A${RESET}  │  ${RED}${BOLD}Agent B: $SCORE_B $BAND_B 🚨 ENFORCEMENT TRIGGERED${RESET}"
+    elif [ "$BAND_B" = "BLOCKED" ]; then
+        echo -e "  Req $i/15  ${GREEN}Agent A: $SCORE_A $BAND_A${RESET}  │  ${RED}Agent B: $SCORE_B $BAND_B${RESET}"
     elif [ "$BAND_B" = "RESTRICTED" ]; then
         echo -e "  Req $i/15  ${GREEN}Agent A: $SCORE_A $BAND_A${RESET}  │  ${RED}Agent B: $SCORE_B $BAND_B${RESET}"
     elif [ "$BAND_B" = "MONITORED" ]; then
