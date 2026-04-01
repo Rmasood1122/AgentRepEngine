@@ -1,224 +1,244 @@
-# AgentRepEngine — Pilot Letter of Understanding
-## 30-Day Zero-Risk Visibility Deployment Agreement
-Version 2.0 | Confidential
+# Letter of Understanding — AgentRepEngine Pilot Deployment
+# Version: 2.0 | March 31, 2026
+# Confidential — For Evaluation Purposes Only
 
 ---
 
-### Parties
+## COVER NOTE
 
-Vendor: Naseem A2A Research Lab (rehan@naseem-a2a.com)
-Client: [Organization Name]
-Date:   [Date]
+Regulators are about to require AI audit trails for agent-based
+systems operating in regulated environments. AgentRepEngine does
+not help you prepare for that requirement — AgentRepEngine is
+the implementation of that requirement, already built and running.
 
----
-
-### What This Is
-
-This is not a contract. It is a mutual understanding of what
-the 30-day zero-risk visibility deployment involves, what
-success looks like, and what happens next. A formal agreement
-follows if both parties choose to proceed after the pilot.
+This letter of understanding establishes the terms for a 30-day
+observe-mode pilot deployment at no cost, with no enforcement
+actions taken without your team's explicit sign-off.
 
 ---
 
-### Pilot Terms
+## PARTIES
 
-**Duration:** 30 days from installation date
-**Cost:** $0
-**Mode:** Zero-impact visibility only — no agent will be blocked
-**Installation:** 4 hours on one environment, customer-hosted
-**Data:** All behavioral telemetry stays within your network perimeter
-**Dependency:** No external network dependency during operation
+**Provider:**
+Naseem A2A Research Lab
+Operating through: Call2leads Inc. (S-Corp)
+Contact: rehanrana@call2leads.com
+IP Anchor: Zenodo DOI 10.5281/zenodo.19169185
 
----
-
-### What We Install
-
-One Kong gateway plugin and one scoring service container.
-No changes to your existing agents or infrastructure.
-Full rollback in under 10 minutes at any time.
-Deployment model: Docker Compose, customer-hosted, no SaaS dependency.
+**Recipient:**
+Organization: ___________________________
+Primary Contact: ___________________________
+Title: ___________________________
+Email: ___________________________
 
 ---
 
-### What You Get
+## WHAT IS BEING PILOTED
 
-- Every agent request scored in real time by ARE's behavioral
-  attention engine (8 behavioral dimensions, sub-millisecond overhead)
-- Statistical behavioral deviation detection across sessions
-- Adversarial baseline poisoning defense (adversarial baseline poisoning defense)
-- Cryptographically non-repudiable enforcement log with cryptographically non-repudiable enforcement log
-- SOC2-compatible export available at any time
-- SIEM feed: structured CEF/JSON events compatible with Splunk
-  and Microsoft Sentinel
-- Daily summary of scored agent activity
-- Context-sensitive enforcement thresholds: trading agents,
-  reporting agents, and retrieval agents scored differently
-  by policy design
+AgentRepEngine (ARE) is a runtime behavioral enforcement layer
+for AI agents. It sits inside your Kong API gateway, scores
+every agent action against that agent's own behavioral baseline,
+and produces a tamper-evident audit trail of every decision.
 
----
+ARE does not modify your agents. It does not require changes
+to your application code. It does not send data outside your
+network perimeter.
 
-### Pilot Rollout Schedule
-
-We do not ask you to enable enforcement. You graduate through
-stages at your own pace. We never advance without your sign-off.
-
-**Weeks 1-2: Zero-Impact Visibility Mode**
-ARE's behavioral attention engine scores every agent request.
-Statistical behavioral deviation detection runs continuously.
-Nothing is blocked. Your security team reviews the detection log.
-No production impact. No risk. No procurement commitment required.
-
-**Week 3: Flagging Mode**
-Anomalies are surfaced to your security team for review.
-No automated blocking. Human review on every flag.
-Your team confirms detection quality before any enforcement discussion.
-
-**Weeks 4-6: Enforcement Mode (your decision)**
-Behavioral enforcement with automatic human review escalation
-enabled only after your security team has reviewed and approved
-100+ decisions in visibility mode.
-Auto-rollback fires immediately if false positive rate exceeds 2%.
-
-**Weeks 7-12: Full Enforcement**
-Full enforcement with auto-rollback protection.
-Your team retains full override authority at all times.
-Every override feeds back into baseline calibration.
-
-**You control the pace. We don't advance without your sign-off.**
+**Pilot scope:** Observe mode only for 30 days. ARE logs and
+scores all agent traffic. Zero enforcement actions are taken.
+Your security team reviews the output. You decide what happens
+next.
 
 ---
 
-### Pilot Success Criteria
+## PILOT STRUCTURE
 
-Both parties agree in advance on what success means.
-The pilot succeeds when all three criteria are met:
+### Phase 1 — Observe Mode (Days 1–30)
+- ARE deployed in your Kong gateway — Docker Compose
+- All agent traffic logged and scored in real time
+- Zero enforcement actions — agents operate normally
+- Full audit trail generated: every decision, every score,
+  every contributing factor
+- Daily summary available via audit export endpoint
+- Your team reviews flagged anomalies at your own pace
 
-1. **False positive rate ≤ 2% in production**
-   Measured against your actual agent traffic during the pilot.
-   Not against our synthetic validation corpus.
+### Phase 2 — Assessment (Day 28–30)
+- Joint review of pilot findings with your security team
+- FP rate measured against your production traffic
+- ROI quantification (see Appendix A)
+- Mutual decision on whether to proceed to enforce mode
 
-2. **At least one confirmed true positive enforcement event**
-   A behavioral anomaly detected, reviewed by your security team,
-   and confirmed as a genuine risk or policy violation.
-
-3. **Audit trail reviewed and accepted by your security team**
-   Your security engineer reviews the cryptographically non-repudiable
-   enforcement log and confirms it meets your audit requirements.
-
-If none of these occur within 30 days, the pilot has failed
-and we will tell you so directly.
-
----
-
-### GDPR Article 22 / Human Oversight Documentation
-
-ARE's enforcement decisions are made on agent behavior, not on
-human subjects. If an agent acts on behalf of a human user,
-your organization must assess GDPR Article 22 applicability
-for your specific deployment.
-
-The staged rollout with explicit CISO sign-off at each phase
-constitutes the human oversight mechanism required for GDPR
-Article 22 compliance review. ARE provides the cryptographically
-non-repudiable enforcement log required for any Article 22
-documentation.
-
-ARE stores: agent_did, feature_vector, timestamp. No user PII.
-Default retention: 90 days behavioral events.
-Compatible with: DORA, SOX data governance, HIPAA (no PHI stored).
-Phase 1 reason objects: English-language only.
+### Phase 3 — Enforce Mode (Day 31+, optional)
+- Requires explicit written sign-off from your team
+- Auto-rollback active: if FP rate exceeds 2%, ARE
+  automatically reverts to observe mode
+- Human review required on all blocks for first 7 days
+- You control the pace. We do not advance without your sign-off.
 
 ---
 
-### DORA Alignment
+## WHAT YOUR TEAM GETS AT DAY 30
 
-For DORA-regulated organizations:
+1. **Audit trail** — complete hash-chained log of every agent
+   action scored during the pilot, exportable in SOC2 format
 
-ARE directly addresses DORA Article 17 (ICT incident classification)
-via hash-chained enforcement decisions that cannot be retroactively
-altered. Every blocked or flagged agent action is a classifiable
-ICT incident with a structured reason object and tamper-evident log.
+2. **Anomaly report** — all flagged behaviors with confidence
+   scores, contributing features, and recommended actions
 
-ARE addresses DORA Article 28 (third-party ICT risk management)
-by scoring and enforcing behavioral boundaries on AI agents that
-act as third-party components within your ICT infrastructure.
+3. **FP rate measurement** — false positive rate on your
+   production traffic (target: <1% on well-configured environment)
 
-This pilot agreement itself constitutes a documented ICT contractual
-arrangement per DORA Article 30, with defined success criteria,
-rollout gates, and exit provisions.
+4. **ROI quantification** — see Appendix A
 
----
-
-### What Happens Next
-
-If pilot succeeds and you choose to continue:
-
-**Visibility product** (zero-impact visibility mode):
-$50,000/year per environment — CISO decision
-
-**Enforcement product** (enforce mode):
-$100,000/year per environment — security team upgrade
-
-**Intelligence product** (self-improving thresholds):
-$150,000/year per environment — CFO renewal
-
-Annual enterprise pricing: volume discounts for 3+ environments.
-
-If pilot fails or you choose not to continue:
-- We uninstall completely in under 10 minutes
-- You keep all audit logs generated during the pilot
-- No obligation, no invoice, no follow-up pressure
+5. **Regulatory checklist** — completed accountability checklist
+   mapping your pilot results to DORA, GDPR, and NIST requirements
 
 ---
 
-### Override Authority
+## TERMS
 
-You retain full override authority at all times.
-ENFORCEMENT_MODE switch is yours to control.
-We never flip it without your explicit instruction.
-Auto-rollback to zero-impact visibility mode fires automatically
-if false positive rate exceeds 2% — protecting you from
-misconfiguration without human intervention.
+### Data and Privacy
+- All behavioral data remains within your network perimeter
+- ARE has no external API calls, no telemetry, no phone-home
+- Your team controls backup, retention, and deletion of all data
+- GDPR Article 5 data minimization compliance by architecture
 
----
+### Intellectual Property
+- ARE's IP is anchored at Zenodo DOI 10.5281/zenodo.19169185
+- Your team's agent behavioral data remains your property
+- Pilot findings and anomaly reports are your confidential data
 
-### What We Need From You
+### Cost
+- Observe-mode pilot: no cost
+- Enforce-mode deployment pricing: discussed at Day 30 review
+- Target ACV: $50,000–$150,000 annually depending on scope
 
-- One security engineer available for the 4-hour installation
-- Kong Gateway 3.6.x running in your environment
-- PostgreSQL 16+ and Redis 7+ (or we deploy via Docker Compose)
-- Network access between Kong and scoring service container
-- 30 days of visibility data before any enforcement discussion
+### Termination
+- Either party may terminate this pilot with 5 business days
+  written notice
+- All ARE components are removed on termination
+- Your audit trail data is retained by you — ARE retains nothing
 
----
-
-### Post-Pilot Deliverable
-
-After the pilot, ARE produces a structured case study documenting:
-
-1. **Background** — your agent deployment profile and risk surface
-2. **Methodology** — detection approach and threshold configuration
-3. **Results** — behavioral anomalies detected, confirmed incidents,
-   false positive rate achieved
-4. **Confirmed incidents** — hash-verified enforcement decisions
-   your security team reviewed and confirmed
-
-This document is formatted for regulatory examiners. When your
-DORA or SEC examiner asks what you did to govern your AI agents
-this quarter, this document is the answer.
+### Liability
+- ARE is provided as-is for pilot evaluation purposes
+- No SLA applies during observe-mode pilot
+- Enforce-mode SLA negotiated at Day 30 if proceeding
 
 ---
 
-### Signatures
+## TECHNICAL PREREQUISITES
 
-This letter of understanding becomes effective when both
-parties confirm via email.
+Before pilot deployment, your team confirms:
 
-Vendor confirmation: rehan@naseem-a2a.com
-Client confirmation: [contact email]
+- [ ] Kong API Gateway running (version 3.x or later)
+- [ ] Docker and Docker Compose available on deployment host
+- [ ] PostgreSQL accessible (or Docker Compose managed instance)
+- [ ] Redis accessible (or Docker Compose managed instance)
+- [ ] Network connectivity between Kong and scoring service
+- [ ] Security team contact designated for daily anomaly review
+- [ ] SIEM webhook endpoint available (optional — for real-time alerts)
+
+Estimated deployment time: 2–4 hours with ARE engineering support.
 
 ---
 
-*This document is guidance, not a legal contract.
-A formal MSA and DPA are available on request.*
+## SIGNATURES
+
+This letter of understanding is non-binding. It establishes
+mutual intent to conduct the pilot under the terms above.
+
+**Provider**
+
+Signed: ___________________________
+Name: Rehan Rana
+Title: Founder, Naseem A2A Research Lab
+Date: ___________________________
+
+**Recipient**
+
+Signed: ___________________________
+Name: ___________________________
+Title: ___________________________
+Date: ___________________________
+
+---
+
+## APPENDIX A — ROI FRAMEWORK
+
+*Quantified at Day 30 based on your actual pilot data.*
+
+### Labor Cost Reduction
+
+| Activity | Current State | With ARE | Estimated Saving |
+|----------|--------------|----------|-----------------|
+| SOC investigation per AI agent incident | 2–4 hours manual review | Instant: reason object + audit trail | $400–$800 per incident |
+| Audit preparation for regulatory exam | 2–4 weeks manual log compilation | On-demand export, pre-formatted | $20,000–$80,000 per exam |
+| Incident response (block + investigate) | 4–8 hours per incident | Auto-detected, SIEM alerted, reason documented | $800–$1,600 per incident |
+
+### Regulatory Cost Avoidance
+
+| Risk | Regulatory Exposure | ARE Mitigation |
+|------|--------------------|--------------:|
+| DORA non-compliance (AI agent governance gap) | Up to 2% of global annual revenue | Audit trail + accountability checklist closes gap |
+| GDPR Article 22 violation (unexplained automated decision) | Up to €20M or 4% of global turnover | reason_object provides required explanation |
+| SEC AI governance deficiency finding | Remediation cost + reputational risk | Audit trail satisfies examiner documentation requests |
+
+### Payback Period
+```
+ARE annual cost:         $50,000–$150,000
+One avoided DORA finding: $500,000–$50,000,000+
+One avoided audit prep:   $20,000–$80,000
+One avoided incident:     $400–$1,600
+
+Payback period: First avoided regulatory finding.
+```
+
+### Pilot ROI (Day 30 measurement)
+
+At Day 30 your team will have:
+- Actual incident count detected during pilot
+- Actual FP rate on production traffic
+- Actual SOC time saved (incidents auto-documented)
+- Actual audit export generated (one command)
+
+These numbers replace the estimates above with your real data.
+
+---
+
+## APPENDIX B — WHAT GDPR ARTICLE 22 REQUIRES
+
+GDPR Article 22 gives individuals the right to explanation
+when subject to automated decisions. For AI agent deployments
+in regulated environments, this means every enforcement action
+on an agent must have a documented rationale.
+
+ARE's reason_object satisfies this requirement automatically:
+```json
+{
+  "decision": "BLOCKED",
+  "agent_did": "did:jwt:org:finance-agent:001",
+  "score": 187,
+  "confidence_pct": 94,
+  "policy_fired": "pii_exfiltration_v1",
+  "policy_threshold": "PIIFieldAccessRate > 500/hour",
+  "recommended_action": "Isolate agent and review last 24h of activity",
+  "trigger_events": [
+    {
+      "event_type": "pii_field_access_rate",
+      "count": 600,
+      "baseline_per_hour": 20,
+      "deviation_sigma": 23.2
+    }
+  ],
+  "computed_at": 1743465600
+}
+```
+
+No additional tooling required. No data scientist required.
+Your compliance team reads it directly.
+
+---
+
+*AgentRepEngine v1.0 | Naseem A2A Research Lab*
+*IP: Zenodo DOI 10.5281/zenodo.19169185*
+*GitHub: github.com/Rehanrana11/AgentRepEngine*
