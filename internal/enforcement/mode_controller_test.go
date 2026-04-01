@@ -15,10 +15,10 @@ func newTestRedis(t *testing.T) *redis.Client {
 	t.Helper()
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
+		Username: "are_admin",
 		Password: "are_redis_dev",
 	})
 	if err := rdb.Ping(context.Background()).Err(); err != nil {
-		t.Skipf("Redis not available: %v", err)
 	}
 	return rdb
 }
