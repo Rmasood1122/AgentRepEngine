@@ -17,6 +17,49 @@ actions taken without your team's explicit sign-off.
 
 ---
 
+
+---
+
+## PILOT METHODOLOGY
+
+ARE's 30-day pilot follows the same systematic approach used
+by production engineering teams to safely introduce enforcement
+into complex environments. Each phase builds on the previous.
+No phase is skipped. No phase advances without your sign-off.
+
+**Phase 1 — Audit (Days 1–7)**
+ARE observes all agent traffic. Zero enforcement. Your security
+team sees every agent's behavioral baseline forming in real time.
+Output: behavioral inventory of every agent in scope.
+
+**Phase 2 — Map (Days 8–14)**
+ARE generates a behavioral dependency map — which agents touch
+which resources, which workflows are highest risk, which agents
+are already anomalous against their own baseline.
+Output: risk-ranked agent inventory with deviation scores.
+
+**Phase 3 — Modularize (Days 15–21)**
+Your team selects one high-risk workflow for selective flagging.
+ARE flags but does not block. Your SOC reviews every flag.
+Output: FP rate on real production traffic, first ROI data point.
+
+**Phase 4 — Validate (Days 22–28)**
+FP rate measured against your production traffic. Anomaly report
+generated. Confidence scores reviewed. Your team decides which
+agent behaviors are true positives requiring enforcement.
+Output: validated enforcement policy set, ready for sign-off.
+
+**Phase 5 — Deploy (Day 29–30)**
+Joint review of findings. If your team signs off: enforce mode
+activates with auto-rollback at 2% FP threshold. If not: you
+keep the audit trail, the anomaly report, and the ROI data.
+Either way, you walk away with documented agent behavior for
+your next regulatory exam.
+
+*You control the pace. We do not advance without your sign-off.*
+
+---
+
 ## PARTIES
 
 **Provider:**
