@@ -227,7 +227,7 @@ F1 score:             0.9286
 Precision:            100%
 Slow-walk detection:  100% (10/10 scenarios)
 Call overhead:        0.25ns Linux — zero allocations
-Demo runtime:         12 seconds
+Demo runtime:         ~30 seconds Windows Docker | faster on Linux production
 Hardening score:      94/100
 
 ---
