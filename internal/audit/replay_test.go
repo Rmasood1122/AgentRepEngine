@@ -13,8 +13,8 @@ import (
 
 func getTestDB(t *testing.T) *sql.DB {
 	connStrings := []string{
-		"postgres://are:are_dev@localhost:5432/agentrepengine?sslmode=disable&connect_timeout=2",
-		"postgres://are:are_dev@127.0.0.1:5432/agentrepengine?sslmode=disable&connect_timeout=2",
+		"postgres://are:are_dev@localhost:5433/agentrepengine?sslmode=disable&connect_timeout=2",
+		"postgres://are:are_dev@127.0.0.1:5433/agentrepengine?sslmode=disable&connect_timeout=2",
 	}
 
 	if envURL := os.Getenv("DATABASE_URL"); envURL != "" {
