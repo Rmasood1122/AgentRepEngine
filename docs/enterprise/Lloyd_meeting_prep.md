@@ -6,10 +6,11 @@
 
 ## ONE-SENTENCE PRODUCT DESCRIPTION
 
-"ARE is a behavioral enforcement layer for AI agents — it sits in
-your gateway, scores every agent action against its own baseline,
-and blocks anomalous behavior before it commits. Like a firewall,
-but for what AI agents do, not what packets they carry."
+"ARE is the behavioral grounding layer for AI agents. RAG solved
+hallucination for LLM outputs — anchoring responses to verified
+data. ARE solves the same problem one layer deeper: anchoring
+agent actions to org-specific behavioral baselines, enforcing at
+the gateway, stopping anomalous behavior before it commits."
 
 ---
 

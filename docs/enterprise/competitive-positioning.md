@@ -6,11 +6,12 @@
 
 ## THE ONE SENTENCE
 
-AgentRepEngine is the only product that enforces behavioral trust
-at the gateway — scoring every AI agent request in real time using
-a behavioral attention engine and stopping anomalous actions before
+AgentRepEngine is the behavioral grounding layer for AI agents.
+RAG solved hallucination for LLM outputs by anchoring responses
+to verified data. ARE solves the same problem one layer deeper —
+anchoring agent actions to org-specific behavioral baselines,
+enforcing at the gateway, stopping anomalous behavior before
 data leaves your environment.
-
 ---
 
 ## COMPETITIVE LANDSCAPE
