@@ -14,8 +14,10 @@ func newTestRedis(t *testing.T) *redis.Client {
 	t.Helper()
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
+		Username: "are_admin",
 		Password: "are_redis_dev",
 	})
+
 	ctx := context.Background()
 	if err := rdb.Ping(ctx).Err(); err != nil {
 		t.Skipf("Redis not available at localhost:6379 — skipping replay tests: %v", err)
