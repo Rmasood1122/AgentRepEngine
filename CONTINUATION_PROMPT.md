@@ -28,7 +28,20 @@ CONTINUATION_PROMPT: updated March 31 ✅
 
 ## COMPLETED — MARCH 31, 2026 (FULL SESSION)
 
+```
+### TW-11 + TW-2 (April 1 session)
+- TW-11: prerequisites-checklist.md — 30 requirements, 100% met ✅ da00341
+- TW-2: pilot-letter-of-understanding.md v2.0 ✅ ba2fca3
+  - C12 cover note, ROI appendix, GDPR Art.22 example payload
+- TIER 1 COMPLETE — all tasks done before Lloyd meeting
+```
+```
+| TW-11: Accountability checklist | ✅ DONE | da00341 |
+| TW-2: LoU final draft + ROI     | ✅ DONE | ba2fca3 |
+
 ### Earlier in Session
+
+
 - TW-0: Feature vector storage verification ✅ PASS
 - TW-PRE-2: Org-scoped baseline isolation ✅ FIXED (critical bug)
 - PL-SIEM-VERIFY: SIEM fields verification ✅ PASS
