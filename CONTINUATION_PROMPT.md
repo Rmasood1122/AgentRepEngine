@@ -1,152 +1,81 @@
-# AgentRepEngine — CONTINUATION PROMPT
-# Next session starts here
-
-## APEX VERSION
+AgentRepEngine — CONTINUATION PROMPT
+Next session starts here
+APEX VERSION
 APEX v5.2 + ZROS v2.7 + MASTER_LEARNINGS v2.1 DELTA + LEARNING_INTELLIGENCE v3.1
 First command: APEX ACTIVATE — check LinkedIn messages first
 NOTE: Do NOT ask about Lloyd until after April 6, 2026. He said "next week."
 
----
-
-## REPO
+REPO
 https://github.com/Rehanrana11/AgentRepEngine
 Branch: master (push with git push origin master — NOT main)
 Zenodo DOI: 10.5281/zenodo.19169185 — PUBLISHED March 22, 2026
 IP chain: ATP (Dec 2025) → ATG (Dec 2025) → AgentRepEngine (Mar 2026)
 
----
-
-## CURRENT STATE — March 31, 2026
-
+CURRENT STATE — April 1, 2026
 Phase 1: COMPLETE — all 10 tasks done
 Hardening score: 94/100 ✅
 Lloyd: said "next week" — meeting expected week of April 7
 LEARNING_INTELLIGENCE: v3.1 uploaded to Claude Project ✅
-CONTINUATION_PROMPT: updated March 31 ✅
+CONTINUATION_PROMPT: updated April 1 ✅
+April 1 fixes (commit 65941e8)
 
----
-
-## COMPLETED — MARCH 31, 2026 (FULL SESSION)
-
-### QUALITY_INTELLIGENCE v1.0 — 31f5efa
-- Forensic audit of all 20 sessions
-- 10 root causes of rework
-- 8 FAANG-grade practices identified
-- 5 dilution incidents documented
-- 20 laws for future products
-- Session-start quality gate
-- Upload to Claude Project ✅
-
-```
-### TW-11 + TW-2 (April 1 session)
-- TW-11: prerequisites-checklist.md — 30 requirements, 100% met ✅ da00341
-- TW-2: pilot-letter-of-understanding.md v2.0 ✅ ba2fca3
-  - C12 cover note, ROI appendix, GDPR Art.22 example payload
-- TIER 1 COMPLETE — all tasks done before Lloyd meeting
-```
-```
-| TW-11: Accountability checklist | ✅ DONE | da00341 |
-| TW-2: LoU final draft + ROI     | ✅ DONE | ba2fca3 |
-
-### Earlier in Session
+TestAutoRollback: FIXED — postgres port 5433 (native Windows PG conflict resolved)
+reason_object_v1.json: v1.1.0 — confidence_pct added (required + properties + example)
+SUCCESS_STRATEGY tests: ALL PASS
 
 
-- TW-0: Feature vector storage verification ✅ PASS
-- TW-PRE-2: Org-scoped baseline isolation ✅ FIXED (critical bug)
-- PL-SIEM-VERIFY: SIEM fields verification ✅ PASS
-- LEARNING_INTELLIGENCE v3.1 created — deficit audit complete ✅
-- 24x Strategy designed: Learning→Claim→Close chain ✅
+COMPLETED — APRIL 1, 2026
+TaskStatusCommitTestAutoRollback fix✅ DONE65941e8T9: Held-out corpus✅ PASS — 100% TP / 0% FP—T10: /verify load test✅ PASS — 20/20 200s—T11: confidence_pct in reason_object spec✅ PASS — 3 matches65941e8T12: PostgreSQL connection count✅ PASS — 2 active—go test ./...✅ ALL GREEN—
 
-### Learning Intelligence (Later in Session)
-- L74–L102: 29 learnings extracted across 4 course batches ✅
-- C1–C12: 12 compressed Lloyd claims built ✅
-- M9 confirmed: audit-native enforcement category claim ✅
-- M10 candidate: anti-lock-in vs Check Point (post-T8) ✅
-- MASTER_LEARNINGS: L95, L97, L99 permanent entries added ✅
+COMPLETED — MARCH 31, 2026 (FULL SESSION)
+Earlier in Session
 
-### TW-1: Lloyd Meeting Prep ✅ DONE
-- docs/enterprise/Lloyd_meeting_prep.md — COMPLETE
-- Merged v3.1 (13 points) + C1–C12 = 15 points final
-- Objection map, metric recall, two conversation sequences
-- Committed and pushed to master ✅
+TW-0: Feature vector storage verification ✅ PASS
+TW-PRE-2: Org-scoped baseline isolation ✅ FIXED (critical bug)
+PL-SIEM-VERIFY: SIEM fields verification ✅ PASS
+LEARNING_INTELLIGENCE v3.1 created — deficit audit complete ✅
+24x Strategy designed: Learning→Claim→Close chain ✅
 
-### TW-REHEARSAL ✅ DONE
-- 8 phrases rehearsed aloud
-- Metrics cold recall complete
+Learning Intelligence (Later in Session)
 
-### M6: confidence_pct ✅ COMPLETE
-- internal/scoring/explainability.go — ConfidencePct field added
-- Formula: clamp(0, 100, (1 - worstZ/3.0) * 100)
-- internal/scoring/explainability_test.go — updated + TestConfidencePctRange added
-- internal/scoring/hardening_test.go — both call sites fixed
-- go test ./... — ALL GREEN ✅
-- C4 now true in production: "ARE tells you it's 94% confident"
+L74–L102: 29 learnings extracted across 4 course batches ✅
+C1–C12: 12 compressed Lloyd claims built ✅
+M9 confirmed: audit-native enforcement category claim ✅
+M10 candidate: anti-lock-in vs Check Point (post-T8) ✅
+MASTER_LEARNINGS: L95, L97, L99 permanent entries added ✅
 
-### Earlier Milestones (also March 31)
-| Milestone | Description | Commit |
-|-----------|-------------|--------|
-| TW-5 | Held-out validation corpus | 2192eda |
-| TW-7 | 4-metric F1 reporting across all enterprise docs | e16691e |
-| TW-9 | Evaluation harness methodology (279 lines) | be4baef |
-| TW-3 | Attack corpus expanded 30→50 scenarios | 0abe6c6 |
-| TW-4 | Kong plugin payload validation | a09310c |
-| TW-6 | Variance growth rate trigger | 9012f26 |
-| M1 | Language upgrade across all 7 enterprise docs | 6849412 |
-| M4 | DORA AI agent compliance checklist | c5ab731 |
-| M8 | Hackathon demo — 456 lines, 90s runtime, 7 phases | b1496d2 |
+TW-1: Lloyd Meeting Prep ✅ DONE
 
----
+docs/enterprise/Lloyd_meeting_prep.md — COMPLETE
+Merged v3.1 (13 points) + C1–C12 = 15 points final
+Objection map, metric recall, two conversation sequences
+Committed and pushed to master ✅
 
-## PHASE 1 STATUS
+TW-REHEARSAL ✅ DONE
 
-| Task | Status |
-|------|--------|
-| T0 Evaluation harness | ✅ Done — 0.00% FP / 86.67% TP |
-| T1 JWT identity library | ✅ Done — G-IDENTITY passed |
-| T2 Kong gateway plugin | ✅ Done — RS256 verified end-to-end |
-| T3 Redis + Postgres store | ✅ Done — health ok |
-| T4 Velocity + z-score | ✅ Done — G-SCORE passed |
-| T5 5 YAML policy packs | ✅ Done — 5 OWASP packs |
-| T6 Explainability engine | ✅ Done — G-EXPLAIN passed |
-| T7 Replay / forensics | ✅ Done — SOC2 export |
-| T8 First enterprise deploy | 🟡 IN PROGRESS — Lloyd meeting week of April 7 |
-| T9 Open header spec draft | ✅ Done — internal draft |
+8 phrases rehearsed aloud
+Metrics cold recall complete
 
----
+M6: confidence_pct ✅ COMPLETE
 
-## TIER 1 EXECUTION QUEUE — THIS WEEK (before Lloyd, April 7)
-Status as of March 31 end of session.
+internal/scoring/explainability.go — ConfidencePct field added
+Formula: clamp(0, 100, (1 - worstZ/3.0) * 100)
+internal/scoring/explainability_test.go — updated + TestConfidencePctRange added
+internal/scoring/hardening_test.go — both call sites fixed
+go test ./... — ALL GREEN ✅
+C4 now true in production: "ARE tells you it's 94% confident"
 
-| Task | Status | Effort |
-|------|--------|--------|
-| TW-0: Feature vector verification | ✅ DONE | 15 min |
-| TW-PRE-2: Org-scoped baseline fix | ✅ DONE | 3 hrs |
-| TW-1: Lloyd meeting prep (15 points) | ✅ DONE | 90 min |
-| TW-REHEARSAL: Say phrases aloud | ✅ DONE | 20 min |
-| M6: confidence_pct in reason object | ✅ DONE | 45 min |
-| TW-11: Accountability checklist table | ⬜ TODO | 45 min |
-| TW-2: LoU final draft + ROI appendix | ⬜ TODO | 45 min |
-| TW-9: Evaluation harness methodology doc | ⬜ TODO | 30 min |
-| TW-5: Held-out test set creation | ✅ DONE | — |
-| TW-7: 4-metric F1 reporting | ✅ DONE | — |
-| TW-3: Attack corpus expansion | ✅ DONE | — |
-| TW-4: Kong payload validation | ✅ DONE | — |
-| TW-6: Variance growth rate trigger | ✅ DONE | — |
+Earlier Milestones (also March 31)
+MilestoneDescriptionCommitTW-5Held-out validation corpus2192edaTW-74-metric F1 reporting across all enterprise docse16691eTW-9Evaluation harness methodology (279 lines)be4baefTW-3Attack corpus expanded 30→50 scenarios0abe6c6TW-4Kong plugin payload validationa09310cTW-6Variance growth rate trigger9012f26M1Language upgrade across all 7 enterprise docs6849412M4DORA AI agent compliance checklistc5ab731M8Hackathon demo — 456 lines, 90s runtime, 7 phasesb1496d2TW-11Prerequisites checklist — 30 requirements, 100% metda00341TW-2LoU final draft v2.0 + ROI appendix + C12 coverba2fca3
 
-REMAINING TIER 1 EFFORT: ~2 hours
+PHASE 1 STATUS
+TaskStatusT0 Evaluation harness✅ Done — 0.00% FP / 86.67% TPT1 JWT identity library✅ Done — G-IDENTITY passedT2 Kong gateway plugin✅ Done — RS256 verified end-to-endT3 Redis + Postgres store✅ Done — health okT4 Velocity + z-score✅ Done — G-SCORE passedT5 5 YAML policy packs✅ Done — 5 OWASP packsT6 Explainability engine✅ Done — G-EXPLAIN passedT7 Replay / forensics✅ Done — SOC2 exportT8 First enterprise deploy🟡 IN PROGRESS — Lloyd meeting week of April 7T9 Open header spec draft✅ Done — internal draft
 
-EXECUTE IN THIS ORDER NEXT SESSION:
-1. TW-11 → docs/enterprise/prerequisites-checklist.md
-           accountability checklist table — procurement close doc
-2. TW-2  → docs/enterprise/pilot-letter-of-understanding.md
-           LoU final draft + ROI appendix + C12 cover letter
-3. TW-9  → docs/enterprise/evaluation-harness-methodology.md
-           evaluation methodology doc (if not already done)
+TIER 1 EXECUTION QUEUE — STATUS April 1
+ALL TIER 1 TASKS COMPLETE. No remaining pre-Lloyd work.
+TaskStatusCommitTW-0: Feature vector verification✅ DONE—TW-PRE-2: Org-scoped baseline fix✅ DONE—TW-1: Lloyd meeting prep (15 points)✅ DONE—TW-REHEARSAL: Say phrases aloud✅ DONE—M6: confidence_pct in reason object✅ DONE—TW-11: Accountability checklist table✅ DONEda00341TW-2: LoU final draft + ROI appendix✅ DONEba2fca3TW-9: Evaluation harness methodology doc✅ DONEbe4baefTW-5: Held-out test set creation✅ DONE2192edaTW-7: 4-metric F1 reporting✅ DONEe16691eTW-3: Attack corpus expansion✅ DONE0abe6c6TW-4: Kong payload validation✅ DONEa09310cTW-6: Variance growth rate trigger✅ DONE9012f26
 
----
-
-## MULTIPLIER STATUS
-```
+MULTIPLIER STATUS
 M1  ✅ Language upgrade (executed)
 M2  ⬜ Slow-walk research note → Zenodo (Week 2-3)
 M3  ⬜ SIEM integration story (Week 2-3)
@@ -160,76 +89,44 @@ M8  ✅ Hackathon demo (executed)
 M9  ✅ CONFIRMED — audit-native enforcement
                "Auditors verify it themselves. No attestation required."
 M10 ⬜ CANDIDATE — anti-lock-in vs Check Point (post-T8)
-```
 
----
-
-## 12 COMPRESSED LLOYD CLAIMS — C1–C12
-
+12 COMPRESSED LLOYD CLAIMS — C1–C12
 C1  "Enforcement at your gateway. Data never leaves.
-    Auditors verify themselves."
-
+Auditors verify themselves."
 C2  "ARE implements the NIST/OWASP standard for AI agent
-    security. Built before the standard was published."
-
+security. Built before the standard was published."
 C3  "Passes every item on the regulatory accountability
-    checklist. Out of the box."
-
+checklist. Out of the box."
 C4  "94% confident this agent is anomalous — based on
-    30 days of its own baseline." ← M6 NOW LIVE IN CODE
-
+30 days of its own baseline." ← M6 NOW LIVE IN CODE
 C5  "Financial services proved this architecture works for
-    documents. ARE applies it to agents."
-
+documents. ARE applies it to agents."
 C6  "Fails open. Agents keep running. SOC sees it before
-    you ask."
-
+you ask."
 C7  "Below the application layer. Agents can't see it.
-    Can't route around it."
-
+Can't route around it."
 C8  "30-day observe mode. At day 30: ROI quantified,
-    incidents documented, decision yours."
-
+incidents documented, decision yours."
 C9  "LangChain, LlamaIndex, custom. If it goes through
-    Kong, ARE sees it."
-
+Kong, ARE sees it."
 C10 "The baseline updates on every transaction. Enforcement
-    gets more precise the longer it runs."
-
+gets more precise the longer it runs."
 C11 "Every enforcement decision is human-readable. Agent ID,
-    score, confidence, reason. No data scientist required."
-
+score, confidence, reason. No data scientist required."
 C12 "Regulators are about to require AI audit trails. ARE
-    doesn't help you prepare — ARE is the implementation,
-    already running."
+doesn't help you prepare — ARE is the implementation,
+already running."
 
----
-
-## COMMERCIAL STATUS
-
+COMMERCIAL STATUS
 T8: IN PROGRESS — Lloyd meeting expected week of April 7
 Character Capital Labs G6: Decision expected ~April 13
 Hackathon: Lightning AI + Validia — April 4, Newlab Brooklyn 9:30AM-6PM
-
 DO NOT ASK ABOUT LLOYD UNTIL AFTER APRIL 6, 2026.
 
----
+PIPELINE
+ContactStatusLloyd Lemish (NWN)Said "next week" — meeting week of April 7Andy Watkin-ChildWarm intro via Boardy — DORA/SEC specialistUnmukt Raizada (TrustEvals.ai)LinkedIn connected + engagedAndrew Gyamfi (Translucent AI)Sitting buyer profileBettina Briz (Boardy)Relationship-building phaseDavid MatousekFollowed + replied publicly
 
-## PIPELINE
-
-| Contact | Status |
-|---------|--------|
-| Lloyd Lemish (NWN) | Said "next week" — meeting week of April 7 |
-| Andy Watkin-Child | Warm intro via Boardy — DORA/SEC specialist |
-| Unmukt Raizada (TrustEvals.ai) | LinkedIn connected + engaged |
-| Andrew Gyamfi (Translucent AI) | Sitting buyer profile |
-| Bettina Briz (Boardy) | Relationship-building phase |
-| David Matousek | Followed + replied publicly |
-
----
-
-## METRICS — KNOW COLD
-
+METRICS — KNOW COLD
 FP rate:              0.00% on 100-scenario internal corpus
 TP rate:              86.67%
 F1 score:             0.9286
@@ -239,50 +136,35 @@ Call overhead:        0.25ns Linux — zero allocations
 Demo runtime:         ~30 seconds Windows Docker | faster on Linux production
 Hardening score:      94/100
 
----
-
-## INFRASTRUCTURE STATUS
-
-| Component | Status |
-|-----------|--------|
-| Docker | Running — all containers healthy |
-| PostgreSQL | agentrepengine-postgres-1, user: are, db: agentrepengine |
-| Redis | agentrepengine-redis-1, ACL user: are_admin / are_redis_dev |
-| Scoring service | Running on :8080 |
-| Kong | Running |
-| Go build | Clean — go build ./... passes |
-| Tests | ALL GREEN — go test ./... ✅ |
-
+INFRASTRUCTURE STATUS
+ComponentStatusDockerRunning — all containers healthyPostgreSQLagentrepengine-postgres-1, user: are, db: agentrepengineRedisagentrepengine-redis-1, ACL user: are_admin / are_redis_devScoring serviceRunning on :8080KongRunningGo buildClean — go build ./... passesTestsALL GREEN — go test ./... ✅
 Redis ACL note: default user is OFF. Use:
-  docker exec agentrepengine-redis-1 redis-cli --no-auth-warning \
-    --user are_admin -a are_redis_dev KEYS "*"
+docker exec agentrepengine-redis-1 redis-cli --no-auth-warning 
+--user are_admin -a are_redis_dev KEYS "*"
+PostgreSQL note: port 5433 — NOT 5432 (native Windows PostgreSQL owns 5432).
+Connect via Docker exec only:
+docker exec agentrepengine-postgres-1 psql -U are -d agentrepengine -c "..."
+DSN for tests: postgres://are:are_dev@localhost:5433/agentrepengine?sslmode=disable
 
-PostgreSQL note: connect via Docker:
-  docker exec agentrepengine-postgres-1 psql -U are -d agentrepengine -c "..."
-
----
-
-## ENVIRONMENT
-
+ENVIRONMENT
 Scoring language : Go
 Gateway          : Kong (Lua)
 Shell            : Git Bash on Windows (MINGW64)
 Runtime          : Docker Desktop on Windows
-Python           : 3.13.5
+Python           : 3.14 (pythoncore-3.14-64)
+Python JWT path  : C:/Users/rmaso/AppData/Local/Python/pythoncore-3.14-64/python.exe
+(use this explicit path — python3 in Git Bash resolves to wrong binary)
 Editor           : VS Code (always use: code <filename>)
 GitHub           : https://github.com/Rehanrana11/AgentRepEngine.git
 Push command     : git push origin master (NOT main)
-
 ⚠ Git Bash path mangling: use // prefix for absolute paths in docker exec
-  Example: docker exec container cat //etc/redis/users.acl
-
+Example: docker exec container cat //etc/redis/users.acl
 ⚠ Python file encoding: always use encoding='utf-8' in open() calls
-  Windows default cp1252 causes UnicodeDecodeError on Go source files
+Windows default cp1252 causes UnicodeDecodeError on Go source files
+⚠ Paste safety: never paste Claude's explanation text into terminal.
+Only paste the contents of code blocks. [200~ prefix = bracketed paste error.
 
----
-
-## LEARNING INTELLIGENCE
-
+LEARNING INTELLIGENCE
 Version: v3.1 (uploaded to Claude Project March 31)
 Total learnings: 102 (L74–L102 extracted this session)
 COMPOUND: 70 total | MULTIPLIER: 4 confirmed | REJECTED: 13
