@@ -3,7 +3,7 @@
   "$id": "https://agentrepengine.io/schemas/reason_object_v1.json",
   "title": "AgentRepEngine Reason Object v1",
   "description": "Structured enforcement decision explanation. Every BLOCKED or AUDIT decision produces exactly one reason object.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "object",
   "required": [
     "decision",
@@ -17,7 +17,8 @@
     "recommended_action",
     "peer_cluster",
     "peer_cluster_avg_score",
-    "deviation_from_cluster"
+    "deviation_from_cluster",
+    "confidence_pct"
   ],
   "properties": {
     "decision": {
@@ -104,6 +105,12 @@
       "minimum": -1000,
       "maximum": 1000,
       "description": "This agent score minus peer cluster average. Negative = below cluster average."
+    },
+    "confidence_pct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Model confidence that this enforcement decision is correct. Formula: clamp(0,100,(1-worstZ/3.0)*100). A value of 94 means the worst anomaly is 0.18 sigma from threshold. No data scientist required to interpret."
     }
   },
   "examples": [
@@ -127,7 +134,8 @@
       "recommended_action": "Human review before re-authorization",
       "peer_cluster": "data-analyst-agents",
       "peer_cluster_avg_score": 700,
-      "deviation_from_cluster": -513
+      "deviation_from_cluster": -513,
+      "confidence_pct": 94.0
     }
   ]
 }

@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	_ "github.com/lib/pq"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -27,7 +28,7 @@ func newTestRedis(t *testing.T) *redis.Client {
 func newTestDB(t *testing.T) *sql.DB {
 	t.Helper()
 	db, err := sql.Open("postgres",
-		"postgres://are:are_dev@localhost:5432/agentrepengine?sslmode=disable")
+		"postgres://are:are_dev@localhost:5433/agentrepengine?sslmode=disable")
 	if err != nil {
 		t.Skipf("PostgreSQL not available: %v", err)
 	}
