@@ -5,12 +5,16 @@ services:
       - "6379:6379"
     command: >
       redis-server
-      --save ""
-      --appendonly no
+      --maxmemory 512mb
+      --maxmemory-policy noeviction
+      --save 60 1
+      --appendonly yes
+      --appendfilename appendonly.aof
       --requirepass are_redis_dev
       --aclfile /etc/redis/users.acl
     volumes:
       - ./config/redis/users.acl:/etc/redis/users.acl:ro
+      - redis-data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "are_redis_dev", "ping"]
       interval: 5s
@@ -21,7 +25,6 @@ services:
     image: postgres:16-alpine
     ports:
       - "5433:5432"
-    
     environment:
       POSTGRES_USER: are
       POSTGRES_PASSWORD: are_dev
@@ -48,7 +51,7 @@ services:
       SCORING_API_KEY: "are-internal-key-change-in-production"
     volumes:
       - ./keys:/app/keys:ro
-    depends_on: 
+    depends_on:
       postgres:
         condition: service_healthy
       redis:
@@ -115,3 +118,4 @@ services:
 volumes:
   pgdata:
   grafana_data:
+  redis-data:
