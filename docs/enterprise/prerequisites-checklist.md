@@ -83,6 +83,8 @@ Your auditors can verify each claim independently.
 | Replayed tokens must be rejected | jti claim + Redis used-token cache, TTL = token expiry | Send same token twice → second rejected |
 | Identity persists across sessions | agent_did is stable DID-format identifier, score persists in PostgreSQL | `SELECT agent_did, score FROM agent_scores WHERE agent_did='did:jwt:...'` |
 
+Each agent must have a unique JWT identity | One unique `sub` claim per agent required — multiple agents sharing one JWT identity corrupt behavioral baselines and will produce invalid scores | Verify with your JWT issuer before install: each agent process must have a distinct `sub` claim |
+
 **DORA Article 9 (ICT security) / Zero Trust / NIST SP 800-207:** All five identity requirements met. ✅
 
 ---
