@@ -153,7 +153,8 @@ AgentRepEngine defends against this with two independent layers:
 2. Variance growth rate monitoring flags the baseline shift as it
    begins — early warning before the attack succeeds
 
-100% detection rate on 10 synthetic slow-walk scenarios.
+100% detection rate on 10 synthetic single-agent slow-walk scenarios.
+Multi-agent coordinated evasion detection is a Phase 2 capability.
 No other AI agent security product addresses this attack class.
 
 ---

@@ -86,7 +86,8 @@ Layer 1: OWASP enforcement policies catch high-value actions
 regardless of score — a TRUSTED agent cannot silently exfiltrate.
 Layer 2: Variance growth rate monitoring flags baseline shifts
 before they complete.
-Result: 100% detection on 10 synthetic slow-walk scenarios.
+Result: 100% detection on 10 synthetic single-agent slow-walk scenarios.
+Scope: single-agent patterns only. Multi-agent coordinated evasion is a Phase 2 capability.
 
 ✅ **Auto-rollback ModeController**
 If false positive rate exceeds 2% in production: automatic

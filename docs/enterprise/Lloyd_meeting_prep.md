@@ -49,6 +49,8 @@ Deliver in response to questions. Do not recite in sequence.
     variance growth rate; a doubling of weekly variance triggers
     an early warning before the attack succeeds. 100% detection
     rate on our 10-scenario slow-walk corpus."
+    (Note: single-agent slow-walk detection. Multi-agent coordinated
+    evasion is a Phase 2 capability.)
 
 ### DEPLOYMENT + BYPASS
 (7) "Enforcement is at the Kong gateway layer, below the
