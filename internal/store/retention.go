@@ -75,7 +75,7 @@ func runRetention(db *sql.DB) {
 		return
 	}
 
-	if depth > QueueDepthWarning {
+	if depth >= QueueDepthWarning {
 		log.Printf("QUEUE_DEPTH_WARNING: %d rows in agent_event_queue — exceeds %d threshold. "+
 			"Check processing pipeline or increase retention purge frequency.",
 			depth, QueueDepthWarning)
