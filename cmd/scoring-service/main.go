@@ -82,6 +82,11 @@ func main() {
 	go consumer.Start()
 	slog.Info("event consumer started")
 
+	// Start retention job — purges processed events older than 90 days every 24h
+	store.StartRetentionJob(db)
+	slog.Info("retention job started", "retention_days", store.RetentionDays,
+		"queue_depth_warning_threshold", store.QueueDepthWarning)
+
 	go func() {
 		for {
 			var agentCount float64
@@ -205,6 +210,11 @@ func healthHandler(db *sql.DB, s *store.ScoreStore, mc *enforcement.ModeControll
 		if chainErr != nil || !chainResult {
 			hashChainValid = "false"
 		}
+		queueDepth, _ := store.QueueDepth(r.Context(), db)
+		queueStatus := "ok"
+		if queueDepth > store.QueueDepthWarning {
+			queueStatus = "warning"
+		}
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, `{
   "status": "ok",
@@ -212,8 +222,10 @@ func healthHandler(db *sql.DB, s *store.ScoreStore, mc *enforcement.ModeControll
   "postgres": "%s",
   "enforcement_mode": "%s",
   "hash_chain_valid": %s,
+  "queue_depth": %d,
+  "queue_status": "%s",
   "log_format": "json"
-}`, redisStatus, dbStatus, currentMode, hashChainValid)
+}`, redisStatus, dbStatus, currentMode, hashChainValid, queueDepth, queueStatus)
 	}
 }
 
@@ -256,7 +268,7 @@ func verifyHandler(s *store.ScoreStore) http.HandlerFunc {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, `{"valid":true,"agent_did":%q,"org_id":%q,"instance_id":%q,"lineage_hash":%q}`,
-		claims.AgentDID, claims.OrgID, claims.InstanceID, claims.LineageHash)
+			claims.AgentDID, claims.OrgID, claims.InstanceID, claims.LineageHash)
 	}
 }
 
@@ -371,8 +383,6 @@ func eventHandler(db *sql.DB, s *store.ScoreStore) http.HandlerFunc {
 			privacyTier = 1
 		}
 
-		// Use feature vector from request body if provided (agent SDK).
-		// Fall back to gateway-observable defaults if not provided.
 		fv := body.FeatureVector
 		vector := scoring.FeatureVector{
 			ToolCallRatePerHour:       coalesceF(fv.ToolCallRatePerHour, 1.0),
