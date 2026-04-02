@@ -16,7 +16,20 @@ local BANDS = {
     RESTRICTED = 200,
     BLOCKED    = 0,
 }
-
+-- Kong version compatibility check
+do
+    local kong_version = kong and kong.version or "unknown"
+    if kong_version ~= "unknown" then
+        local major, minor = kong_version:match("^(%d+)%.(%d+)")
+        major = tonumber(major) or 0
+        minor = tonumber(minor) or 0
+        if major < 2 or (major == 2 and minor < 8) then
+            kong.log.err("ARE COMPATIBILITY WARNING: Kong ", kong_version,
+                " detected. Minimum supported version is 2.8. ",
+                "Plugin behavior may be unpredictable.")
+        end
+    end
+end
 -- Allowed event types for payload validation
 local ALLOWED_EVENT_TYPES = {
     http_request     = true,
@@ -298,9 +311,12 @@ function AgentReputationHandler:access(conf)
 
     local red, err = get_redis_client(conf)
     if not red then
+        kong.log.warn("FAIL_OPEN: Redis unavailable for agent=", agent_did,
+            " — score=700 assigned, enforcement suspended, event logged")
         kong.service.request.set_header("X-Agent-Score", "700")
         kong.service.request.set_header("X-Agent-Band", "MONITORED")
         kong.service.request.set_header("X-Agent-Infra-Error", "true")
+        kong.service.request.set_header("X-Agent-Fail-Open", "true")
         return
     end
 
@@ -415,9 +431,13 @@ function AgentReputationHandler:log(conf)
             },
         })
         if not res then
-            ngx.log(ngx.WARN, "Event emit failed: ", req_err)
-        end
-    end)
+            ngx.log(ngx.WARN, "Event emit failed: ", req_err,
+                " — scoring_unavailable, fail_open, event_dropped")
+        elseif res.status >= 500 then
+            ngx.log(ngx.WARN, "Event emit 5xx: ", res.status,
+                " — scoring_service_error, fail_open, event_dropped")
+        end)
+    
 
     if not ok then
         kong.log.warn("Event emit timer failed: ", err)
