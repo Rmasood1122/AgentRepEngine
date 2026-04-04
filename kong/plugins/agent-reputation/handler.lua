@@ -436,7 +436,9 @@ function AgentReputationHandler:log(conf)
         elseif res.status >= 500 then
             ngx.log(ngx.WARN, "Event emit 5xx: ", res.status,
                 " — scoring_service_error, fail_open, event_dropped")
-        end)
+        end
+    end)
+    
     
 
     if not ok then
