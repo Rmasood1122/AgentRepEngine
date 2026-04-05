@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS fp_candidates (
     id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     agent_did       TEXT        NOT NULL,
     org_id          TEXT        NOT NULL,
-    decision_id     UUID        REFERENCES enforcement_decisions(id),
+    decision_id     BIGINT,
     score           INTEGER     NOT NULL CHECK (score >= 0 AND score <= 1000),
     band            TEXT        NOT NULL CHECK (band IN ('BLOCKED','RESTRICTED','MONITORED','TRUSTED')),
     reason_object   JSONB       NOT NULL,
