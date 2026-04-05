@@ -43,7 +43,41 @@ func PurgeOldEvents(ctx context.Context, db *sql.DB) (int64, error) {
 	return rows, nil
 }
 
-// StartRetentionJob runs PurgeOldEvents every 24 hours in the background.
+// SnapshotBaselines copies current std_dev values from agent_baselines
+// into agent_baseline_snapshots (one row per org/agent/feature per day).
+// Called daily by the retention job.
+//
+// This snapshot is the historical reference used by CheckVarianceGrowthRate()
+// in internal/scoring/policy.go to detect slow-walk baseline poisoning.
+// Without daily snapshots, variance growth detection is silent — the LEFT JOIN
+// in CheckVarianceGrowthRate always returns NULL and all checks are skipped.
+//
+// INSERT ... ON CONFLICT DO NOTHING ensures idempotency:
+// running twice in one day produces exactly one snapshot row per feature.
+func SnapshotBaselines(ctx context.Context, db *sql.DB) (int64, error) {
+	result, err := db.ExecContext(ctx, `
+		INSERT INTO agent_baseline_snapshots
+			(org_id, agent_did, feature_name, std_dev, sample_count, snapshot_date)
+		SELECT
+			org_id,
+			agent_did,
+			feature_name,
+			std_dev,
+			sample_count,
+			NOW()
+		FROM agent_baselines
+		WHERE sample_count >= 100
+		ON CONFLICT (org_id, agent_did, feature_name, DATE(snapshot_date))
+		DO NOTHING
+	`)
+	if err != nil {
+		return 0, fmt.Errorf("snapshot baselines: %w", err)
+	}
+	rows, _ := result.RowsAffected()
+	return rows, nil
+}
+
+// StartRetentionJob runs PurgeOldEvents and SnapshotBaselines every 24 hours.
 // Call once at startup. Logs results and queue depth on each run.
 func StartRetentionJob(db *sql.DB) {
 	go func() {
@@ -74,12 +108,20 @@ func runRetention(db *sql.DB) {
 		log.Printf("queue_depth_error: %v", err)
 		return
 	}
-
 	if depth >= QueueDepthWarning {
 		log.Printf("QUEUE_DEPTH_WARNING: %d rows in agent_event_queue — exceeds %d threshold. "+
 			"Check processing pipeline or increase retention purge frequency.",
 			depth, QueueDepthWarning)
 	} else {
 		log.Printf("queue_depth_ok: %d rows", depth)
+	}
+
+	// Snapshot current baselines for variance growth rate detection.
+	// Required by CheckVarianceGrowthRate() in internal/scoring/policy.go.
+	snapped, err := SnapshotBaselines(ctx, db)
+	if err != nil {
+		log.Printf("snapshot_baselines_error: %v", err)
+	} else {
+		log.Printf("snapshot_baselines_complete: inserted=%d new baseline snapshots", snapped)
 	}
 }
