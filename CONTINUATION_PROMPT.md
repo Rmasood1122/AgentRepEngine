@@ -11,7 +11,7 @@ Branch: master (push with git push origin master — NOT main)
 Zenodo DOI: 10.5281/zenodo.19169185 — PUBLISHED March 22, 2026
 IP chain: ATP (Dec 2025) → ATG (Dec 2025) → AgentRepEngine (Mar 2026)
 
-# CURRENT STATE — April 2, 2026 (Evening Session)
+# CURRENT STATE — April 5, 2026 (Session 2)
 
 April 4 — Sprint 0 Complete
 Sprint 0: ALL TASKS COMPLETE ✅
@@ -67,18 +67,22 @@ All 10 CAT-1 technical failures addressed. Committed and pushed to master.
 - internal/store/retention.go
 
 ## Tests — April 2 Evening
-go test ./... — ALL GREEN ✅ (Windows)
-go test ./... — ALL GREEN ✅ (Linux — golang:1.24-alpine)
-Hardening score: 96/100 (unchanged — no new test files this session)
-HEAD: 76f19df
+go test ./... — ALL GREEN ✅ (Windows) — April 5
+Hardening score: 96/100
+HEAD: 94bdb37
+Commits this session: 08404c8 (TW-0), 94bdb37 (U-01)
+Gap audit complete: 30 items remain on unbuilt registry (ARE_MASTER_ROADMAP_v2.md)
+fp_candidates ✅ already built | mode_change_log ✅ already built | held_out ✅ already builtHEAD: 94bdb37
 
 # PENDING — NOT YET DONE (commercial actions)
 LinkedIn messages NOT YET SENT: Sri Rajan, Rock Lambros, David Matousek
 Turner Novak email domain UNVERIFIED: bana vs banana — verify before sending
 Hackathon April 4: zero preparation as of April 2
 Lloyd: CISO invite + Check Point renewal question NOT YET SENT
-Gen Digital ADR: NOT YET RESEARCHED
-Vendor package (MSA, pilot scope, data brief): NOT YET BUILT
+Gen Digital ADR: ✅ DONE — docs/competitive/gen-digital-adr-response.md
+Vendor package (MSA, pilot scope, data brief): NOT YET BUILT — U-06, Tier 2
+Language upgrade M1 (13 phrase replacements): NOT YET DONE — U-03, before Lloyd
+TW-REHEARSAL (say C1–C12 aloud): NOT YET DONE — do before Monday
 Secondary investor list (10 names): NOT YET BUILT
 C-Corp conversion email: NOT YET SENT
 Andy Watkin-Child outreach: NOT YET SENT
@@ -101,6 +105,8 @@ Helm chart — only if NWN confirms Kubernetes environment
 | T8 First enterprise deploy | 🟡 IN PROGRESS — Lloyd meeting week of April 7 |
 | T9 Open header spec draft | ✅ Done — internal draft |
 | CAT-1 Technical hardening | ✅ Done — all 10 failures addressed April 2 |
+| TW-0 Feature vector storage | ✅ Done — 004_scoring_dimensions.sql — 08404c8 |
+| U-01 Gen Digital ADR response | ✅ Done — docs/competitive/gen-digital-adr-response.md — 94bdb37 |
 
 # METRICS — KNOW COLD
 FP rate:              0.00% on 100-scenario internal corpus
