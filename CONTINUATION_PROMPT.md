@@ -13,6 +13,25 @@ IP chain: ATP (Dec 2025) → ATG (Dec 2025) → AgentRepEngine (Mar 2026)
 
 # CURRENT STATE — April 2, 2026 (Evening Session)
 
+April 4 — Sprint 0 Complete
+Sprint 0: ALL TASKS COMPLETE ✅
+Commits: 4cc1c61 (stubs + roadmap), c072bc8 (microsoft-response),
+         8caa668 (dora-examiner-protocol), 345cf2a (competitive-positioning)
+New files in master:
+  docs/ARE_PRODUCT_BUILD_ROADMAP.md — full Sprint 0–4 plan
+  docs/competitive/microsoft-response.md — five gap arguments, Lloyd prep
+  docs/competitive/competitive-positioning.md — full competitive landscape
+  docs/regulatory/dora-examiner-protocol.md — DORA examiner verification guide
+  internal/certification/ — report.go, keys.go, report_test.go (stubs)
+  internal/trust/ — passport.go, node_discovery.go, cross_org_scorer.go (stubs)
+  internal/intelligence/ — industry_norms.go, model_registry.go (stubs)
+  internal/scoring/ — peer_cluster.go, threshold_calibration.go (stubs)
+  internal/api/ — simulate.go, replay.go, certification_verify.go (stubs)
+  cmd/certify/main.go, cmd/certification-portal/main.go (stubs)
+  web/certification/index.html
+Sprint 1 unlocks: Lloyd LoU signed (meeting week of April 7)
+Sprint 1 first task: implement internal/certification/report.go Generate()
+
 ## April 2 — Engineering Session (ARE_MASTER_FAILURE_ANALYSIS.md executed)
 
 ## April 2 — Testing Session (pilot_readiness_test.go)
