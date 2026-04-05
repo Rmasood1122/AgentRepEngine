@@ -200,3 +200,8 @@ func (r *ReasonObject) ToJSON() string {
 	}
 	return string(data)
 }
+
+// BaselineMaturity indicates whether the agent has an established baseline
+// Values: "30d_established" | "probation_Xd" (where X = days of data)
+// Enterprise must not enable enforcement on probation agents.
+// This field is required in every reason object. [F — G-EXPLAIN gate]

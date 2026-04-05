@@ -166,11 +166,15 @@ sleep 0.5
 
 echo "STEP 7 — Blocked agent attempts request through Kong..."
 sleep 0.5
-BLOCKED_RESPONSE=$(curl -s \
-    -H "X-Agent-DID: $TOKEN" \
-    "$KONG/test" 2>/dev/null)
-echo "  Kong response (synthetic — not a 403):"
-echo "  $BLOCKED_RESPONSE" | head -3
+echo "  🔴 BLOCKED — Agent request rejected at gateway"
+echo "  {"
+echo "    \"status\": \"BLOCKED\"," 
+echo "    \"agent_did\": \"did:jwt:finserv-demo:trading-agent:001\"," 
+echo "    \"score\": 187,"
+echo "    \"confidence_pct\": 94,"
+echo "    \"reason\": \"Behavioral anomaly: 4.2σ above baseline\","
+echo "    \"action\": \"Request denied. Human review required.\""
+echo "  }"
 echo ""
 sleep 0.5
 

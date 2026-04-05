@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ARE Certification Verification</title>
+  <!-- Minimal. Fast to audit. No tracking. No external dependencies. -->
+</head>
+<body>
+  <h1>ARE Behavioral Certification Verification</h1>
+
+  <section id="verify">
+    <h2>Verify a Certification</h2>
+    <p>Enter the certification hash from an ARE behavioral certification report.</p>
+    <input type="text" id="cert-hash" placeholder="SHA-256 certification hash" />
+    <button onclick="verifyCert()">Verify</button>
+    <div id="result"></div>
+  </section>
+
+  <section id="standard">
+    <h2>Agentic Behavioral Certification Standard</h2>
+    <p>
+      The ARE behavioral certification standard is published at
+      <a href="https://zenodo.org/record/19169185">Zenodo DOI 10.5281/zenodo.19169185</a>.
+    </p>
+    <p>
+      The standard defines what an Agentic Behavioral Certification covers,
+      how the hash chain is structured, and how a third party (regulator, auditor)
+      can independently verify it without trusting ARE's attestation.
+    </p>
+  </section>
+
+  <script>
+    async function verifyCert() {
+      const hash = document.getElementById('cert-hash').value.trim();
+      if (!hash) return;
+      const res = await fetch('/v1/certify/verify?hash=' + encodeURIComponent(hash));
+      const data = await res.json();
+      document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
