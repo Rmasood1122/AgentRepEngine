@@ -129,7 +129,7 @@ func (s *ScoreStore) GetScore(agentDID string) (*ScoreResult, error) {
 
 // WriteScore writes score to PostgreSQL first, then Redis.
 // Fires SIEM webhook on every BLOCKED decision.
-// Instruments blocked decisions and score update metrics.
+// FP-7: logs RESTRICTED and BLOCKED decisions to fp_candidates for human review.
 func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{}) error {
 	band := scoring.ScoreBand(score)
 
@@ -146,7 +146,6 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 		}
 	}
 
-	// Instrument enforcement decision metrics
 	// BlockedDecisionsTotal: only increment on actual BLOCKED decisions
 	if band == "BLOCKED" {
 		metrics.BlockedDecisionsTotal.WithLabelValues("BLOCKED", policyName).Inc()
@@ -164,8 +163,6 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 	}
 
 	// Write scoring dimensions to scoring_explanations — TW-0 fix
-	// Persists all computed scoring dimensions as queryable columns.
-	// Additive — never modifies agent_identities or enforcement_decisions.
 	if result, ok := reasonObj.(*scoring.ScoredResult); ok {
 		_, err = s.db.Exec(`
 			INSERT INTO scoring_explanations
@@ -186,7 +183,6 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 			reasonJSON,
 		)
 		if err != nil {
-			// Non-fatal — log and continue. Never block enforcement on analytics write.
 			slog.Error("scoring_explanation_write_failed",
 				"agent_did", agentDID,
 				"error", err)
@@ -194,6 +190,24 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 	}
 
 	key := "score:" + agentDID
+
+	// FP-7: Log RESTRICTED and BLOCKED decisions to fp_candidates for human review.
+	// confirmed_fp = NULL until a human reviews. Foundation of production FP measurement.
+	// Additive — never modifies enforcement_decisions or scoring_explanations.
+	if band == "RESTRICTED" || band == "BLOCKED" {
+		_, fpErr := s.db.Exec(`
+			INSERT INTO fp_candidates
+				(agent_did, score, band, reason_object, flagged_at)
+			VALUES ($1, $2, $3, $4, NOW())`,
+			agentDID, score, band, reasonJSON,
+		)
+		if fpErr != nil {
+			slog.Error("fp_candidate_write_failed",
+				"agent_did", agentDID,
+				"band", band,
+				"error", fpErr)
+		}
+	}
 
 	if band == "BLOCKED" {
 		// Immediate cache invalidation on block
@@ -206,7 +220,6 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 		}
 		// H5 FIX: Fire SIEM webhook on every BLOCKED decision
 		// Fire-and-forget — SIEM delivery never blocks enforcement
-		// scoreDelta=0 placeholder — Phase 2 tracks previous score in WriteScore
 		s.siem.SendBlocked(agentDID, score, 0, policyName, reasonJSON)
 		slog.Info("siem_webhook_fired",
 			"agent_did", agentDID,
