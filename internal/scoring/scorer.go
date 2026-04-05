@@ -58,6 +58,7 @@ func (s *Scorer) Score(orgID, agentDID string, vector FeatureVector,
 	// Compute worst z-score across all features
 	worstZ := 0.0
 	worstFeature := ""
+	clusterWorstZ := 0.0 // M5-STEP-1: worst z-score vs cluster baseline
 	featureZScores := map[string]float64{}
 
 	for feature, value := range features {
@@ -68,6 +69,13 @@ func (s *Scorer) Score(orgID, agentDID string, vector FeatureVector,
 		if z > worstZ {
 			worstZ = z
 			worstFeature = feature
+		}
+
+		// M5-STEP-1: compute cluster z-score for peer deviation signal
+		clusterBaseline := s.baselines.GetClusterBaseline("default", feature)
+		clusterZ := ComputeZScore(value, clusterBaseline)
+		if clusterZ > clusterWorstZ {
+			clusterWorstZ = clusterZ
 		}
 
 		// Update agent baseline with this observation
@@ -83,11 +91,20 @@ func (s *Scorer) Score(orgID, agentDID string, vector FeatureVector,
 		s.baselines.UpdateClusterBaseline("default", feature, value)
 	}
 
-	// Compute velocity penalty
+	// Compute velocity penalty — M5-STEP-1: blend own baseline (70%) + cluster (30%)
+	// Phase 1: own baseline only used when cluster has <100 samples (bootstrap period)
+	// Phase 2: full blend once cluster has 100+ samples per feature
+	blendedZ := worstZ
+	clusterBaseline := s.baselines.GetClusterBaseline("default", "tool_call_rate_per_hour")
+	if clusterBaseline.SampleCount >= 100 {
+		// Cluster is established — apply peer deviation blend
+		blendedZ = worstZ*0.7 + clusterWorstZ*0.3
+	}
+
 	penalty := 0.0
-	if worstZ > s.config.ZScoreThreshold {
+	if blendedZ > s.config.ZScoreThreshold {
 		penalty = math.Min(
-			s.config.PenaltyPerSigma*(worstZ-s.config.ZScoreThreshold),
+			s.config.PenaltyPerSigma*(blendedZ-s.config.ZScoreThreshold),
 			s.config.MaxPenalty,
 		)
 	}
@@ -109,6 +126,9 @@ func (s *Scorer) Score(orgID, agentDID string, vector FeatureVector,
 		"worst_feature":    worstFeature,
 		"worst_z_score":    fmt.Sprintf("%.2f", worstZ),
 		"penalty":          penalty,
+		"blended_z":        fmt.Sprintf("%.2f", blendedZ),
+		"cluster_worst_z":  fmt.Sprintf("%.2f", clusterWorstZ),
+		"cluster_samples":  clusterBaseline.SampleCount,
 		"feature_z_scores": featureZScores,
 		"weights":          map[string]float64{"H": weights.Historical, "V": weights.Velocity},
 		"computed_at":      time.Now().Unix(),

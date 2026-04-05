@@ -63,6 +63,24 @@ func (s *BaselineStore) GetBaseline(orgID, agentDID, featureName string) Baselin
 	return hardcodedBaseline(featureName)
 }
 
+// GetClusterBaseline returns the cluster-level baseline for a feature directly.
+// Used by M5-STEP-1 peer cluster deviation scoring — bypasses agent-level lookup.
+// Falls back to hardcoded defaults if cluster_baselines table has no data yet.
+func (s *BaselineStore) GetClusterBaseline(clusterID, featureName string) Baseline {
+	var mean, stdDev float64
+	var sampleCount int
+	err := s.db.QueryRow(`
+		SELECT mean, std_dev, sample_count
+		FROM cluster_baselines
+		WHERE cluster_id = $1 AND feature_name = $2`,
+		clusterID, featureName,
+	).Scan(&mean, &stdDev, &sampleCount)
+	if err == nil {
+		return Baseline{Mean: mean, StdDev: stdDev, SampleCount: sampleCount}
+	}
+	return hardcodedBaseline(featureName)
+}
+
 // UpdateAgentBaseline updates the running mean and std dev for an agent.
 // Keyed on (org_id, agent_did, feature_name) — org-scoped isolation.
 // Uses Welford's online algorithm — no need to store all historical values.
