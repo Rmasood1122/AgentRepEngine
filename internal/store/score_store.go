@@ -163,6 +163,36 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 		return fmt.Errorf("postgres score write: %w", err)
 	}
 
+	// Write scoring dimensions to scoring_explanations — TW-0 fix
+	// Persists all computed scoring dimensions as queryable columns.
+	// Additive — never modifies agent_identities or enforcement_decisions.
+	if result, ok := reasonObj.(*scoring.ScoredResult); ok {
+		_, err = s.db.Exec(`
+			INSERT INTO scoring_explanations
+				(agent_did, score_before, score_after,
+				 history_score, velocity_score, z_score,
+				 composite_score, band, z_score_feature,
+				 reason_json, created_at)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())`,
+			agentDID,
+			score-result.ScoreDelta,
+			score,
+			result.HistoryScore,
+			result.VelocityScore,
+			result.WorstZScore,
+			result.Score,
+			result.Band,
+			result.WorstFeature,
+			reasonJSON,
+		)
+		if err != nil {
+			// Non-fatal — log and continue. Never block enforcement on analytics write.
+			slog.Error("scoring_explanation_write_failed",
+				"agent_did", agentDID,
+				"error", err)
+		}
+	}
+
 	key := "score:" + agentDID
 
 	if band == "BLOCKED" {

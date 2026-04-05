@@ -9,14 +9,16 @@ import (
 
 // ScoredResult is the output of a full scoring computation.
 type ScoredResult struct {
-	AgentDID     string
-	Score        int
-	Band         string
-	ScoreDelta   int
-	WorstFeature string
-	WorstZScore  float64
-	Penalty      float64
-	Explanation  map[string]interface{}
+	AgentDID      string
+	Score         int
+	Band          string
+	ScoreDelta    int
+	WorstFeature  string
+	WorstZScore   float64
+	Penalty       float64
+	Explanation   map[string]interface{}
+	HistoryScore  int
+	VelocityScore int
 }
 
 // Scorer computes behavioral scores using live baselines.
@@ -123,13 +125,15 @@ func (s *Scorer) Score(orgID, agentDID string, vector FeatureVector,
 	)
 
 	return &ScoredResult{
-		AgentDID:     agentDID,
-		Score:        newScore,
-		Band:         band,
-		ScoreDelta:   delta,
-		WorstFeature: worstFeature,
-		WorstZScore:  worstZ,
-		Penalty:      penalty,
-		Explanation:  explanation,
+		AgentDID:      agentDID,
+		Score:         newScore,
+		Band:          band,
+		ScoreDelta:    delta,
+		WorstFeature:  worstFeature,
+		WorstZScore:   worstZ,
+		Penalty:       penalty,
+		Explanation:   explanation,
+		HistoryScore:  int(H),
+		VelocityScore: int(V),
 	}, nil
 }
