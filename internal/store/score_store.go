@@ -102,7 +102,20 @@ func (s *ScoreStore) GetScore(agentDID string) (*ScoreResult, error) {
 		}, nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("db score lookup: %w", err)
+		// PL-2: Both Redis and PostgreSQL unavailable.
+		// Fail-open at MONITORED — never fail-closed on infrastructure failure.
+		// MONITORED allows the agent to continue with active audit logging.
+		// Staleness note: score may be stale by up to Redis TTL (60s) + propagation delay.
+		slog.Error("score_lookup_both_stores_failed_failing_open",
+			"agent_did", agentDID,
+			"error", err)
+		reason := `{"score":500,"band":"MONITORED","source":"failopen","note":"both_stores_unavailable_score_may_be_stale"}`
+		return &ScoreResult{
+			Score:      500,
+			Band:       "MONITORED",
+			Source:     "failopen",
+			ReasonJSON: reason,
+		}, nil
 	}
 
 	band := scoring.ScoreBand(currentScore)
