@@ -194,5 +194,30 @@ It is a market educator that makes ARE's CISO conversations easier.
 Every developer who installs ADR and starts thinking about AI agent
 security is a future conversation that leads to a CISO who needs ARE.
 
-Built: April 5, 2026 | APEX v5.2
+---
+
+## WHAT TO MONITOR
+
+Gen Digital opened a GitHub PR on March 17 titled "session-level
+behavioral baselines for anomaly detection" — not yet shipped.
+If merged, GAP 5 (static rules vs behavioral baseline) narrows for
+single-session detection only. Does not address gateway deployment,
+audit trail, fleet scope, or compliance mapping.
+
+Independent security analysis (Help Net Security, March 2026) noted:
+"Independent performance benchmarks, latency overhead from real-time
+interception, and any analysis of potential bypass techniques are
+absent from the available materials." No FP rate has been published.
+
+Check github.com/gendigitalinc/sage/pulls monthly for enterprise
+deployment story. That is the only development that changes the
+competitive picture materially.
+
+The primary competitive clock remains Check Point–Lakera ($300M,
+March 2026). Integration timeline 12–24 months. ARE's answer:
+"Check Point bundles. We deploy in days."
+
+---
+
+Built: April 5, 2026 | Last updated: April 5, 2026 | APEX v5.2
 File: docs/competitive/gen-digital-adr-response.md
