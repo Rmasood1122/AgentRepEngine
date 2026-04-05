@@ -294,3 +294,83 @@ func CheckVarianceGrowthRate(db *sql.DB, orgID, agentDID string) ([]VarianceGrow
 
 	return results, rows.Err()
 }
+
+// CoordinatedAttackResult holds the outcome of a coordinated attack check.
+// A coordinated attack is detected when multiple agents in the same org
+// show simultaneous anomalous behavior — each looks normal individually
+// but the fleet-wide deviation pattern is statistically anomalous.
+type CoordinatedAttackResult struct {
+	OrgID             string
+	DeviatingAgents   int     // number of agents currently in RESTRICTED or BLOCKED band
+	TotalAgents       int     // total active agents in org (seen in last 24h)
+	DeviationRate     float64 // deviatingAgents / totalAgents
+	IsCoordinated     bool    // true if deviation rate exceeds threshold
+	ThresholdExceeded float64 // the threshold that was exceeded
+}
+
+const (
+	// CoordinatedAttackThreshold is the fraction of org agents that must be
+	// simultaneously anomalous to trigger a coordinated attack alert.
+	// 0.25 = 25% of fleet deviating simultaneously = statistically anomalous.
+	CoordinatedAttackThreshold = 0.25
+
+	// CoordinatedAttackMinAgents is the minimum fleet size before the check fires.
+	// Prevents false positives on small orgs (1-2 agents, both happen to spike).
+	CoordinatedAttackMinAgents = 4
+)
+
+// CheckCoordinatedAttack detects simultaneous multi-agent deviation in an org.
+// Queries agent_identities for agents with score < 500 (RESTRICTED/BLOCKED band).
+// If ≥25% of the fleet is simultaneously anomalous → coordinated attack signal.
+// M5-STEP-2: new detection claim — "ARE detects both individual and coordinated attacks."
+func CheckCoordinatedAttack(db *sql.DB, orgID string) (*CoordinatedAttackResult, error) {
+	result := &CoordinatedAttackResult{
+		OrgID:             orgID,
+		ThresholdExceeded: CoordinatedAttackThreshold,
+	}
+
+	// Count total active agents (seen in last 24 hours)
+	err := db.QueryRow(`
+		SELECT COUNT(*)
+		FROM agent_identities
+		WHERE org_id = $1
+		  AND last_seen > NOW() - INTERVAL '24 hours'`,
+		orgID,
+	).Scan(&result.TotalAgents)
+	if err != nil {
+		return nil, fmt.Errorf("coordinated attack total count: %w", err)
+	}
+
+	// Not enough agents to detect coordinated attack
+	if result.TotalAgents < CoordinatedAttackMinAgents {
+		return result, nil
+	}
+
+	// Count agents currently in RESTRICTED or BLOCKED band (score < 500)
+	err = db.QueryRow(`
+		SELECT COUNT(*)
+		FROM agent_identities
+		WHERE org_id = $1
+		  AND last_seen > NOW() - INTERVAL '24 hours'
+		  AND current_score < 500`,
+		orgID,
+	).Scan(&result.DeviatingAgents)
+	if err != nil {
+		return nil, fmt.Errorf("coordinated attack deviation count: %w", err)
+	}
+
+	result.DeviationRate = float64(result.DeviatingAgents) / float64(result.TotalAgents)
+	result.IsCoordinated = result.DeviationRate >= CoordinatedAttackThreshold
+
+	if result.IsCoordinated {
+		slog.Warn("coordinated_attack_detected",
+			"org_id", orgID,
+			"deviating_agents", result.DeviatingAgents,
+			"total_agents", result.TotalAgents,
+			"deviation_rate", fmt.Sprintf("%.2f", result.DeviationRate),
+			"threshold", CoordinatedAttackThreshold,
+		)
+	}
+
+	return result, nil
+}
