@@ -17,13 +17,18 @@ CREATE TABLE IF NOT EXISTS agent_baseline_snapshots (
     snapshot_date TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Generated column: pre-computed UTC date for idempotency checks
+ALTER TABLE agent_baseline_snapshots
+    ADD COLUMN IF NOT EXISTS snapshot_day DATE
+    GENERATED ALWAYS AS (DATE(timezone('UTC', snapshot_date))) STORED;
+
 -- Index for the exact JOIN pattern used in CheckVarianceGrowthRate
 CREATE INDEX IF NOT EXISTS idx_baseline_snapshots_lookup
     ON agent_baseline_snapshots (org_id, agent_did, feature_name, snapshot_date DESC);
 
 -- Unique constraint: one snapshot per agent per feature per day
 CREATE UNIQUE INDEX IF NOT EXISTS idx_baseline_snapshots_daily
-    ON agent_baseline_snapshots (org_id, agent_did, feature_name, DATE(snapshot_date));
+    ON agent_baseline_snapshots (org_id, agent_did, feature_name, snapshot_day);
 
 COMMENT ON TABLE agent_baseline_snapshots IS
     'Weekly snapshots of agent baseline std_dev values. '

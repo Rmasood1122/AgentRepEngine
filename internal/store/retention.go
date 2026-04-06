@@ -52,14 +52,14 @@ func PurgeOldEvents(ctx context.Context, db *sql.DB) (int64, error) {
 // Without daily snapshots, variance growth detection is silent — the LEFT JOIN
 // in CheckVarianceGrowthRate always returns NULL and all checks are skipped.
 //
-// INSERT ... ON CONFLICT DO NOTHING ensures idempotency:
+// NOT EXISTS ensures idempotency:
 // running twice in one day produces exactly one snapshot row per feature.
 func SnapshotBaselines(ctx context.Context, db *sql.DB) (int64, error) {
 	result, err := db.ExecContext(ctx, `
 		INSERT INTO agent_baseline_snapshots
 			(org_id, agent_did, feature_name, std_dev, sample_count, snapshot_date)
 		SELECT
-			org_id,
+			org_id::text,
 			agent_did,
 			feature_name,
 			std_dev,
@@ -67,8 +67,14 @@ func SnapshotBaselines(ctx context.Context, db *sql.DB) (int64, error) {
 			NOW()
 		FROM agent_baselines
 		WHERE sample_count >= 100
-		ON CONFLICT (org_id, agent_did, feature_name, DATE(snapshot_date))
-		DO NOTHING
+		AND NOT EXISTS (
+			SELECT 1 FROM agent_baseline_snapshots s
+			WHERE s.org_id = agent_baselines.org_id::text
+			AND s.agent_did = agent_baselines.agent_did
+			AND s.feature_name = agent_baselines.feature_name
+			AND s.snapshot_date >= DATE_TRUNC('day', NOW() AT TIME ZONE 'UTC')
+			AND s.snapshot_date < DATE_TRUNC('day', NOW() AT TIME ZONE 'UTC') + INTERVAL '1 day'
+		)
 	`)
 	if err != nil {
 		return 0, fmt.Errorf("snapshot baselines: %w", err)
