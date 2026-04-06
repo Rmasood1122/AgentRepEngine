@@ -9,7 +9,7 @@ Branch: master (push with git push origin master — NOT main)
 Zenodo DOI: 10.5281/zenodo.19169185 — PUBLISHED March 22, 2026
 IP chain: ATP (Dec 2025) → ATG (Dec 2025) → AgentRepEngine (Mar 2026)
 CURRENT STATE — April 5, 2026 (End of Day)
-HEAD: 02ffa5b
+HEAD: 2257d6e
 go test ./... — ALL GREEN ✅ — 17 packages, 0 failures
 Hardening score: 96/100+
 Tests: 17 packages (was 14 — added performance, regression, taxonomy tests)
@@ -130,11 +130,16 @@ Next learning number: L103
 Next MASTER_LEARNINGS number: L100
 NEXT SESSION PRIORITIES (in order)
 
-TW-REHEARSAL — say C1–C12 aloud before Lloyd meeting (you, not Claude)
-M1 language upgrade — 13 phrase replacements across docs (1 hr)
-Andrew Gyamfi — Boardy message for direct email TODAY
-Unmukt Raizada — LinkedIn direct TODAY
-Andy Watkin-Child — LinkedIn direct TODAY
-Lloyd — contact Monday April 7 to confirm meeting
-Sri Rajan / Rock Lambros / David Matousek — send drafted messages
-Turner Novak — verify domain (bana vs banana) then email
+PHASE 0 BUILD SPRINT — COMPLETE (April 6, 2026)
+All 7 tasks committed. HEAD: 2257d6e
+
+NEXT SESSION PRIORITIES (in order)
+
+1. Andrew Gyamfi — Boardy message for direct email — SITTING BUYER — DO TODAY
+2. Unmukt Raizada — LinkedIn direct — DO TODAY
+3. Andy Watkin-Child — LinkedIn direct — DO TODAY
+4. Lloyd — contact Monday April 7 to confirm meeting
+5. TW-REHEARSAL — say C1–C13 aloud before Lloyd meeting
+6. M1 language upgrade — 13 phrase replacements across docs (1 hr)
+7. Turner Novak — verify domain (bana vs banana) then email
+8. Sri Rajan / Rock Lambros / David Matousek — send drafted messages
