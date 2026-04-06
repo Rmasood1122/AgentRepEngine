@@ -11,8 +11,8 @@
 # 5. Never say "zero false positives" — always use the agreed Tier 1 claim.
 #
 # AGREED FP CLAIM (use verbatim everywhere):
-# "Zero false positives across our 100-scenario internal validation corpus —
-#  statistically bounding our FP rate below 3.6% with 95% confidence.
+# "Zero false positives across our 150 synthetic validation scenarios including 50 boundary scenarios at z-score 4.0–5.5 —
+#  statistically bounding FP rate below 2.0% with 95% confidence (Clopper-Pearson).
 #  Before any enforcement activates, we run 30 days of observe mode on your
 #  production traffic and measure your actual FP rate. You decide when
 #  enforcement goes live."
@@ -130,7 +130,7 @@ PHASE 1 — APRIL 5–7 | ~11 hrs | Pre-meeting hardening + FP foundation
       - List of behavioral categories covered
       - Independence verification statement
       - Boundary scenario rationale
-      - Confidence interval disclosure: 95% CI [0%, 3.6%] on 100 scenarios
+      - Confidence interval disclosure: 95% CI [0%, 2.0%] on 150 scenarios (50 boundary at z-score 4.0–5.5)
       - Path to Tier 2 claim (300 scenarios → CI [0%, 1%])
 
 ─── COMPETITIVE TRACK ──────────────────────────────────────────────────
@@ -294,7 +294,7 @@ FP CLAIM UPGRADE LADDER
 
 Tier 1 — NOW (use today):
   "Zero false positives across 100 synthetic validation scenarios —
-   statistically bounding FP rate below 3.6% with 95% confidence."
+   statistically bounding FP rate below 2.0% with 95% confidence (Clopper-Pearson)."
 
 Tier 2 — After FP-3 + FP-5 (300 scenarios):
   "Zero false positives across 300 synthetic validation scenarios

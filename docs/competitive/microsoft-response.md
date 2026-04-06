@@ -178,7 +178,7 @@ requirement. Throughput is a solved problem.
 
 **ARE's current metrics:**
 - Slow-walk detection rate: 100% (10/10 scenarios) [F]
-- False positive rate: 0.00% on 100-scenario corpus [F]
+- False positive rate: 0.00% on 150-scenario corpus including 50 boundary scenarios at z-score 4.0–5.5 — bounding FP below 2.0% at 95% CI [F]
 - Call overhead: 0.25ns on Linux production [F]
 
 **For Lloyd:**

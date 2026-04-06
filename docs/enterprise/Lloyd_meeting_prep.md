@@ -137,7 +137,7 @@ WHERE created_at > NOW() - INTERVAL '30 days';
 
 ## METRICS — NO NOTES
 
-FP rate:              0.00% on 100-scenario internal corpus
+FP rate:              0.00% on 150-scenario corpus (50 boundary at z-score 4.0–5.5) — <2.0% at 95% CI
 TP rate:              86.67%
 F1 score:             0.9286
 Slow-walk detection:  100% (10/10 multi-day scenarios)

@@ -195,7 +195,7 @@ Recite these without hesitation in every conversation:
 
 | Metric | Value | Context |
 |--------|-------|---------|
-| FP rate | 0.00% | 100-scenario internal corpus [F] |
+| FP rate | 0.00% | 150-scenario corpus, 50 boundary scenarios, <2.0% at 95% CI [F] |
 | TP rate | 88% (44/50) | Above 85% gate [F] |
 | Held-out TP | 100% (6/6) | Unseen scenarios [F] |
 | Slow-walk detection | 100% | 10/10 scenarios [F] |
