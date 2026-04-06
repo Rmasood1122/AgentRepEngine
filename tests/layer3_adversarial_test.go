@@ -6,9 +6,9 @@
 package tests
 
 import (
+	"fmt"
 	"math"
 	"testing"
-	"fmt"
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -17,16 +17,16 @@ import (
 // ─────────────────────────────────────────────────────────────────────────────
 
 type AgentState struct {
-	DID              string
-	BaselineRate     float64  // calls/minute baseline
-	BaselineStdDev   float64  // historical std dev
-	HistoryScore     float64  // H component (0–1000)
-	CurrentRate      float64  // current observed rate
-	PIIFieldRate     float64  // fraction of calls accessing PII
-	PermEscalations  int      // total permission escalation attempts
+	DID               string
+	BaselineRate      float64 // calls/minute baseline
+	BaselineStdDev    float64 // historical std dev
+	HistoryScore      float64 // H component (0–1000)
+	CurrentRate       float64 // current observed rate
+	PIIFieldRate      float64 // fraction of calls accessing PII
+	PermEscalations   int     // total permission escalation attempts
 	CrossTenantProbes int     // cross-tenant resource accesses
-	SubAgentDepth    int      // spawn depth of child agents
-	EventCount       int      // total events in baseline window
+	SubAgentDepth     int     // spawn depth of child agents
+	EventCount        int     // total events in baseline window
 }
 
 type ScoringResult struct {
@@ -45,8 +45,49 @@ func scoreAgent(a AgentState) ScoringResult {
 	vPenalty := velocityPenalty(z)
 	v := math.Max(0, 1000-vPenalty)
 
+	rawScore := 0.5*a.HistoryScore + 0.5*v
+	score := math.Max(0, math.Min(1000, rawScore))
+
+	// STEP 2 — Velocity ceilings (replaces additive cap)
+	// NIST ZTA: history cannot shield active anomaly
+	if z > 20.0 {
+		score = math.Min(score, 199)
+	} else if z > 10.0 {
+		score = math.Min(score, 499)
+	} else if z > 3.0 {
+		score = math.Min(score, 699)
+	}
+
+	// STEP 3 — Policy violation ceilings (replaces flat additive penalty)
+	// DORA Art.17: immediate containment regardless of history
+	if a.CrossTenantProbes > 0 {
+		score = math.Min(score, 499)
+	}
+	if a.PIIFieldRate > 0.3 {
+		score = math.Min(score, 499)
+	}
+	if a.PermEscalations > 2 {
+		score = math.Min(score, 499)
+	}
+
+	// STEP 4 — Composite escalation
+	// SEC material control: two simultaneous violations → BLOCK
+	activeViolations := 0
+	if a.CrossTenantProbes > 0 {
+		activeViolations++
+	}
+	if a.PIIFieldRate > 0.3 {
+		activeViolations++
+	}
+	if a.PermEscalations > 2 {
+		activeViolations++
+	}
+	if activeViolations >= 2 {
+		score = math.Min(score, 199)
+	}
+
+	// Policy violations for HighRisk flag (kept for Layer 1 compatibility)
 	violations := evaluatePolicyViolations(a.PIIFieldRate, a.PermEscalations, a.CrossTenantProbes)
-	policyPenalty := totalPenalty(violations)
 	highRisk := false
 	for _, viol := range violations {
 		if viol.HighRisk {
@@ -54,21 +95,31 @@ func scoreAgent(a AgentState) ScoringResult {
 		}
 	}
 
-	rawScore := 0.5*a.HistoryScore + 0.5*v - policyPenalty
-	score := math.Max(0, math.Min(1000, rawScore))
 	band := assignBand(score)
 
-	reason := fmt.Sprintf("H=%.0f V=%.0f z=%.2f vPenalty=%.0f policyPenalty=%.0f",
-		a.HistoryScore, v, z, vPenalty, policyPenalty)
+	reason := fmt.Sprintf("H=%.0f V=%.0f z=%.2f vPenalty=%.0f ceiling_applied=%v",
+		a.HistoryScore, v, z, vPenalty, score < rawScore)
 
 	return ScoringResult{
-		Score:     score,
-		Band:      band,
-		Blocked:   band == BandBlocked,
-		HighRisk:  highRisk,
-		ZScore:    z,
-		Penalties: vPenalty + policyPenalty,
-		Reason:    reason,
+		Score:    score,
+		Band:     band,
+		Blocked:  band == BandBlocked,
+		HighRisk: highRisk,
+		ZScore:   z,
+		Penalties: vPenalty + func() float64 {
+			p := 0.0
+			if a.CrossTenantProbes > 0 {
+				p += 300
+			}
+			if a.PIIFieldRate > 0.3 {
+				p += 200
+			}
+			if a.PermEscalations > 2 {
+				p += 150
+			}
+			return p
+		}(),
+		Reason: reason,
 	}
 }
 
@@ -89,7 +140,6 @@ func evolveBaseline(initial AgentState, dailyRate float64, days int) AgentState 
 
 // fmt import for reason string
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION 3A — Slow-Walk Attack Detection
 // The most sophisticated evasion pattern. No competitor documents testing this.
@@ -104,13 +154,13 @@ func TestLayer3_SlowWalk_BaselinePoisoning_Detected(t *testing.T) {
 	// ARE's defense: PIIFieldRate > 0.3 triggers HIGH_RISK VERIFY regardless
 
 	agent := AgentState{
-		DID:             "did:are:slowwalk-attacker-001",
-		BaselineRate:    10.0, // 10 calls/min normal
-		BaselineStdDev:  2.0,
-		HistoryScore:    900.0, // Trusted agent — long history
-		CurrentRate:     10.0,
-		PIIFieldRate:    0.05, // Normal PII access
-		EventCount:      5000,
+		DID:            "did:are:slowwalk-attacker-001",
+		BaselineRate:   10.0, // 10 calls/min normal
+		BaselineStdDev: 2.0,
+		HistoryScore:   900.0, // Trusted agent — long history
+		CurrentRate:    10.0,
+		PIIFieldRate:   0.05, // Normal PII access
+		EventCount:     5000,
 	}
 
 	// Phase 1: 14 days of gradual rate increase (slow-walk)
@@ -329,7 +379,7 @@ func TestLayer3_MultiAgent_PeerCluster_ScoringAvailable(t *testing.T) {
 
 	// Simulate peer cluster scoring
 	peerScores := []float64{820, 840, 810, 830, 815} // Normal peer cluster
-	outlierScore := 300.0                              // Outlier agent
+	outlierScore := 300.0                            // Outlier agent
 
 	peerMean := func(scores []float64) float64 {
 		sum := 0.0
@@ -368,13 +418,13 @@ func TestLayer3_MultiAgent_PeerCluster_ScoringAvailable(t *testing.T) {
 func TestLayer3_SubAgentSpawn_DepthThreshold(t *testing.T) {
 	// SubAgentSpawnDepth > 3 triggers HIGH_RISK VERIFY
 	agent := AgentState{
-		DID:           "did:are:spawn-attack-001",
-		BaselineRate:  5.0,
+		DID:            "did:are:spawn-attack-001",
+		BaselineRate:   5.0,
 		BaselineStdDev: 1.0,
-		HistoryScore:  800.0,
-		CurrentRate:   5.0,
-		PIIFieldRate:  0.1,
-		SubAgentDepth: 4, // Exceeds threshold of 3
+		HistoryScore:   800.0,
+		CurrentRate:    5.0,
+		PIIFieldRate:   0.1,
+		SubAgentDepth:  4, // Exceeds threshold of 3
 	}
 
 	// SubAgentDepth > 3 must flag HIGH_RISK
@@ -494,13 +544,13 @@ func TestLayer3_StackedAttack_RecoverAfterFalseAlert_Legitimate(t *testing.T) {
 	// E3: FP recovery path matters for CISO trust in the pilot
 
 	agent := AgentState{
-		DID:            "did:are:recovering-agent-001",
-		BaselineRate:   10.0,
-		BaselineStdDev: 2.0,
-		HistoryScore:   200.0, // Was penalized (incorrectly or correctly)
-		CurrentRate:    10.0,  // Back to normal
-		PIIFieldRate:   0.05,
-		PermEscalations: 0,
+		DID:               "did:are:recovering-agent-001",
+		BaselineRate:      10.0,
+		BaselineStdDev:    2.0,
+		HistoryScore:      200.0, // Was penalized (incorrectly or correctly)
+		CurrentRate:       10.0,  // Back to normal
+		PIIFieldRate:      0.05,
+		PermEscalations:   0,
 		CrossTenantProbes: 0,
 	}
 

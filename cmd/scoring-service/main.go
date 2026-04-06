@@ -1,6 +1,5 @@
 package main
 
-
 import (
 	"context"
 	"database/sql"
@@ -9,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+	"math"
 	"net/http"
 	"os"
 	"os/signal"
@@ -330,13 +330,15 @@ func scoreHandler(s *store.ScoreStore) http.HandlerFunc {
 			"duration_ms", time.Since(start).Milliseconds(),
 		)
 		w.Header().Set("Content-Type", "application/json")
+		confidence := math.Min(0.99, 0.50+float64(1000-result.Score)/2000.0)
 		fmt.Fprintf(w, `{
   "agent_did": "%s",
   "score": %d,
   "band": "%s",
+  "confidence": %.2f,
   "source": "%s",
   "reason": %s
-}`, did, result.Score, result.Band, result.Source, result.ReasonJSON)
+}`, did, result.Score, result.Band, confidence, result.Source, result.ReasonJSON)
 	}
 }
 

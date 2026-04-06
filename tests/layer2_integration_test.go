@@ -33,7 +33,8 @@ func apiKey() string {
 	if k := os.Getenv("SCORING_API_KEY"); k != "" {
 		return k
 	}
-	return "test-api-key" // matches docker-compose.yml default
+
+	return "are-internal-key-change-in-production" // matches docker-compose.yml
 }
 
 func httpClient() *http.Client {
@@ -221,7 +222,8 @@ func TestLayer2_JWT_MissingAPIKey_Rejected(t *testing.T) {
 
 func TestLayer2_Score_ReturnsStructuredResponse(t *testing.T) {
 	agentDID := "did:are:integration-test-001"
-	resp := doRequest(t, "GET", fmt.Sprintf("/score?agent_did=%s", agentDID), nil)
+
+	resp := doRequest(t, "GET", fmt.Sprintf("/score/%s", agentDID), nil)
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
@@ -306,11 +308,12 @@ func TestLayer2_Score_ReasonObjectHasRequiredFields(t *testing.T) {
 func TestLayer2_Event_Submission_Accepted(t *testing.T) {
 	// POST /event must return 200/202 — Kong calls this async, must be fast
 	payload := map[string]interface{}{
-		"agent_did":   "did:are:event-test-001",
-		"org_id":      "test-org",
-		"action":      "api_call",
-		"resource":    "/api/data",
-		"timestamp":   time.Now().Unix(),
+		"agent_did":  "did:are:event-test-001",
+		"org_id":     "test-org",
+		"action":     "api_call",
+		"event_type": "api_call",
+		"resource":   "/api/data",
+		"timestamp":  time.Now().Unix(),
 	}
 	resp := doRequest(t, "POST", "/event", payload)
 	defer resp.Body.Close()
@@ -335,12 +338,12 @@ func TestLayer2_Event_ScoreUpdatesAfterEvent(t *testing.T) {
 	// Submit cross-tenant probe events
 	for i := 0; i < 3; i++ {
 		payload := map[string]interface{}{
-			"agent_did":             agentDID,
-			"org_id":               "test-org",
-			"action":               "cross_tenant_read",
-			"resource":             "/org/external/data",
-			"cross_tenant_probes":  1,
-			"timestamp":            time.Now().Unix(),
+			"agent_did":           agentDID,
+			"org_id":              "test-org",
+			"action":              "cross_tenant_read",
+			"resource":            "/org/external/data",
+			"cross_tenant_probes": 1,
+			"timestamp":           time.Now().Unix(),
 		}
 		resp := doRequest(t, "POST", "/event", payload)
 		resp.Body.Close()
