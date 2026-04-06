@@ -89,14 +89,14 @@ func TestZScoreComputation(t *testing.T) {
 	baseline := Baseline{Mean: 80, StdDev: 60}
 
 	// Normal behavior — z < 3
-	normalZ := ComputeZScore(100, baseline)
+	normalZ := ComputeZScore(100, baseline, 0.1)
 	if normalZ >= 3.0 {
 		t.Errorf("normal behavior z-score too high: %.2f", normalZ)
 	}
 	t.Logf("✅ Normal z-score: %.2f (value=100, mean=80, std=60)", normalZ)
 
 	// Anomalous behavior — z > 3
-	anomalousZ := ComputeZScore(500, baseline)
+	anomalousZ := ComputeZScore(500, baseline, 0.1)
 	if anomalousZ <= 3.0 {
 		t.Errorf("anomalous behavior not detected: z=%.2f", anomalousZ)
 	}
@@ -104,7 +104,7 @@ func TestZScoreComputation(t *testing.T) {
 
 	// Zero std dev — should return 0 not divide by zero
 	zeroStd := Baseline{Mean: 80, StdDev: 0}
-	safeZ := ComputeZScore(500, zeroStd)
+	safeZ := ComputeZScore(500, zeroStd, 0.1)
 	if math.IsNaN(safeZ) || math.IsInf(safeZ, 0) {
 		t.Errorf("zero std dev caused NaN/Inf: %.2f", safeZ)
 	}

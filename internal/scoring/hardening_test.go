@@ -42,7 +42,7 @@ func TestGAP6_ScoreMonotonicallyDecreases(t *testing.T) {
 
 	scores := []int{}
 	for toolCallRate := 80.0; toolCallRate <= 500; toolCallRate += 20 {
-		z := ComputeZScore(toolCallRate, baseline)
+		z := ComputeZScore(toolCallRate, baseline, 0.1)
 		penalty := 0.0
 		if z > 3.0 {
 			penalty = min(100*(z-3.0), 300)

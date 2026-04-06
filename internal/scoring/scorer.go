@@ -63,7 +63,7 @@ func (s *Scorer) Score(orgID, agentDID string, vector FeatureVector,
 
 	for feature, value := range features {
 		baseline := s.baselines.GetBaseline(orgID, agentDID, feature)
-		z := ComputeZScore(value, baseline)
+		z := ComputeZScore(value, baseline, s.config.MinStdDev)
 		featureZScores[feature] = z
 
 		if z > worstZ {
@@ -73,7 +73,7 @@ func (s *Scorer) Score(orgID, agentDID string, vector FeatureVector,
 
 		// M5-STEP-1: compute cluster z-score for peer deviation signal
 		clusterBaseline := s.baselines.GetClusterBaseline("default", feature)
-		clusterZ := ComputeZScore(value, clusterBaseline)
+		clusterZ := ComputeZScore(value, clusterBaseline, s.config.MinStdDev)
 		if clusterZ > clusterWorstZ {
 			clusterWorstZ = clusterZ
 		}

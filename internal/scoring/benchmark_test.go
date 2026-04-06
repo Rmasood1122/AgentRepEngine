@@ -75,7 +75,7 @@ func BenchmarkComputeZScore(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ComputeZScore(75.0, baseline)
+		ComputeZScore(75.0, baseline, 0.1)
 	}
 }
 
