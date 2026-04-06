@@ -26,6 +26,8 @@ type ReasonObject struct {
 	DeviationFromCluster  int            `json:"deviation_from_cluster"`
 	ConfidencePct         int            `json:"confidence_pct"`
 	ConfidenceExplanation string         `json:"confidence_explanation"`
+	GDPRPlainLanguage     string         `json:"gdpr_plain_language"`
+	DORAArticle           string         `json:"dora_article,omitempty"`
 	ComputedAt            int64          `json:"computed_at"`
 }
 
@@ -105,6 +107,8 @@ func ExplainDecision(
 		DeviationFromCluster:  deviationFromCluster,
 		ConfidencePct:         confidencePct,
 		ConfidenceExplanation: buildConfidenceExplanation(newScore, violations, worstZScore),
+		GDPRPlainLanguage:     buildGDPRPlainLanguage(decision, policyFired, confidencePct, worstZScore),
+		DORAArticle:           buildDORAArticle(policyFired),
 		ComputedAt:            time.Now().Unix(),
 	}
 
@@ -254,6 +258,52 @@ func (r *ReasonObject) ToJSON() string {
 		)
 	}
 	return string(data)
+}
+
+// buildGDPRPlainLanguage produces a human-readable explanation suitable for
+// GDPR Art.22 automated decision disclosure requirements.
+// Must be understandable by a non-technical data subject.
+func buildGDPRPlainLanguage(decision, policyFired string, confidencePct int, worstZScore float64) string {
+	switch decision {
+	case "BLOCKED":
+		return fmt.Sprintf(
+			"This AI agent was automatically restricted because its recent activity "+
+				"was %.1f standard deviations above its normal baseline behavior. "+
+				"The triggered policy was '%s'. "+
+				"The system is %d%% confident this represents anomalous activity. "+
+				"A human reviewer must authorize resumption of normal operation.",
+			worstZScore, policyFired, 100-confidencePct,
+		)
+	case "RESTRICTED":
+		return fmt.Sprintf(
+			"This AI agent has been flagged for elevated monitoring because its activity "+
+				"showed unusual patterns (%.1f standard deviations above baseline). "+
+				"The triggered policy was '%s'. No requests have been blocked. "+
+				"Human review is recommended.",
+			worstZScore, policyFired,
+		)
+	default:
+		return "This AI agent's activity is within normal behavioral parameters. No restrictions applied."
+	}
+}
+
+// buildDORAArticle maps policy names to the relevant DORA article reference.
+// Used for regulatory evidence packages and audit trail enrichment.
+func buildDORAArticle(policyFired string) string {
+	doraMapping := map[string]string{
+		"bulk_pii_access_prevention_v1":    "DORA Art.10 — ICT incident detection and response",
+		"cross_tenant_probe_prevention_v1": "DORA Art.10 — ICT incident detection and response",
+		"high_frequency_tool_call_v1":      "DORA Art.9 — Protection and prevention",
+		"endpoint_enumeration_v1":          "DORA Art.9 — Protection and prevention",
+		"sub_agent_spawn_depth_v1":         "DORA Art.10 — ICT incident detection and response",
+	}
+	if article, ok := doraMapping[policyFired]; ok {
+		return article
+	}
+	if policyFired != "no_policy_fired" && policyFired != "" {
+		return "DORA Art.9 — Protection and prevention"
+	}
+	return ""
 }
 
 // BaselineMaturity indicates whether the agent has an established baseline.
