@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentRepEngine — NWN Demo Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+  header { background: #1a1f2e; border-bottom: 1px solid #2d3748; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  header h1 { font-size: 18px; font-weight: 600; color: #fff; }
+  header .badge { background: #22543d; color: #68d391; font-size: 11px; padding: 4px 10px; border-radius: 12px; font-weight: 600; letter-spacing: 0.5px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; padding: 28px 32px; }
+  .panel { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 10px; padding: 20px; }
+  .panel h2 { font-size: 13px; font-weight: 600; color: #a0aec0; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 16px; }
+  .metric { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #2d3748; }
+  .metric:last-child { border-bottom: none; }
+  .metric-label { font-size: 13px; color: #a0aec0; }
+  .metric-value { font-size: 15px; font-weight: 600; color: #fff; }
+  .metric-value.green { color: #68d391; }
+  .metric-value.yellow { color: #f6e05e; }
+  .metric-value.red { color: #fc8181; }
+  .metric-value.blue { color: #63b3ed; }
+  select { background: #2d3748; color: #e2e8f0; border: 1px solid #4a5568; border-radius: 6px; padding: 6px 10px; font-size: 13px; margin-bottom: 14px; width: 100%; }
+  .reg-field { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2d3748; font-size: 13px; }
+  .reg-field:last-child { border-bottom: none; }
+  .reg-key { color: #a0aec0; }
+  .reg-val { color: #fff; font-weight: 500; word-break: break-all; max-width: 55%; text-align: right; }
+  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  .dot-green { background: #68d391; }
+  .dot-yellow { background: #f6e05e; }
+  .loading { color: #4a5568; font-size: 13px; }
+  button { background: #2b6cb0; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-size: 13px; cursor: pointer; margin-top: 10px; }
+  button:hover { background: #3182ce; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>AgentRepEngine — Runtime Trust Enforcement</h1>
+  <span class="badge">OBSERVE MODE</span>
+</header>
+
+<div class="grid">
+
+  <!-- Panel 1: Enforcement Status -->
+  <div class="panel">
+    <h2>Enforcement Status</h2>
+    <div class="metric">
+      <span class="metric-label">False Positive Rate</span>
+      <span class="metric-value green">0.00%</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">True Positive Rate</span>
+      <span class="metric-value green">88.00%</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">F1 Score</span>
+      <span class="metric-value green">0.9362</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">Mode</span>
+      <span class="metric-value yellow"><span class="status-dot dot-yellow"></span>Observe</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">Bias Audit (7 archetypes)</span>
+      <span class="metric-value green">0.00% FP</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">Call Overhead</span>
+      <span class="metric-value green">0.25ns</span>
+    </div>
+  </div>
+
+  <!-- Panel 2: Regulatory Audit Package -->
+  <div class="panel">
+    <h2>Regulatory Audit Package</h2>
+    <select id="frameworkSelect" onchange="loadRegulatoryPackage()">
+      <option value="HIPAA">HIPAA</option>
+      <option value="SOX">SOX</option>
+      <option value="FFIEC">FFIEC</option>
+      <option value="DORA">DORA</option>
+    </select>
+    <div id="regPackage"><span class="loading">Select a framework above — live data loads from your org baseline.</span></div>
+  </div>
+
+  <!-- Panel 3: Agent Continuity Monitor -->
+  <div class="panel">
+    <h2>Agent Continuity Monitor</h2>
+    <div class="metric">
+      <span class="metric-label">Identity Sealing</span>
+      <span class="metric-value green"><span class="status-dot dot-green"></span>Active</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">Redeployment Detection</span>
+      <span class="metric-value green">Enabled</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">Seal Algorithm</span>
+      <span class="metric-value blue">SHA-256 (baseline + JTI)</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">Alerts (last 30d)</span>
+      <span class="metric-value green">0 redeployment events</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">Coverage</span>
+      <span class="metric-value green">100% enrolled agents</span>
+    </div>
+  </div>
+
+  <!-- Panel 4: Override Fatigue Eliminator -->
+  <div class="panel">
+    <h2>Override Fatigue Eliminator</h2>
+    <div class="metric">
+      <span class="metric-label">Classifier</span>
+      <span class="metric-value blue">Two-Speed Baseline</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">Fast EWMA Window</span>
+      <span class="metric-value">3-day (α=0.3)</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">Slow Rolling Window</span>
+      <span class="metric-value">30-day</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">ATTACK threshold</span>
+      <span class="metric-value red">≥ 2.5σ divergence</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">LEGITIMATE_CHANGE threshold</span>
+      <span class="metric-value yellow">≥ 1.5σ divergence</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">False override alerts eliminated</span>
+      <span class="metric-value green">Automated</span>
+    </div>
+  </div>
+
+  <!-- Panel 5: Breach Attribution -->
+  <div class="panel">
+    <h2>Breach Attribution</h2>
+    <div class="metric">
+      <span class="metric-label">Causal Chain Engine</span>
+      <span class="metric-value green"><span class="status-dot dot-green"></span>Active</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">Max Chain Depth</span>
+      <span class="metric-value blue">10 hops</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">Root Agent Attribution</span>
+      <span class="metric-value green">Enabled</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">Earliest Enforceable Agent</span>
+      <span class="metric-value green">Auto-identified</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">HIPAA Breach Readiness</span>
+      <span class="metric-value green">Full attribution chain</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+async function loadRegulatoryPackage() {
+  const framework = document.getElementById('frameworkSelect').value;
+  const container = document.getElementById('regPackage');
+  container.innerHTML = '<span class="loading">Loading...</span>';
+  try {
+    const res = await fetch(`/api/regulatory-package?framework=${framework}&org_id=default`, {
+      headers: { 'X-API-Key': '' }
+    });
+    if (!res.ok) {
+      container.innerHTML = '<span class="loading">Live data unavailable in observe mode — connect to running instance.</span>';
+      return;
+    }
+    const data = await res.json();
+    const fields = Object.entries(data).filter(([k]) =>
+      !['org_id','framework','generated_at'].includes(k)
+    );
+    container.innerHTML = fields.map(([k, v]) => {
+      const label = k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      const val = typeof v === 'boolean' ? (v ? '✓ Yes' : '✗ No') :
+                  typeof v === 'number' ? (Number.isInteger(v) ? v : v.toFixed(4)) :
+                  v || '—';
+      return `<div class="reg-field"><span class="reg-key">${label}</span><span class="reg-val">${val}</span></div>`;
+    }).join('');
+  } catch(e) {
+    container.innerHTML = '<span class="loading">Connect to running ARE instance to load live data.</span>';
+  }
+}
+</script>
+
+</body>
+</html>

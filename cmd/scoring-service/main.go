@@ -1,5 +1,6 @@
 package main
 
+
 import (
 	"context"
 	"database/sql"
@@ -120,8 +121,8 @@ func main() {
 	auditHandler := audit.NewHandler(db)
 	mux.HandleFunc("/audit/replay", requireAPIKey(auditHandler.ReplayHandler))
 	mux.HandleFunc("/audit/export", requireAPIKey(auditHandler.ExportHandler))
-	mux.HandleFunc("/enforcement/override", requireAPIKey(auditHandler.OverrideHandler))
-	mux.HandleFunc("/enforcement/freeze", requireAPIKey(audit.NewFreezeHandler(db, scoreStore.GetRedisClient())))
+	mux.HandleFunc("/dashboard", dashboardHandler(db))
+	mux.HandleFunc("/api/regulatory-package", requireAPIKey(regulatoryPackageHandler(db)))
 
 	srv := &http.Server{
 		Addr:         ":" + port,
