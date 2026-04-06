@@ -5,6 +5,8 @@
 package tests
 
 import (
+	"fmt"
+	"math"
 	"testing"
 	"time"
 )
@@ -140,7 +142,7 @@ func TestLayer6_HIPAA_PIIBreach_Attribution(t *testing.T) {
 		BaselineStdDev: 2.0,
 		HistoryScore: 750.0,
 		CurrentRate:  10.0,
-		PIIRate:      0.95, // Bulk PII access
+		PIIFieldRate:      0.95, // Bulk PII access
 	}
 
 	result := scoreAgent(agent)
@@ -169,7 +171,7 @@ func TestLayer6_SOX_AccessControl_PermissionViolations_Logged(t *testing.T) {
 		BaselineStdDev:  3.0,
 		HistoryScore:    800.0,
 		CurrentRate:     15.0,
-		PIIRate:         0.1,
+		PIIFieldRate:         0.1,
 		PermEscalations: 4, // Clear SOX violation
 	}
 
@@ -226,7 +228,7 @@ func TestLayer7_ScoreCalculation_SubMicrosecond(t *testing.T) {
 		BaselineStdDev: 2.0,
 		HistoryScore:   800.0,
 		CurrentRate:    10.0,
-		PIIRate:        0.05,
+		PIIFieldRate:        0.05,
 	}
 
 	const iterations = 100000
@@ -270,7 +272,7 @@ func TestLayer7_PolicyEvaluation_1000AgentsUnderTenMs(t *testing.T) {
 			BaselineStdDev: 2.0,
 			HistoryScore:   float64(700 + i%300),
 			CurrentRate:    float64(10 + i%50),
-			PIIRate:        float64(i%10) * 0.025,
+			PIIFieldRate:        float64(i%10) * 0.025,
 		}
 	}
 
@@ -354,11 +356,11 @@ func TestLayer8_MultiFramework_JWTIdentity_SameScore(t *testing.T) {
 	// Two agents with identical behavior but different frameworks → same score
 	agentLC := AgentState{
 		DID: "did:are:langchain-001", BaselineRate: 10, BaselineStdDev: 2,
-		HistoryScore: 800, CurrentRate: 10, PIIRate: 0.1,
+		HistoryScore: 800, CurrentRate: 10, PIIFieldRate: 0.1,
 	}
 	agentLI := AgentState{
 		DID: "did:are:llamaindex-001", BaselineRate: 10, BaselineStdDev: 2,
-		HistoryScore: 800, CurrentRate: 10, PIIRate: 0.1,
+		HistoryScore: 800, CurrentRate: 10, PIIFieldRate: 0.1,
 	}
 
 	resultLC := scoreAgent(agentLC)
@@ -383,7 +385,7 @@ func TestLayer9_C1_EnforcementAtGateway(t *testing.T) {
 
 	agent := AgentState{
 		DID: "did:are:c1-test", BaselineRate: 10, BaselineStdDev: 2,
-		HistoryScore: 200, CurrentRate: 100, PIIRate: 0.9,
+		HistoryScore: 200, CurrentRate: 100, PIIFieldRate: 0.9,
 		CrossTenantProbes: 2,
 	}
 	result := scoreAgent(agent)
@@ -400,7 +402,7 @@ func TestLayer9_C4_ConfidenceScore_Populated(t *testing.T) {
 
 	agent := AgentState{
 		DID: "did:are:c4-test", BaselineRate: 10, BaselineStdDev: 2,
-		HistoryScore: 400, CurrentRate: 85, PIIRate: 0.5,
+		HistoryScore: 400, CurrentRate: 85, PIIFieldRate: 0.5,
 	}
 	result := scoreAgent(agent)
 
@@ -446,7 +448,7 @@ func TestLayer9_C11_ReasonObject_HumanReadable(t *testing.T) {
 	// C11: "Every enforcement decision is human-readable. Agent ID, score, confidence, reason."
 	agent := AgentState{
 		DID: "did:are:c11-test", BaselineRate: 10, BaselineStdDev: 2,
-		HistoryScore: 300, CurrentRate: 80, PIIRate: 0.6,
+		HistoryScore: 300, CurrentRate: 80, PIIFieldRate: 0.6,
 	}
 	result := scoreAgent(agent)
 
@@ -499,7 +501,7 @@ func TestLayer9_Regression_ScoreFormulaUnchanged(t *testing.T) {
 		BaselineStdDev: 2.0,
 		HistoryScore:   800.0,
 		CurrentRate:    10.0,
-		PIIRate:        0.05,
+		PIIFieldRate:        0.05,
 	}
 
 	result := scoreAgent(agent)
@@ -524,7 +526,7 @@ func TestLayer9_Regression_FPRateAnchor(t *testing.T) {
 			DID: fmt.Sprintf("did:are:regression-fp-%s", arch.Name),
 			BaselineRate: arch.BaselineRate, BaselineStdDev: arch.BaselineStdDev,
 			HistoryScore: arch.HistoryScore, CurrentRate: arch.CurrentRate,
-			PIIFieldRate: arch.PIIRate,
+			PIIFieldRate: arch.PIIFieldRate,
 		}
 		if scoreAgent(agent).Blocked {
 			fpCount++
@@ -541,11 +543,11 @@ func TestLayer9_Regression_TPRateAnchor(t *testing.T) {
 	// Regression: TP rate should remain >= 88%
 	// Sample of known attack patterns that must be detected
 	attacks := []AgentState{
-		{DID: "a1", BaselineRate: 10, BaselineStdDev: 2, HistoryScore: 800, CurrentRate: 100, PIIRate: 0.9},
+		{DID: "a1", BaselineRate: 10, BaselineStdDev: 2, HistoryScore: 800, CurrentRate: 100, PIIFieldRate: 0.9},
 		{DID: "a2", BaselineRate: 10, BaselineStdDev: 2, HistoryScore: 700, CurrentRate: 80, CrossTenantProbes: 2},
 		{DID: "a3", BaselineRate: 10, BaselineStdDev: 2, HistoryScore: 750, CurrentRate: 50, PermEscalations: 5},
-		{DID: "a4", BaselineRate: 10, BaselineStdDev: 2, HistoryScore: 900, CurrentRate: 200, PIIRate: 0.8},
-		{DID: "a5", BaselineRate: 10, BaselineStdDev: 2, HistoryScore: 600, CurrentRate: 90, PIIRate: 0.5, CrossTenantProbes: 1},
+		{DID: "a4", BaselineRate: 10, BaselineStdDev: 2, HistoryScore: 900, CurrentRate: 200, PIIFieldRate: 0.8},
+		{DID: "a5", BaselineRate: 10, BaselineStdDev: 2, HistoryScore: 600, CurrentRate: 90, PIIFieldRate: 0.5, CrossTenantProbes: 1},
 	}
 
 	detected := 0
@@ -583,7 +585,7 @@ func TestCompetitorGap_LakeraGuard_NoBehavioralBaseline(t *testing.T) {
 	// ARE advantage: 30-day per-agent baseline with z-score personalization
 	agent := AgentState{
 		DID: "did:are:lakera-gap-test", BaselineRate: 10, BaselineStdDev: 2,
-		HistoryScore: 800, CurrentRate: 80, PIIRate: 0.05,
+		HistoryScore: 800, CurrentRate: 80, PIIFieldRate: 0.05,
 	}
 	result := scoreAgent(agent)
 	// ARE detects the behavioral anomaly that Lakera would miss
@@ -601,7 +603,7 @@ func TestCompetitorGap_ProtectAI_NoGatewayEnforcement(t *testing.T) {
 	// Demonstrate enforcement is pre-action (at gateway) not post-action
 	agent := AgentState{
 		DID: "did:are:protectai-gap", BaselineRate: 10, BaselineStdDev: 2,
-		HistoryScore: 100, CurrentRate: 10, PIIRate: 0.9,
+		HistoryScore: 100, CurrentRate: 10, PIIFieldRate: 0.9,
 	}
 	result := scoreAgent(agent)
 
@@ -622,7 +624,7 @@ func TestCompetitorGap_Validia_NoBehavioralScoring(t *testing.T) {
 	// Score behavior
 	agent := AgentState{
 		DID: did, BaselineRate: 10, BaselineStdDev: 2,
-		HistoryScore: 800, CurrentRate: 10, PIIRate: 0.05,
+		HistoryScore: 800, CurrentRate: 10, PIIFieldRate: 0.05,
 	}
 	hasBehaviorScore := scoreAgent(agent).Score > 0
 

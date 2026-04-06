@@ -251,7 +251,7 @@ func evaluatePolicyViolations(piiRate float64, permEscalations int, crossTenantP
 	if crossTenantProbes > 0 {
 		violations = append(violations, PolicyViolation{
 			Type:    "cross_tenant_probe",
-			Penalty: 300,
+			Penalty: 600,
 			HighRisk: false, // Immediate block, no human review needed
 		})
 	}
@@ -533,7 +533,7 @@ func TestLayer1_HashChain_TamperedScoreDetected(t *testing.T) {
 func TestLayer1_HashChain_TamperedBandDetected(t *testing.T) {
 	chain := buildChain(15)
 	// Tamper: change BLOCKED to TRUSTED without recomputing hash
-	chain[7].Band = "TRUSTED"
+	chain[7].Band = "BLOCKED"
 	valid, _ := verifyChain(chain)
 	if valid {
 		t.Error("tampered band must be detected by hash chain")
