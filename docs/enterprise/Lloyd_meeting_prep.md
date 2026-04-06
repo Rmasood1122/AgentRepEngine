@@ -81,6 +81,19 @@ Deliver in response to questions. Do not recite in sequence.
      checklist — audit trail, incident response, human oversight,
      corrective action. Out of the box. DORA Article 45, GDPR
      Article 22, SEC AI governance — one architecture."
+     **C13** — "Here is the query your CISO runs themselves. No dashboards, no reports, no trust required."
+```sql
+SELECT
+  COUNT(*) FILTER (WHERE override = true)::float
+    / NULLIF(COUNT(*), 0) AS fp_rate,
+  COUNT(*) AS total_decisions,
+  COUNT(*) FILTER (WHERE override = true) AS confirmed_fps
+FROM enforcement_decisions
+WHERE created_at > NOW() - INTERVAL '30 days';
+```
+
+> This query runs on your PostgreSQL instance, inside your firewall.
+> ARE never sees the result. The FP rate measurement is yours.
 
 (13) "Every enforcement decision is human-readable — agent ID,
      score, confidence, contributing factors, timestamp. Your
