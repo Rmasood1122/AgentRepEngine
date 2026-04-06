@@ -6,23 +6,32 @@ First command: APEX ACTIVATE
 REPO
 https://github.com/Rehanrana11/AgentRepEngine
 Branch: master (push with git push origin master — NOT main)
-CURRENT STATE — April 06, 2026
-HEAD: 8742dae
+CURRENT STATE — April 07, 2026
+HEAD: 87cfc48
 go test ./... — ALL GREEN ✅ (with SCORING_API_KEY=are-internal-key-change-in-production)
 SESSION CLOSE RECORD
-  Session date:     April 06, 2026
-  Messages:         0
-  Duration:         82 min
-  Last action:      git push origin master — 5 commits pushed 7b32849..7f37999
+  Session date:     April 07, 2026
+  Messages:         ~80
+  Duration:         ~3 hrs
+  Last action:      git push origin master — 7 commits pushed eb01bcd..87cfc48
   Irreversible:     YES ✅
 RECENT COMMITS
-7f37999 feat: NWN demo dashboard â€” HIPAA SOX DORA panels for Lloyd
-227c580 feat: two-speed baseline â€” ATTACK vs LEGITIMATE_CHANGE
-d4bfb77 feat: multi-agent causal chain â€” HIPAA breach attribution
-87f23a1 feat: agent identity continuity seal â€” HIPAA breach detection
-7b32849 feat: US regulatory evidence package â€” HIPAA SOX FFIEC DORA
+87cfc48 docs: maintenance window procedure — freeze, mode switch, verification, rollback
+90f592f docs: FP corpus independence methodology — proves 0.00% is not overfit
+d4b9cc6 docs: per-archetype adaptive threshold guide — 7 archetypes, bias audit results
+26e3f21 feat: NIS2 proportionality + GDPR data transfer policy packs
+e89cd42 feat: GDPR plain language reason + DORA article classifier in ReasonObject
+04ee471 feat: VRF threshold randomization — per-agent jitter defeats threshold probing
+eb01bcd feat: SIR state machine — SIR lifecycle, human clear, probation, Redis persistence
 
-8742dae feat: ceiling override scoring model — DORA Art.10/NIST ZTA compliant, all tests green
+Previous session:
+7f37999 feat: NWN demo dashboard — HIPAA SOX DORA panels for Lloyd
+227c580 feat: two-speed baseline — ATTACK vs LEGITIMATE_CHANGE
+d4bfb77 feat: multi-agent causal chain — HIPAA breach attribution
+87f23a1 feat: agent identity continuity seal — HIPAA breach detection
+7b32849 feat: US regulatory evidence package — HIPAA SOX FFIEC DORA
+8742dae feat: ceiling override scoring model — DORA Art.10/NIST ZTA compliant
+
 Tests: ALL GREEN ✅
 
 PENDING — NOT YET DONE (commercial actions)
@@ -42,27 +51,23 @@ Secondary investor list (10 names) — NOT BUILT
 C-Corp conversion email — NOT SENT
 Sovren Software follow-up — inbound signal, never followed up
 
-REMAINING ENGINEERING 
-REMAINING ENGINEERING (no deployment dependency):
-#6 corpus — ALREADY DONE (100 + 50 = 150 scenarios confirmed)
-#7 Per-archetype adaptive threshold doc — 1 hr
-#8 FP corpus independence doc — 1 hr
-#9 docs/ops/maintenance-window-procedure.md — 30 min
-#11 FP measurement methodology 7-layer update — 1 hr
-#10 Conformal prediction confidence bounds — 2 hrs (lowest priority)
+REMAINING ENGINEERING
 (Tier 1 — after LoU signed)
 L133 — scripts/hackathon-demo.sh + README demo link (2 hrs)
 L134 — Investor deck metrics update: F1=0.9362, 17 packages, M5 claims (30 min)
-NUCLEAR BUILD — WEEK 1 REMAINING (Day 2–4):
-[ ] SIR state machine (internal/scoring/sir_state.go) — 5 hrs
-[ ] VRF threshold randomization (internal/scoring/vrf_threshold.go) — 3 hrs
-[ ] GDPR plain language reason (explainability.go) — 2 hrs
-[ ] DORA tier classifier (explainability.go) — 1 hr
-[ ] NIS2 proportionality YAML (config/policy_packs/) — 30 min
-[ ] GDPR transfer YAML (config/policy_packs/) — 30 min
-[ ] #7 per-archetype threshold doc — 1 hr
-[ ] #8 FP corpus independence doc — 1 hr
-[ ] #9 maintenance-window-procedure.md — 30 min
+#11 FP measurement methodology 7-layer update — 1 hr
+#10 Conformal prediction confidence bounds — 2 hrs (lowest priority)
+
+NUCLEAR BUILD — WEEK 1: ✅ COMPLETE
+[x] SIR state machine (internal/scoring/sir_state.go) — eb01bcd
+[x] VRF threshold randomization (internal/scoring/vrf_threshold.go) — 04ee471
+[x] GDPR plain language reason (explainability.go) — e89cd42
+[x] DORA tier classifier (explainability.go) — e89cd42
+[x] NIS2 proportionality YAML (config/policy_packs/) — 26e3f21
+[x] GDPR transfer YAML (config/policy_packs/) — 26e3f21
+[x] #7 per-archetype threshold doc — d4b9cc6
+[x] #8 FP corpus independence doc — 90f592f
+[x] #9 maintenance-window-procedure.md — 87cfc48
 
 NUCLEAR BUILD — WEEK 2 (Days 5–10):
 [ ] Merkle audit tree (internal/audit/merkle.go) — 6 hrs
@@ -87,34 +92,26 @@ T1 JWT identity library     ✅ Done — G-IDENTITY passed
 T2 Kong gateway plugin      ✅ Done — RS256 verified end-to-end
 T3 Redis + Postgres store   ✅ Done — health ok
 T4 Velocity + z-score       ✅ Done — G-SCORE passed
-T5 5 YAML policy packs      ✅ Done — 5 OWASP packs
-T6 Explainability engine    ✅ Done — G-EXPLAIN passed + confidence_explanation live
+T5 7 YAML policy packs      ✅ Done — 5 OWASP + NIS2 + GDPR
+T6 Explainability engine    ✅ Done — G-EXPLAIN passed + GDPR plain language + DORA article
 T7 Replay / forensics       ✅ Done — SOC2 export
 T8 First enterprise deploy  🟡 IN PROGRESS — Lloyd meeting week of April 7
 T9 Open header spec draft   ✅ Done — internal draft
 CAT-1 Technical hardening   ✅ Done — all 10 failures addressed
 TW-0 Feature vector storage ✅ Done — scoring_explanations 19 columns
 U-01 Gen Digital ADR        ✅ Done
+SIR state machine           ✅ Done — eb01bcd
+VRF threshold randomization ✅ Done — 04ee471
+GDPR plain language         ✅ Done — e89cd42
+NIS2 + GDPR policy packs    ✅ Done — 26e3f21
+Per-archetype threshold doc ✅ Done — d4b9cc6
+FP corpus independence doc  ✅ Done — 90f592f
+Maintenance window proc     ✅ Done — 87cfc48
 L112 Daily FP metrics job   ✅ Done — 0b44755
 L116 Entra bridge           ✅ Done — 8d1fd72
 L126 DORA verify binary     ✅ Done — f178ce6
 L120 Vendor risk + DPA      ✅ Done — df2f669
 L131 SDK deployment guide   ✅ Done — f311249
-M6-STEP-2                   ✅ Done — 9a674a9
-FP-7 fp_candidates wire     ✅ Done — ac1034a
-PL-2 fail-open fallback     ✅ Done — 649bd98
-PL-5 typed ScoringPayload   ✅ Done — a027502
-PL-12 burst/stress test     ✅ Done — 656fc58
-PL-13 A/B weight validation ✅ Done — 8e1a29d
-PL-14 regression gate suite ✅ Done — be4c5c6
-PL-16 FP bias audit         ✅ Done — 7b9820e
-PL-17 Kong stateless verify ✅ Done — 1cdd3bf
-PL-8 staged curriculum      ✅ Done — 89f9b48
-PL-10 5-category taxonomy   ✅ Done — b76bdcb
-M5-STEP-1 peer cluster      ✅ Done — 6ef9451
-M5-STEP-2 coordinated attack✅ Done — 2e0fbdd
-M7-STEP-1 threshold advisor ✅ Done — 887a58b
-M7-STEP-2 human approval    ✅ Done — 61c283f
 
 METRICS — KNOW COLD
 FP rate:              0.00% on 100-scenario internal corpus
@@ -128,18 +125,18 @@ Call overhead:        0.25ns Linux — zero allocations
 Demo runtime:         ~30 seconds Windows Docker
 Hardening score:      96/100+
 Bias audit:           0.00% FP across all 7 agent archetypes
+Policy packs:         7 total (5 OWASP + NIS2 + GDPR)
 
 COMMERCIAL STATUS
-T8: IN PROGRESS — Lloyd meeting expected week of April 7
+T8: IN PROGRESS — Lloyd meeting week of April 7 — contact today
 Character Capital Labs G6: Decision expected ~April 13
 Leaders in AI Summit NYC: April 21–22
 Momentum AI NYC: April 27–28
 AIAI New York: June 4 (Kuntal Dutta confirmed speaker — BNY Mellon)
-DO NOT ASK ABOUT LLOYD — meeting is week of April 7. Contact him Monday April 7.
 
 PIPELINE
 Contact                         Status
-Lloyd Lemish (NWN)              Meeting week of April 7 — contact Monday April 7
+Lloyd Lemish (NWN)              Meeting week of April 7 — contact TODAY April 7
 Andrew Gyamfi (Translucent AI)  Sitting buyer — Boardy message not sent — PRIORITY
 Andy Watkin-Child               Advisory board + DORA intros — outreach not sent — PRIORITY
 Unmukt Raizada (TrustEvals.ai)  FinServ validation — outreach not sent — PRIORITY
@@ -160,7 +157,7 @@ Redis           agentrepengine-redis-1, AOF+RDB, 512mb noeviction, are_admin ACL
 Scoring service Running on :8080
 Kong            Running — min version 2.8 required
 Go build        Clean — go build ./... passes
-Tests           ALL GREEN — 18 packages — go test ./... ✅ f311249
+Tests           ALL GREEN — go test ./... ✅ 87cfc48
 
 Redis ACL note: default user is OFF. Use:
 docker exec agentrepengine-redis-1 redis-cli --no-auth-warning --user are_admin -a are_redis_dev KEYS "*"
@@ -206,13 +203,13 @@ Next MASTER_LEARNINGS number: L100
 
 NEXT SESSION PRIORITIES (in order)
 
-1. Andrew Gyamfi — Boardy message for direct email — SITTING BUYER — DO TODAY
-2. Unmukt Raizada — LinkedIn direct — DO TODAY
-3. Andy Watkin-Child — LinkedIn direct — DO TODAY
-4. Lloyd — contact Monday April 7 to confirm meeting
+1. Lloyd — contact TODAY April 7 to confirm meeting (LinkedIn)
+2. Andrew Gyamfi — Boardy message for direct email — SITTING BUYER — DO TODAY
+3. Unmukt Raizada — LinkedIn direct — DO TODAY
+4. Andy Watkin-Child — LinkedIn direct — DO TODAY
 5. TW-REHEARSAL — say C1–C12 aloud before Lloyd meeting
 6. M1 language upgrade — 13 phrase replacements across docs (1 hr)
 7. Turner Novak — verify domain (bana vs banana) then email
 8. Sri Rajan / Rock Lambros / David Matousek — send drafted messages
-9. L133 — scripts/hackathon-demo.sh + README demo link (after LoU)
+9. Week 2 nuclear build — Merkle audit tree (internal/audit/merkle.go) — 6 hrs
 10. L134 — Investor deck metrics update (before Leaders in AI Summit April 21)
