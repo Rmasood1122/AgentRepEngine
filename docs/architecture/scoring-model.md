@@ -52,7 +52,7 @@ from the Agentic Trust Architecture research corpus (Z1).
 
 | Score | Band | ATP State | Enforcement Action |
 |-------|------|-----------|-------------------|
-| 700–1000 | TRUSTED | RESOLVE | ALLOW + passive log |
+| 800–1000 | TRUSTED | RESOLVE | ALLOW + passive log |
 | 500–699 | MONITORED | VERIFY | ALLOW + active audit |
 | 200–499 | RESTRICTED | VERIFY+ | THROTTLE + human review on HIGH_RISK |
 | 0–199 | BLOCKED | DEFER | Synthetic response (not 403) |
@@ -79,7 +79,7 @@ Monotonic: adding conflicts never decreases severity.
 ```
 
 Threshold → ATP state mapping:
-- Γ < 0.3 → RESOLVE (score 700–1000)
+- Γ < 0.3 → RESOLVE (score 800–1000)
 - 0.3 ≤ Γ < 0.7 → VERIFY (score 400–699)
 - Γ ≥ 0.7 → DEFER (score 0–399)
 
@@ -127,8 +127,8 @@ HIGH_RISK operation classes:
 - cross_tenant_data_access
 
 When HIGH_RISK is triggered:
-- Score ≥ 700: VERIFY state → human approval required
-- Score < 700: DEFER state → blocked pending review
+- Score ≥ 800: VERIFY state → human approval required
+- Score < 800: DEFER state → blocked pending review
 - Score ≥ 950: auto-RESOLVE available (configurable)
 
 This closes the reputation attack: an adversary cannot build
