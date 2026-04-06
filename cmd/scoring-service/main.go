@@ -121,6 +121,7 @@ func main() {
 	mux.HandleFunc("/audit/replay", requireAPIKey(auditHandler.ReplayHandler))
 	mux.HandleFunc("/audit/export", requireAPIKey(auditHandler.ExportHandler))
 	mux.HandleFunc("/enforcement/override", requireAPIKey(auditHandler.OverrideHandler))
+	mux.HandleFunc("/enforcement/freeze", requireAPIKey(audit.NewFreezeHandler(db, scoreStore.GetRedisClient())))
 
 	srv := &http.Server{
 		Addr:         ":" + port,
