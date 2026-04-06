@@ -9,13 +9,18 @@ Branch: master (push with git push origin master — NOT main)
 Zenodo DOI: 10.5281/zenodo.19169185 — PUBLISHED March 22, 2026
 IP chain: ATP (Dec 2025) → ATG (Dec 2025) → AgentRepEngine (Mar 2026)
 CURRENT STATE — April 6, 2026 (End of Day)
-HEAD: f311249
+HEAD: 46100a2
 go test ./... — ALL GREEN ✅ — 18 packages, 0 failures
 Hardening score: 96/100+
 Tests: 18 packages (added internal/bridge)
 
 April 6 — Engineering Sprint (this session)
-6 tasks completed. All committed and pushed to master.
+10 tasks completed. All committed and pushed to master.
+
+b0c0e4a  #1 min_std_floor wired into ComputeZScore — low-variance agent FP eliminated
+c62b11b  #2 max_score_after_violation cap — trust-shield attack prevention
+1fc89ca  #3 maintenance window score freeze — POST /enforcement/freeze
+46100a2  #4 temporal context + fleet activity multiplier — schedule-driven FPs eliminated
 
 Commit  Task        What Was Built
 0b44755 L112        Daily FP metrics aggregation job + self-verifying SQL views (migrations/005)
@@ -65,7 +70,15 @@ Secondary investor list (10 names) — NOT BUILT
 C-Corp conversion email — NOT SENT
 Sovren Software follow-up — inbound signal, never followed up
 
-REMAINING ENGINEERING (Tier 1 — after LoU signed)
+REMAINING ENGINEERING 
+REMAINING ENGINEERING (no deployment dependency):
+#6 corpus — ALREADY DONE (100 + 50 = 150 scenarios confirmed)
+#7 Per-archetype adaptive threshold doc — 1 hr
+#8 FP corpus independence doc — 1 hr
+#9 docs/ops/maintenance-window-procedure.md — 30 min
+#11 FP measurement methodology 7-layer update — 1 hr
+#10 Conformal prediction confidence bounds — 2 hrs (lowest priority)
+(Tier 1 — after LoU signed)
 L133 — scripts/hackathon-demo.sh + README demo link (2 hrs)
 L134 — Investor deck metrics update: F1=0.9362, 17 packages, M5 claims (30 min)
 
