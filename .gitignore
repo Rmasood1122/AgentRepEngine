@@ -8,3 +8,5 @@ main
 sdk/python/__pycache__/
 sdk/python/**/__pycache__/
 **/*.pyc
+scripts/tools/session_log.json
+scripts/tools/new_chat_starter.txt
