@@ -8,7 +8,7 @@ https://github.com/Rehanrana11/AgentRepEngine
 Branch: master (push with git push origin master — NOT main)
 CURRENT STATE — April 06, 2026
 HEAD: 8742dae
-go test ./... — ALL GREEN ✅
+go test ./... — ALL GREEN ✅ (with SCORING_API_KEY=are-internal-key-change-in-production)
 SESSION CLOSE RECORD
   Session date:     April 06, 2026
   Messages:         0
@@ -53,6 +53,28 @@ REMAINING ENGINEERING (no deployment dependency):
 (Tier 1 — after LoU signed)
 L133 — scripts/hackathon-demo.sh + README demo link (2 hrs)
 L134 — Investor deck metrics update: F1=0.9362, 17 packages, M5 claims (30 min)
+NUCLEAR BUILD — WEEK 1 REMAINING (Day 2–4):
+[ ] SIR state machine (internal/scoring/sir_state.go) — 5 hrs
+[ ] VRF threshold randomization (internal/scoring/vrf_threshold.go) — 3 hrs
+[ ] GDPR plain language reason (explainability.go) — 2 hrs
+[ ] DORA tier classifier (explainability.go) — 1 hr
+[ ] NIS2 proportionality YAML (config/policy_packs/) — 30 min
+[ ] GDPR transfer YAML (config/policy_packs/) — 30 min
+[ ] #7 per-archetype threshold doc — 1 hr
+[ ] #8 FP corpus independence doc — 1 hr
+[ ] #9 maintenance-window-procedure.md — 30 min
+
+NUCLEAR BUILD — WEEK 2 (Days 5–10):
+[ ] Merkle audit tree (internal/audit/merkle.go) — 6 hrs
+[ ] LTL formal verification NuSMV (internal/formal/sir_recovery.smv) — 4 hrs
+[ ] TLA+ ceiling invariant (internal/formal/ceiling_invariant.tla) — 4 hrs
+[ ] Raft consensus (internal/consensus/raft_ceiling.go) — 8 hrs
+
+NUCLEAR BUILD — WEEK 3 (Days 11–15):
+[ ] SPHINCS+ PQC signatures (internal/audit/pqc_signer.go) — 6 hrs
+[ ] ZK-STARK composite proof (internal/zkp/composite_proof.go) — 8 hrs
+[ ] Software TEE attestation (internal/attestation/software_tee.go) — 4 hrs
+[ ] OSCAL SOC2 evidence bundle (internal/compliance/oscal.go) — 3 hrs
 
 CONDITIONAL (blocked on Lloyd prerequisites response)
 Helm chart — only if NWN confirms Kubernetes environment
