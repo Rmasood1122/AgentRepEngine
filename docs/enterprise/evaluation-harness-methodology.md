@@ -253,7 +253,7 @@ detection formula, adjust only sensitivity coefficients.
 - The z-score computation: `z = (observed - mean) / std`
 - The decay function: `H(t) = H(t-1) x e^(-0.1 x days)`
 - The velocity penalty formula: `penalty = min(100 x (z - 3.0), 300)`
-- The score band boundaries: TRUSTED 700+, MONITORED 500+, RESTRICTED 200+, BLOCKED <200
+- The score band boundaries: TRUSTED 800+, MONITORED 500+, RESTRICTED 200+, BLOCKED <200
 - The HIGH_RISK trigger thresholds per OWASP policy pack
 - The hash chain formula for the enforcement log
 

@@ -74,7 +74,7 @@ of the framework.
 
 | NIST AI RMF Subcategory | AgentRepEngine Implementation |
 |------------------------|-------------------------------|
-| MANAGE 1.1 — Responses to AI risks | Four enforcement bands: TRUSTED (700-1000) → ALLOW, MONITORED (500-699) → ALLOW + audit, RESTRICTED (200-499) → THROTTLE, BLOCKED (0-199) → synthetic response. |
+| MANAGE 1.1 — Responses to AI risks | Four enforcement bands: TRUSTED (800-1000) → ALLOW, MONITORED (500-699) → ALLOW + audit, RESTRICTED (200-499) → THROTTLE, BLOCKED (0-199) → synthetic response. |
 | MANAGE 1.3 — Responses to emergent risks | HIGH_RISK operation class: bulk_pii_export, credential_access, lateral_movement, mass_deletion → VERIFY state regardless of score. Human review required before any HIGH_RISK action proceeds. |
 | MANAGE 2.2 — Mechanisms for incident response | Override workflow: POST /enforcement/override with reviewer_id + reason_code. Forensics replay: GET /audit/replay. SOC2 export: GET /audit/export?format=soc2. |
 | MANAGE 2.4 — Risk treatments documented | Every enforcement decision produces structured reason object stored in tamper-evident log. Decision rationale preserved indefinitely. |
