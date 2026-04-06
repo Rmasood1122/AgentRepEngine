@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/agentrepengine/are/internal/api"
 	"github.com/agentrepengine/are/internal/audit"
 	"github.com/agentrepengine/are/internal/enforcement"
 	"github.com/agentrepengine/are/internal/identity"
@@ -108,6 +109,7 @@ func main() {
 			time.Sleep(60 * time.Second)
 		}
 	}()
+	apiHandler := api.NewHandler(scoring.NewSIRMachine(scoring.DefaultSIRThresholds(), scoreStore))
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", healthHandler(db, scoreStore, modeCtrl))
@@ -123,6 +125,7 @@ func main() {
 	mux.HandleFunc("/audit/export", requireAPIKey(auditHandler.ExportHandler))
 	mux.HandleFunc("/dashboard", dashboardHandler(db))
 	mux.HandleFunc("/api/regulatory-package", requireAPIKey(regulatoryPackageHandler(db)))
+	mux.HandleFunc("/agent/", requireAPIKey(apiHandler.HandleAgentClear))
 
 	srv := &http.Server{
 		Addr:         ":" + port,

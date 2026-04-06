@@ -102,10 +102,6 @@ func (s *ScoreStore) GetScore(agentDID string) (*ScoreResult, error) {
 		}, nil
 	}
 	if err != nil {
-		// PL-2: Both Redis and PostgreSQL unavailable.
-		// Fail-open at MONITORED — never fail-closed on infrastructure failure.
-		// MONITORED allows the agent to continue with active audit logging.
-		// Staleness note: score may be stale by up to Redis TTL (60s) + propagation delay.
 		slog.Error("score_lookup_both_stores_failed_failing_open",
 			"agent_did", agentDID,
 			"error", err)
@@ -151,7 +147,6 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 		reasonJSON = []byte(fmt.Sprintf(`{"score":%d,"band":"%s"}`, score, band))
 	}
 
-	// Extract policy name for metrics label
 	policyName := "unknown"
 	if rm, ok := reasonObj.(map[string]interface{}); ok {
 		if pf, ok := rm["policy_fired"].(string); ok && pf != "" {
@@ -159,13 +154,11 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 		}
 	}
 
-	// BlockedDecisionsTotal: only increment on actual BLOCKED decisions
 	if band == "BLOCKED" {
 		metrics.BlockedDecisionsTotal.WithLabelValues("BLOCKED", policyName).Inc()
 	}
 	metrics.ScoreUpdatesTotal.WithLabelValues(band, policyName).Inc()
 
-	// PostgreSQL first — source of truth
 	_, err = s.db.Exec(`
 		UPDATE agent_identities
 		SET current_score = $1, last_seen = NOW()
@@ -175,7 +168,6 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 		return fmt.Errorf("postgres score write: %w", err)
 	}
 
-	// Write scoring dimensions to scoring_explanations — TW-0 fix
 	if result, ok := reasonObj.(*scoring.ScoredResult); ok {
 		_, err = s.db.Exec(`
 			INSERT INTO scoring_explanations
@@ -204,9 +196,6 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 
 	key := "score:" + agentDID
 
-	// FP-7: Log RESTRICTED and BLOCKED decisions to fp_candidates for human review.
-	// confirmed_fp = NULL until a human reviews. Foundation of production FP measurement.
-	// Additive — never modifies enforcement_decisions or scoring_explanations.
 	if band == "RESTRICTED" || band == "BLOCKED" {
 		_, fpErr := s.db.Exec(`
 			INSERT INTO fp_candidates
@@ -223,7 +212,6 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 	}
 
 	if band == "BLOCKED" {
-		// Immediate cache invalidation on block
 		if err := s.rdb.Del(s.ctx, key).Err(); err != nil {
 			slog.Error("redis_invalidation_failed",
 				"agent_did", agentDID, "error", err)
@@ -231,8 +219,6 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 			slog.Info("cache_invalidated_on_block",
 				"agent_did", agentDID, "score", score)
 		}
-		// H5 FIX: Fire SIEM webhook on every BLOCKED decision
-		// Fire-and-forget — SIEM delivery never blocks enforcement
 		s.siem.SendBlocked(agentDID, score, 0, policyName, reasonJSON)
 		slog.Info("siem_webhook_fired",
 			"agent_did", agentDID,
@@ -290,4 +276,30 @@ func (s *ScoreStore) EnqueueEvent(agentDID, eventType string,
 	}
 
 	return nil
+}
+
+// GetSIRRecord retrieves the SIR lifecycle record for an agent from Redis.
+// Key pattern: sir:{agent_did}
+func (s *ScoreStore) GetSIRRecord(ctx context.Context, agentDID string) (*scoring.SIRRecord, error) {
+	key := "sir:" + agentDID
+	data, err := s.rdb.Get(ctx, key).Bytes()
+	if err != nil {
+		return nil, fmt.Errorf("sir_store: not found for %s", agentDID)
+	}
+	var record scoring.SIRRecord
+	if err := json.Unmarshal(data, &record); err != nil {
+		return nil, fmt.Errorf("sir_store: unmarshal failed: %w", err)
+	}
+	return &record, nil
+}
+
+// PutSIRRecord persists the SIR lifecycle record for an agent to Redis.
+// TTL: 90 days (aligns with queue retention policy).
+func (s *ScoreStore) PutSIRRecord(ctx context.Context, record *scoring.SIRRecord) error {
+	key := "sir:" + record.AgentDID
+	data, err := json.Marshal(record)
+	if err != nil {
+		return fmt.Errorf("sir_store: marshal failed: %w", err)
+	}
+	return s.rdb.Set(ctx, key, data, 90*24*time.Hour).Err()
 }

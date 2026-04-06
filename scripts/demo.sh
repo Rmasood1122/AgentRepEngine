@@ -115,6 +115,8 @@ VALUES (
         \"decision\": \"BLOCKED\",
         \"agent_did\": \"$AGENT_DID\",
         \"score\": 187,
+        \"confidence_pct\": 12,
+        \"policy_fired\": \"bulk_pii_access_prevention_v1\",
         \"score_delta\": -556,
         \"score_period_hours\": 6,
         \"trigger_events\": [
