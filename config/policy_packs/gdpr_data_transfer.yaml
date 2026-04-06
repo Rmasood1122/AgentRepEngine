@@ -1,0 +1,56 @@
+# GDPR Article 44-49 — Transfers of Personal Data to Third Countries
+# Prevents AI agents from exfiltrating data to unauthorized endpoints
+# outside the EEA or without adequate safeguards.
+name: gdpr_data_transfer
+version: "1.0.0"
+gdpr_ref: "Art.44 — General principle for transfers"
+dora_ref: "Art.10 — ICT incident detection and response"
+description: >
+  Detects and blocks AI agent behaviors consistent with unauthorized
+  data transfer to third-country endpoints. Covers:
+  - Bulk data exfiltration to unknown endpoints
+  - Cross-tenant data access followed by external API calls
+  - High-volume PII access combined with outbound endpoint enumeration
+  Supports GDPR Art.44 compliance by ensuring agent actions do not
+  constitute unauthorized international data transfers.
+thresholds:
+  cross_tenant_probe_count:
+    warning: 1       # any cross-tenant probe → immediate log
+    throttle: 3      # 3+ probes → rate limit
+    block: 5         # 5+ probes → block
+  unique_endpoints_per_hour:
+    warning: 20
+    throttle: 40
+    block: 80
+  pii_plus_endpoint_combined:
+    # Triggered when BOTH pii_field_access_rate > 100 AND unique_endpoints > 20
+    block: 1         # any occurrence → block
+score_penalties:
+  warning: -50
+  throttle: -150
+  block: -400
+enforcement_action: BLOCK
+escalation_action: BLOCK
+human_review_required: true
+gdpr_rights:
+  right_to_explanation: true
+  explanation_field: "gdpr_plain_language"
+  automated_decision_disclosure: true
+  disclosure_note: >
+    Every BLOCK decision includes gdpr_plain_language field in reason_object
+    meeting GDPR Art.22(3) requirement for meaningful information about
+    the logic of automated decision-making.
+explainability_template:
+  policy_fired: gdpr_data_transfer_v1
+  policy_threshold: "Cross-tenant probe or endpoint enumeration exceeds authorized threshold"
+  recommended_action: "Verify agent authorization for cross-boundary data access. Human review required."
+regulatory_evidence:
+  framework: GDPR
+  articles:
+    - "Art.44 — General principle for transfers"
+    - "Art.22 — Automated individual decision-making"
+    - "Art.32 — Security of processing"
+  audit_field: "gdpr_plain_language"
+  evidence_note: >
+    reason_object.gdpr_plain_language satisfies Art.22(3) disclosure requirement.
+    enforcement_decisions hash chain provides Art.32 security of processing evidence.

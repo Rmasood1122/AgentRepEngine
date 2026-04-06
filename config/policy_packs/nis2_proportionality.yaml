@@ -1,0 +1,44 @@
+# NIS2 Directive — Article 21 — Proportionality of Security Measures
+# Ensures AI agent enforcement actions are proportionate to the assessed risk level.
+# Required for EU operators subject to NIS2 (financial, health, infrastructure sectors).
+name: nis2_proportionality
+version: "1.0.0"
+nis2_ref: "Art.21 — Security of network and information systems"
+dora_ref: "Art.9 — Protection and prevention"
+description: >
+  Enforces proportionate response to AI agent behavioral anomalies.
+  Low-confidence anomalies → observe only.
+  Medium-confidence → throttle with audit.
+  High-confidence → block with mandatory human review.
+  Prevents disproportionate blocking that would violate NIS2 Art.21(2)(a)
+  requirement for risk-proportionate security measures.
+thresholds:
+  confidence_pct_observe_max: 40     # below 40% confidence → observe only, no enforcement
+  confidence_pct_throttle_max: 70    # 40–70% confidence → throttle + audit
+  confidence_pct_block_min: 71       # above 70% confidence → block permitted
+  zscore_proportionality_floor: 2.0  # z < 2.0 → never block regardless of score
+score_penalties:
+  observe: 0
+  throttle: -50
+  block: -200
+enforcement_action: THROTTLE
+escalation_action: BLOCK
+human_review_required: true
+proportionality_override:
+  enabled: true
+  description: >
+    If confidence_pct < confidence_pct_block_min, enforcement is capped at THROTTLE
+    even if score band is BLOCKED. Audit log records proportionality_override=true.
+    CISO must manually escalate to BLOCK for low-confidence decisions.
+explainability_template:
+  policy_fired: nis2_proportionality_v1
+  policy_threshold: "Confidence >{confidence_pct_block_min}% required for BLOCK enforcement"
+  recommended_action: "Review confidence score before escalating enforcement level"
+regulatory_evidence:
+  framework: NIS2
+  article: "Art.21(2)(a) — Policies on risk analysis and information system security"
+  audit_field: "proportionality_override"
+  evidence_note: >
+    Every enforcement decision includes confidence_pct in reason_object.
+    Proportionality override events are logged to enforcement_decisions
+    with override=true for NIS2 audit trail.
