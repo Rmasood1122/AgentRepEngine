@@ -549,6 +549,7 @@ def cmd_close(auto=False):
         with open(starter_file, 'w', encoding='utf-8') as f:
             f.write(starter)
         print(f"{GREEN}✅ New chat starter saved to: scripts/tools/new_chat_starter.txt{RESET}")
+        os.system("notepad.exe scripts/tools/new_chat_starter.txt")
         print(f"   Open it, copy everything, paste into new Claude chat.\n")
     except Exception as e:
         print(f"{YELLOW}Could not save starter file: {e}{RESET}")
