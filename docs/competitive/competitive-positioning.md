@@ -26,7 +26,7 @@ Four-hour install. First blocked incident within a week."
 
 **AI Platform Owner (champion):**
 "Production guardrails for your agents — safer tool execution, fewer
-incidents, and measurable governance without re-architecting your stack.
+incidents, and measurable enforcement evidence without re-architecting your stack.
 Check Point bundles this in 6 months. Microsoft ships it May 1.
 We deploy today and we catch what they can't."
 
