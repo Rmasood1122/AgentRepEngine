@@ -113,6 +113,24 @@ func (s *Scorer) Score(orgID, agentDID string, vector FeatureVector,
 	// Final score
 	weights := s.config.ToScoreWeights()
 	newScore := ComputeScore(H, V, weights)
+
+	// #2 max_score_after_violation cap
+	// Prevents trust-shield attacks where high historical trust (H=900)
+	// masks a confirmed z-score violation. A trusted agent that just
+	// triggered a genuine anomaly must drop to RESTRICTED minimum.
+	// Without this cap: trusted agent at H=900 + V penalty stays at ~650 MONITORED.
+	// With this cap: drops to ≤499 RESTRICTED — forces human review.
+	const MaxScoreAfterViolation = 499
+	if blendedZ > s.config.ZScoreThreshold && newScore > MaxScoreAfterViolation {
+		slog.Warn("trust_shield_cap_applied",
+			"agent_did", agentDID,
+			"pre_cap_score", newScore,
+			"capped_to", MaxScoreAfterViolation,
+			"blended_z", blendedZ,
+		)
+		newScore = MaxScoreAfterViolation
+	}
+
 	band := ScoreBand(newScore)
 	delta := newScore - previousScore
 
