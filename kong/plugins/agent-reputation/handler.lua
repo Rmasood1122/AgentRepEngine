@@ -305,6 +305,26 @@ function AgentReputationHandler:access(conf)
         return
     end
 
+    -- L119: DID spoofing prevention
+    -- X-Agent-DID header value must match JWT agent_did claim.
+    -- Fail-open on missing header DID or missing JWT claim (legacy agents).
+    -- Only reject on explicit mismatch: both present AND different.
+    local header_did = kong.request.get_header("X-Agent-DID")
+    local jwt_did = claims.agent_did
+    if header_did and header_did ~= "" and jwt_did and jwt_did ~= "" then
+        if header_did ~= jwt_did then
+            kong.log.warn("DID_SPOOF_DETECTED: header=", header_did,
+                " jwt=", jwt_did, " — rejecting request")
+            if conf.enforcement_mode == "enforce" then
+                return synthetic_response()
+            end
+            kong.service.request.set_header("X-Agent-DID-Spoof", "true")
+            kong.service.request.set_header("X-Agent-Score", "0")
+            kong.service.request.set_header("X-Agent-Band", "BLOCKED")
+            return
+        end
+    end
+
     kong.service.request.set_header("X-Gateway-Verified", "true")
     kong.service.request.set_header("X-Agent-DID-Verified", agent_did)
     kong.service.request.set_header("X-Agent-Org", claims.org_id)
