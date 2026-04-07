@@ -193,16 +193,55 @@ func (c *EventConsumer) processEvent(id int64, agentDID,
 	newScore := ComputeScore(H, V, DefaultWeights)
 	band := ScoreBand(newScore)
 
-	// PL-5: typed ScoringPayload replaces map[string]interface{}.
-	// ~60% payload size reduction. Eliminates reflection overhead on marshal.
-	// confidence_pct: inverse of anomaly confidence. At z=0→100%, at z≥3.0→0%.
+	// confidence_pct: inverse of anomaly confidence.
+	// At z=0 → 100%, at z≥3.0 → 0%.
 	confidencePct := int(math.Max(0, math.Min(100, (1.0-(worstZ/3.0))*100)))
+
+	// TW-6: Variance growth rate check — early warning for slow-walk attacks.
+	// Runs after z-score scoring. If variance doubled in last 7 days → HIGH_RISK.
+	// This catches slow-walk attacks that evade z-score by gradually training
+	// the baseline over multiple days. Z-score stays low; variance growth catches it.
+	policyFired := "no_policy_fired"
+	varianceHighRisk := false
+	vgrResults, vgrErr := CheckVarianceGrowthRate(c.db, orgID, agentDID)
+	if vgrErr != nil {
+		slog.Warn("variance_growth_check_failed",
+			"org_id", orgID,
+			"agent_did", agentDID,
+			"error", vgrErr,
+		)
+	} else {
+		for _, vgr := range vgrResults {
+			if vgr.HighRisk {
+				varianceHighRisk = true
+				policyFired = "variance_growth_rate_exceeded"
+				slog.Warn("slow_walk_early_warning",
+					"org_id", orgID,
+					"agent_did", agentDID,
+					"feature", vgr.Feature,
+					"growth_rate", vgr.GrowthRate,
+					"threshold", VarianceGrowthThreshold,
+					"window_days", VarianceWindowDays,
+				)
+				break
+			}
+		}
+	}
+
+	// Apply variance growth penalty — additive on top of z-score penalty.
+	// HIGH_RISK variance growth: -150 points, flags for human review.
+	// Rationale: slow-walk attack must not silently execute high-value actions
+	// even when z-score looks normal.
+	if varianceHighRisk {
+		newScore = int(max(0, float64(newScore)-150))
+		band = ScoreBand(newScore)
+	}
 
 	reason := ScoringPayload{
 		Decision:      band,
 		AgentDID:      agentDID,
 		OrgID:         orgID,
-		Score:         newScore,
+		Score:         int(newScore),
 		EventType:     eventType,
 		WorstZ:        worstZ,
 		WorstFeature:  worstFeature,
@@ -210,7 +249,7 @@ func (c *EventConsumer) processEvent(id int64, agentDID,
 		HComponent:    H,
 		VComponent:    V,
 		ComputedAt:    time.Now().Unix(),
-		PolicyFired:   "no_policy_fired",
+		PolicyFired:   policyFired,
 		ConfidencePct: confidencePct,
 	}
 
@@ -218,13 +257,14 @@ func (c *EventConsumer) processEvent(id int64, agentDID,
 		"agent_did", agentDID,
 		"org_id", orgID,
 		"event_type", eventType,
-		"score", newScore,
+		"score", int(newScore),
 		"band", band,
 		"worst_z", worstZ,
 		"worst_feature", worstFeature,
+		"policy_fired", policyFired,
 	)
 
-	return c.scoreWriter.WriteScore(agentDID, newScore, reason)
+	return c.scoreWriter.WriteScore(agentDID, int(newScore), reason)
 }
 
 // getAgentContext fetches current score and org_id from agent_identities.
