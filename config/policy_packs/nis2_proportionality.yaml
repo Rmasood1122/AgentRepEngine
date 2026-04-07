@@ -13,10 +13,15 @@ description: >
   Prevents disproportionate blocking that would violate NIS2 Art.21(2)(a)
   requirement for risk-proportionate security measures.
 thresholds:
-  confidence_pct_observe_max: 40     # below 40% confidence → observe only, no enforcement
-  confidence_pct_throttle_max: 70    # 40–70% confidence → throttle + audit
-  confidence_pct_block_min: 71       # above 70% confidence → block permitted
-  zscore_proportionality_floor: 2.0  # z < 2.0 → never block regardless of score
+  thresholds:
+  confidence_pct:
+    warning: 40.0
+    throttle: 70.0
+    block: 71.0
+  zscore_proportionality:
+    warning: 1.5
+    throttle: 2.0
+    block: 3.0
 score_penalties:
   observe: 0
   throttle: -50

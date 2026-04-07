@@ -9,8 +9,8 @@ func TestPolicyEngineLoads(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to load policy packs: %v", err)
 	}
-	if len(engine.packs) != 5 {
-		t.Errorf("expected 5 policy packs, got %d", len(engine.packs))
+	if len(engine.packs) != 7 {
+		t.Errorf("expected 7 policy packs, got %d", len(engine.packs))
 	}
 	for _, p := range engine.packs {
 		t.Logf("✅ Loaded: %s (%s)", p.Name, p.OWASPRef)
