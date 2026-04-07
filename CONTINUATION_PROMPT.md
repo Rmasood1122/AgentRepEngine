@@ -209,20 +209,84 @@ CISO unlock phrase: "You control the pace — we don't advance to enforce mode w
 
 LEARNING INTELLIGENCE
 Version: v3.1 (uploaded to Claude Project March 31)
-Total learnings: 143 (L103–L143 extracted — PenTest+ PT0-003 session complete)
+Total learnings: 143 (L103–L143 — PenTest+ PT0-003 complete)
 Next learning number: L144
 Next MASTER_LEARNINGS number: L100
-NOTE: GENERATE not yet called for L144 — wait for paste or explicit command next session.
+NOTE: GENERATE not yet called — L144 waiting for paste next session.
+
+L135–L143 RECOVERED (PenTest+ PT0-003 — all COMPOUND):
+L135 — RAG/behavioral grounding analogy — Klarna/Intercom proof points → TW-1 + C13
+L136 — Low-and-slow recon = slow-walk baseline poisoning → TW-1 talking point
+L137 — ARP poisoning = agent identity spoofing → TW-1 identity argument
+L138 — Credential stuffing = stolen JWT replay → TW-1 identity argument
+L139 — OWASP #9 logging failures — 200-day breach gap → TW-1 + C14 claim
+L140 — SSRF/business logic = agent scope escalation → validates HIGH_RISK triggers
+L141 — SQL injection/XSS = agent payload injection → expands TW-4 scope
+L142 — API security/cloud misconfig = ARE deployment surface → prereqs checklist
+L143 — JWT session management = ARE identity hardening → handler.lua exp check
+
+UNAPPLIED BUILD TASKS — L135–L143 (before Lloyd, low effort):
+[ ] L139: Add C14 "200-day detection gap" to Lloyd_meeting_prep.md          15 min
+[ ] L141: Add timestamp manipulation to TW-4 scope                          15 min
+[ ] L142: Add API key rotation to prerequisites-checklist.md                30 min
+[ ] L143: Verify handler.lua validates JWT exp claim — fix if not            30 min
+
+UNAPPLIED TIER 1 TASKS (from LEARNING_INTELLIGENCE v3.1 — before Lloyd):
+[ ] TW-0:         Feature vector storage verification (15 min) ★ CRITICAL
+[ ] TW-PRE-2:     Org-scoped baseline key verification (20 min) ★ CRITICAL
+[ ] TW-1:         Lloyd_meeting_prep.md — 13 talking points (60 min)
+[ ] TW-REHEARSAL: Say C1–C12 aloud (20 min)
+[ ] TW-2:         LoU staged curriculum + Article 22 note (60 min)
+[ ] TW-5:         tests/held_out/ creation (30 min) ★ UNLOCKS PL-16
+[ ] TW-7:         4-metric F1 reporting across all docs (30 min)
+[ ] TW-9:         evaluation-harness-methodology.md (60 min)
+[ ] TW-11:        prerequisites-checklist.md updates (45 min)
+[ ] TW-3:         Attack corpus expansion 30→50+ scenarios (120 min)
+[ ] TW-4:         Kong payload validation + timestamp check (60 min)
+[ ] TW-6:         Variance growth rate trigger in policy.go (120 min)
+
+UNAPPLIED PHASE 0 DOC TASKS (from LEARNINGS_DELTA — before Lloyd):
+[ ] L117: Fix score band threshold inconsistency (700 vs 800) in docs        30 min
+[ ] L118: docs/enterprise/observe-to-enforce-criteria.md (new)               60 min
+[ ] L110: Self-verifying SQL as C13 in Lloyd_meeting_prep.md                 30 min
+[ ] L111: FP claim Tier 2 update everywhere ("150 scenarios, <2% at 95% CI") 30 min
+[ ] L127: Governance vs enforcement language audit across docs                30 min
+[ ] L121: ARE SOC2(b) framing in docs                                        30 min
+[ ] L132: docs/enterprise/pilot-case-study-template.md (new)                 2 hrs
+[ ] L133: scripts/hackathon-demo.sh + README demo link                       2 hrs ← after LoU
+[ ] L134: Investor deck metrics update (F1=0.9362, 17 packages)              30 min ← before April 21
+
+LLOYD CLAIMS — UPDATED C1–C14
+C1  "Enforcement at your gateway. Data never leaves. Auditors verify themselves."
+C2  "ARE implements the NIST/OWASP standard for AI agent security."
+C3  "Passes every item on the regulatory accountability checklist. Out of the box."
+C4  "94% confident this agent is anomalous — based on 30 days of its own baseline."
+C5  "Financial services proved this architecture works. ARE applies it to agents."
+C6  "Fails open. Agents keep running. SOC sees it before you ask."
+C7  "Below the application layer. Agents can't see it. Can't route around it."
+C8  "30-day observe mode. At day 30: ROI quantified, incidents documented, decision yours."
+C9  "LangChain, LlamaIndex, custom. If it goes through Kong, ARE sees it."
+C10 "The baseline updates on every transaction. Enforcement gets more precise the longer it runs."
+C11 "Every enforcement decision is human-readable. Agent ID, score, confidence, reason."
+C12 "Regulators are about to require AI audit trails. ARE is the implementation, already running."
+C13 "Here is the SQL query. Run it yourself. The result is your FP rate. No vendor controls the measurement."
+C14 "The average breach goes undetected 200 days. ARE detects behavioral drift in real time."
+CISO unlock phrase: "You control the pace — we don't advance to enforce mode without your sign-off after 14 days of clean observe."
 
 NEXT SESSION PRIORITIES (in order)
 
-1. Lloyd — confirm rescheduled date (~April 21 conflicts with Leaders in AI Summit — resolve)
+COMMERCIAL (do before any build work):
+1. Lloyd — confirm exact rescheduled date (April 21 conflicts with Leaders in AI Summit — resolve NOW)
 2. Andrew Gyamfi — Boardy message for direct email — SITTING BUYER — DO FIRST
-3. Unmukt Raizada — LinkedIn direct — DO TODAY
-4. Andy Watkin-Child — LinkedIn direct — DO TODAY
-5. TW-REHEARSAL — say C1–C12 aloud before Lloyd meeting
-6. M1 language upgrade — 13 phrase replacements across docs (1 hr)
-7. Turner Novak — verify domain (bana vs banana) then email
-8. Sri Rajan / Rock Lambros / David Matousek — send drafted messages
-9. L134 — Investor deck metrics update (before Leaders in AI Summit April 21)
-10. L144 — next learning session (paste content or say GENERATE)
+3. Unmukt Raizada — LinkedIn direct
+4. Andy Watkin-Child — LinkedIn direct
+
+BUILD (after at least one commercial action taken):
+5. TW-0 — feature vector storage verification (15 min, zero risk)
+6. TW-PRE-2 — org-scoped baseline verification (20 min)
+7. TW-1 — Lloyd_meeting_prep.md (60 min) — includes C13, C14 from L139
+8. TW-REHEARSAL — say C1–C14 aloud (20 min)
+9. L118 — observe-to-enforce-criteria.md (60 min) — Lloyd will ask for this
+10. L132 — pilot-case-study-template.md (2 hrs) — must exist before pilot starts
+11. L134 — investor deck metrics update (30 min) — before April 21
+12. L144 — next learning session (paste content or say GENERATE)
