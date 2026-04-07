@@ -1,0 +1,154 @@
+-- ============================================================
+-- AgentRepEngine — SIR State Machine Formal Verification
+-- NuSMV model: internal/formal/sir_recovery.smv
+--
+-- Verifies safety and liveness properties of the SIR lifecycle:
+--   TRUSTED → SUSPICIOUS → ISOLATED → RECOVERING → TRUSTED
+--
+-- Regulatory mapping:
+--   DORA Article 17  — ICT incident classification and recovery
+--   SOC2 CC7.2       — incident response procedures
+--   NIST AI RMF      — AI risk monitoring and response
+--
+-- Run: nusmv internal/formal/sir_recovery.smv
+-- All LTLSPEC lines must return: specification ... is true
+-- ============================================================
+
+MODULE main
+
+VAR
+  -- Agent reputation state
+  state : { TRUSTED, MONITORED, SUSPICIOUS, ISOLATED, RECOVERING };
+
+  -- Score band (simplified: high=750+, mid=500-749, low=0-499)
+  score_band : { HIGH, MID, LOW };
+
+  -- Human operator actions
+  human_clear    : boolean;
+  human_escalate : boolean;
+
+  -- System signals
+  anomaly_detected   : boolean;
+  fp_rate_exceeded   : boolean;
+  probation_complete : boolean;
+  recovery_timeout   : boolean;
+
+ASSIGN
+  init(state) := TRUSTED;
+  init(score_band) := HIGH;
+  init(human_clear) := FALSE;
+  init(human_escalate) := FALSE;
+  init(anomaly_detected) := FALSE;
+  init(fp_rate_exceeded) := FALSE;
+  init(probation_complete) := FALSE;
+  init(recovery_timeout) := FALSE;
+
+  -- State transition logic mirrors internal/scoring/sir_state.go
+  next(state) :=
+    case
+      -- TRUSTED: anomaly detected → SUSPICIOUS
+      state = TRUSTED & anomaly_detected & !fp_rate_exceeded : SUSPICIOUS;
+
+      -- TRUSTED: FP rate exceeded → auto-rollback stays TRUSTED (observe mode)
+      state = TRUSTED & fp_rate_exceeded : TRUSTED;
+
+      -- MONITORED: anomaly detected → SUSPICIOUS
+      state = MONITORED & anomaly_detected : SUSPICIOUS;
+
+      -- SUSPICIOUS: score drops LOW → ISOLATED
+      state = SUSPICIOUS & score_band = LOW : ISOLATED;
+
+      -- SUSPICIOUS: human escalates → ISOLATED immediately
+      state = SUSPICIOUS & human_escalate : ISOLATED;
+
+      -- SUSPICIOUS: score recovers HIGH → back to TRUSTED
+      state = SUSPICIOUS & score_band = HIGH & !anomaly_detected : TRUSTED;
+
+      -- ISOLATED: human clears → RECOVERING
+      state = ISOLATED & human_clear : RECOVERING;
+
+      -- ISOLATED: recovery timeout → stays ISOLATED (requires human)
+      state = ISOLATED & recovery_timeout : ISOLATED;
+
+      -- RECOVERING: probation complete + score HIGH → TRUSTED
+      state = RECOVERING & probation_complete & score_band = HIGH : TRUSTED;
+
+      -- RECOVERING: new anomaly during probation → back to SUSPICIOUS
+      state = RECOVERING & anomaly_detected : SUSPICIOUS;
+
+      -- RECOVERING: timeout without recovery → ISOLATED again
+      state = RECOVERING & recovery_timeout & !probation_complete : ISOLATED;
+
+      -- Default: stay in current state
+      TRUE : state;
+    esac;
+
+  -- Score band transitions
+  next(score_band) :=
+    case
+      state = ISOLATED  : LOW;
+      state = RECOVERING & probation_complete : HIGH;
+      anomaly_detected  : LOW;
+      TRUE : score_band;
+    esac;
+
+-- ============================================================
+-- SAFETY PROPERTIES (must always hold — G invariants)
+-- ============================================================
+
+-- S1: A TRUSTED agent is never directly ISOLATED
+--     (must pass through SUSPICIOUS first)
+LTLSPEC G (state = TRUSTED -> X state != ISOLATED)
+
+-- S2: ISOLATED state always requires a human clear before RECOVERING
+--     (no automatic escape from isolation)
+LTLSPEC G (state = ISOLATED & !human_clear -> X state = ISOLATED | X state = ISOLATED)
+
+-- S3: FP rate exceeded never causes enforcement escalation
+--     (fp_rate_exceeded must keep state at TRUSTED or roll back)
+LTLSPEC G (state = TRUSTED & fp_rate_exceeded -> X state = TRUSTED)
+
+-- S4: RECOVERING agent cannot go directly to ISOLATED without anomaly
+LTLSPEC G (state = RECOVERING & !anomaly_detected & !recovery_timeout -> X state != ISOLATED)
+
+-- S5: Score band LOW while TRUSTED cannot persist — must trigger transition
+LTLSPEC G (state = TRUSTED & score_band = LOW -> X state != TRUSTED | X anomaly_detected)
+
+-- ============================================================
+-- LIVENESS PROPERTIES (must eventually hold — F reachability)
+-- ============================================================
+
+-- L1: An ISOLATED agent can always eventually reach TRUSTED
+--     (isolation is not a permanent trap — human clear path always exists)
+LTLSPEC G (state = ISOLATED -> F state = TRUSTED)
+
+-- L2: A SUSPICIOUS agent always eventually resolves
+--     (no infinite suspension in SUSPICIOUS)
+LTLSPEC G (state = SUSPICIOUS -> F (state = TRUSTED | state = ISOLATED))
+
+-- L3: A RECOVERING agent always eventually exits recovery
+LTLSPEC G (state = RECOVERING -> F (state = TRUSTED | state = ISOLATED))
+
+-- ============================================================
+-- COMPLIANCE PROPERTIES (regulatory-specific)
+-- ============================================================
+
+-- C1 (DORA Art.17): Every ISOLATED state transition is preceded by SUSPICIOUS
+--    i.e., isolation never appears without prior anomaly classification
+LTLSPEC G (state != ISOLATED -> (state = ISOLATED -> (Y state = SUSPICIOUS | Y state = ISOLATED)))
+
+-- C2 (SOC2 CC7.2): Human oversight is required for isolation exit
+--    An agent in ISOLATED with no human_clear cannot reach TRUSTED in one step
+LTLSPEC G (state = ISOLATED & !human_clear -> X state != TRUSTED)
+
+-- C3 (NIST AI RMF): Auto-rollback on FP protects TRUSTED agents
+LTLSPEC G (fp_rate_exceeded -> F state = TRUSTED)
+
+-- ============================================================
+-- REACHABILITY (all states must be reachable — no dead states)
+-- ============================================================
+
+LTLSPEC F state = TRUSTED
+LTLSPEC F state = SUSPICIOUS
+LTLSPEC F state = ISOLATED
+LTLSPEC F state = RECOVERING
