@@ -97,7 +97,17 @@ UNAPPLIED PHASE 0 DOC TASKS (from LEARNINGS_DELTA):
 PHASE 2 DESIGN TASKS (after Lloyd LoU signed):
 [ ] docs/architecture/agent-behavioral-passport-design.md              2 hrs
 [ ] Zenodo paper: Agent Behavioral Passport Standard v1.0              2 hrs
-[ ] Cornell Tech / NYU Tandon outreach for corpus validation           30 min
+[ ] Cornell Tech / NYU Tandon outreach for corpus validation 
+TIER 2 TASKS (after LoU signed — full list in LEARNING_INTELLIGENCE v3.1 lines 352–551)
+Key items:
+[ ] PL-SIEM-VERIFY: audit trail format verification (45 min)
+[ ] PL-SECURITY-ATTESTATION: 5-section security doc (3 hrs)
+[ ] PL-2: three-tier Redis fallback (3 hrs)
+[ ] PL-6: Welford's algorithm baseline scalability (3 hrs)
+[ ] PL-12: burst/stress test 50 concurrent requests (2 hrs)
+[ ] PL-13: A/B threshold weight validation (1 hr)
+[ ] PL-16: per-agent-type FP bias audit (1 hr)
+[ ] PL-23: threshold change protocol doc (30 min)          30 min
 
 NUCLEAR BUILD — ALL COMPLETE ✅
 Week 1: SIR, VRF, GDPR, NIS2, threshold docs, FP corpus, maintenance
