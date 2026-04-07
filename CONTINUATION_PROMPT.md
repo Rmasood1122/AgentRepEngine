@@ -36,19 +36,19 @@ HEAD: 0fdde3e
 go test ./... — ALL GREEN ✅ (with SCORING_API_KEY=are-internal-key-change-in-production)
 SESSION CLOSE RECORD
   Session date:     April 07, 2026
-  Messages:         ~180
-  Duration:         ~8 hrs
-  Last action:      TW-0 + TW-PRE-2 verified, CONTINUATION_PROMPT updated
-  Irreversible:     YES ✅
+  Messages:         ~300+
+  Duration:         ~12 hrs
+  Last action:      10-item roadmap executed — all Category A + B complete
+  Irreversible:     YES ✅ — G-COMMERCIAL structural, 8 commits pushed
 RECENT COMMITS
-0fdde3e docs: TW-0 + TW-PRE-2 both PASS — feature vector + org-scoped baseline verified
-ffd8922 docs: CONTINUATION_PROMPT — L135-L143 recovered, all unapplied tasks documented
-8355048 chore: CONTINUATION_PROMPT — Week 2+3 nuclear build complete, HEAD 883fbd1
-883fbd1 feat: OSCAL SOC2 evidence bundle — NIST OSCAL 1.1.2 SOC2/DORA compliance assessment
-03626ba feat: Software TEE attestation — NIST SP 800-190/DORA Art.9 enclave quote verification
-0d4a454 feat: ZK-STARK composite proof — GDPR Art.22/DORA Art.17 zero-knowledge enforcement
-a6b2a6d feat: SPHINCS+ PQC signatures — FIPS 205 audit event signing NIST Level 1
-13d13ee feat: Raft consensus — quorum ceiling decisions DORA Art.10/NIST SP 800-207
+75ece6a docs: M1 FP claim language — remaining 7 files committed
+2a8d14c docs: audit-trail-architecture.md — hash chain + Merkle hierarchy defined
+03740bb docs: M1 FP claim language upgrade complete — zero bare 0.00% claims
+24e627d docs: CONTINUATION_PROMPT pruned — single task master established
+47490a0 docs: connectivity audit — 20 orphaned docs moved to docs/archive/
+7168eb1 docs: nuclear build wiring audit — all 6 components verified WIRED
+998cf45 fix: score band threshold 700→800 — APEX v5.2 authoritative
+c9e3e20 docs: G-COMMERCIAL gate added to CONTINUATION_PROMPT header
 
 Tests: ALL GREEN ✅
 
@@ -228,11 +228,11 @@ Next learning number: L144
 Next MASTER_LEARNINGS number: L100
 GENERATE not called — L144 waiting for paste next session.
 ACTIVE TASKS — BEFORE LLOYD (April 28)
-#1  [ ] B3 — FP claim language upgrade (M1) — grep + replace    1 hr
-#2  [ ] B5 — Audit trail architecture doc                       30 min
-#3  [ ] B1 — Observe-to-enforce criteria doc                     1 hr
-#4  [ ] B4 — Gen Digital ADR competitive response                2 hrs
-#5  [ ] B2 — Pilot case study template                           2 hrs
+#1  [x] B3 — FP claim language upgrade ✅ 03740bb + 75ece6a
+#2  [x] B5 — Audit trail architecture doc ✅ 2a8d14c
+#3  [x] B1 — Observe-to-enforce criteria ✅ already committed
+#4  [x] B4 — Gen Digital ADR competitive response ✅ already committed
+#5  [x] B2 — Pilot case study template ✅ already committed
 #6  [ ] TW-1 — Lloyd_meeting_prep.md 14 talking points           1 hr
 #7  [ ] TW-REHEARSAL — say C1–C14 aloud                         20 min
 #8  [ ] TW-2 — LoU staged curriculum update                      1 hr
