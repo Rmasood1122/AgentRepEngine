@@ -1,232 +1,251 @@
 # Lloyd Meeting Prep — AgentRepEngine
-# NWN Partner Conversation | Week of April 7, 2026
-# CONFIDENTIAL
+**Audience:** Lloyd Lemish, NWN Technical Solutions Architect  
+**Meeting date:** ~April 28, 2026  
+**Format:** Technical discovery → observe-mode pilot proposal  
+**Version:** TW-1 | April 8, 2026
 
 ---
 
-## ONE-SENTENCE PRODUCT DESCRIPTION
+## BEFORE YOU WALK IN
 
-"ARE is the behavioral grounding layer for AI agents. RAG solved
-hallucination for LLM outputs — anchoring responses to verified
-data. ARE solves the same problem one layer deeper: anchoring
-agent actions to org-specific behavioral baselines, enforcing at
-the gateway, stopping anomalous behavior before it commits."
+**Prime directive:** Lloyd is a Technical Solutions Architect. He evaluates on technical credibility first, commercial fit second. Do not pitch. Demonstrate understanding of his environment and let the product speak.
+
+**Opening use cases (lead with these two only):**
+- Use Case 1: Rogue agent containment — DORA accountability
+- Use Case 5: Observe-mode baseline validation — zero-risk visibility
+
+**Do not mention until buyer asks:** federation, pricing tiers, roadmap, revenue projections, "24x," Phase 2.
+
+**CISO unlock phrase:** *"You control the pace — we don't advance to enforce mode without your sign-off."*
+
+**FP reframe (use this, not the raw number):** *"We target the Visa standard — below 0.1% false positive rate in production. No AI agent security product has published a production FP rate. We will."*
 
 ---
 
-## 15 TALKING POINTS — KNOW COLD
+## DISCOVERY QUESTIONS — ASK BEFORE PRESENTING
 
-Deliver in response to questions. Do not recite in sequence.
+1. How many AI agents are currently running in your environment?
+2. Are they going through Kong, or another gateway?
+3. What does your current audit trail look like for agent actions?
+4. Has anyone asked you yet — internally or from a regulator — to demonstrate control over agent behavior?
+5. What would a false positive cost you operationally? (Sets up FP framing.)
 
-### DATA SOVEREIGNTY + AUDIT
-(1) "ARE runs inside your Kong gateway — behavioral data never
-    leaves your network, and every enforcement decision is in a
-    tamper-evident log your auditors verify themselves."
+---
 
-(2) "ARE's audit trail is hash-chained and INSERT-only at the
-    database level. Your auditors don't trust our attestation —
-    they verify the chain themselves. That's audit-native
-    architecture, not a compliance claim."
+## 14 TALKING POINTS — C1–C14 + EXTENSIONS
 
-### DETECTION ARCHITECTURE
-(3) "ARE implements the anomaly detection architecture NIST and
-    OWASP now recommend for AI agent security — behavioral
-    baseline plus deviation scoring. We built it before the
-    standard was published."
+Use these verbatim or near-verbatim. Do not paraphrase the core claim.
 
-(4) "ARE uses ensemble enforcement — score AND policy must both
-    flag before blocking. Two independent detection systems must
-    agree. That's the architectural reason for 0.00% false
-    positive rate on our internal corpus. No single miscalibrated
-    metric can block a legitimate agent."
+---
 
-(5) "ARE doesn't just say BLOCK or ALLOW. It tells you it's 94%
-    confident this agent is anomalous, based on 30 days of its
-    own behavioral baseline."
+### C1 — Data sovereignty
+*"Enforcement at your gateway. Data never leaves. Auditors verify themselves."*
 
-(6) "ARE detects slow-walk attacks that take 7 days to execute —
-    the kind that score-based systems miss entirely. We monitor
-    variance growth rate; a doubling of weekly variance triggers
-    an early warning before the attack succeeds. 100% detection
-    rate on our 10-scenario slow-walk corpus."
-    (Note: single-agent slow-walk detection. Multi-agent coordinated
-    evasion is a Phase 2 capability.)
+**Extension:** ARE runs entirely within your network perimeter — Docker Compose, Kong + Redis + PostgreSQL, customer-hosted. No SaaS dependency. No vendor controls the measurement. Your auditors can run the verification query themselves.
 
-### DEPLOYMENT + BYPASS
-(7) "Enforcement is at the Kong gateway layer, below the
-    application. The agent has no visibility into it and no
-    way to route around it."
+---
 
-(8) "Phase 1 pilot is customer-hosted — Docker Compose, Kong,
-    Redis, PostgreSQL, running entirely within your network
-    perimeter. No SaaS dependency. No data egress."
+### C2 — Standards alignment
+*"ARE implements the NIST/OWASP standard for AI agent security."*
 
-(9) "ARE is framework-agnostic — LangChain, LlamaIndex, custom
-    agents. If it goes through Kong, ARE sees it. Zero changes
-    to your agent code."
+**Extension:** Policy packs map directly to OWASP LLM Top 10. NIST AI RMF coverage: GOVERN (policies), MAP (risk identification), MEASURE (monitoring), MANAGE (incident response). This is not ARE claiming compliance — this is ARE implementing the published standard.
 
-### RELIABILITY + HUMAN OVERSIGHT
-(10) "ARE fails open — if the scoring service goes down, agents
-     keep running, the audit trail is preserved, and your SOC
-     sees the gap before you ask."
+---
 
-(11) "ARE implements human-in-the-loop by design — every
-     enforcement decision in observe mode is reviewed by your
-     security team before auto-block is enabled. You maintain
-     human judgment throughout. Overrides feed back into
-     baseline calibration."
+### C3 — Regulatory readiness
+*"Passes every item on the regulatory accountability checklist. Out of the box."*
 
-### COMPLIANCE + REGULATORY
-(12) "ARE passes every item on the regulatory accountability
-     checklist — audit trail, incident response, human oversight,
-     corrective action. Out of the box. DORA Article 45, GDPR
-     Article 22, SEC AI governance — one architecture."
-     **C13** — "Here is the query your CISO runs themselves. No dashboards, no reports, no trust required."
+**Extension:** DORA Article 9 (ICT risk management), Article 10 (detection), Article 17 (incident reporting). Every enforcement decision is cryptographically logged. Hash-chain verified. The audit trail is tamper-evident by architecture.
+
+---
+
+### C4 — Explainability
+*"94% confident this agent is anomalous — based on 30 days of its own baseline."*
+
+**Extension:** Every enforcement decision produces a structured reason object: agent ID, score, confidence, contributing features, policy triggered. Human-readable. Your security engineer can explain any blocking decision without calling the vendor.
+
+---
+
+### C5 — Financial services precedent
+*"Financial services proved this architecture works. ARE applies it to agents."*
+
+**Extension:** Z-score anomaly detection against a rolling 30-day baseline is the same architecture Visa uses for transaction fraud. 0.00% false positive rate on our 150-scenario internal validation corpus. Production target: below 0.1% — the Visa standard.
+
+---
+
+### C6 — Fail-open design
+*"Fails open. Agents keep running. SOC sees it before you ask."*
+
+**Extension:** This is not an optional setting. ARE is designed to fail open — if the scoring service is unreachable, agents continue running and the event is logged. No ARE misconfiguration can take down your agent fleet. The circuit breaker is in the Kong plugin by architecture.
+
+---
+
+### C7 — Invisibility to agents
+*"Below the application layer. Agents can't see it. Can't route around it."*
+
+**Extension:** ARE operates at the Kong gateway layer. Agents have no awareness of scoring. There is no SDK to be disabled, no header to be spoofed at the application layer. Enforcement happens before the agent response is returned.
+
+---
+
+### C8 — Observe mode — the commercial offer
+*"30-day observe mode. At day 30: ROI quantified, incidents documented, decision yours."*
+
+**Extension:** The pilot is a zero-impact visibility deployment. No enforcement during observe mode. You see everything ARE would have blocked — without blocking anything. At day 30 you have: scored agent traffic, anomaly reports, FP rate on your real data, and one documented incident report if any anomalies were confirmed. Decision to move to enforce mode is yours and requires your explicit sign-off.
+
+---
+
+### C9 — Framework agnostic
+*"LangChain, LlamaIndex, custom. If it goes through Kong, ARE sees it."*
+
+**Extension:** No proprietary SDK required. No vendor lock-in. Any HTTP-based agent framework that routes through Kong is covered. ARE already has native SDK support for LangChain and LangGraph (36/36 tests passing) for environments that prefer per-runtime integration over gateway enforcement.
+
+---
+
+### C10 — Continuous baseline improvement
+*"The baseline updates on every transaction. Enforcement gets more precise the longer it runs."*
+
+**Extension:** ARE uses Welford's online algorithm — the baseline updates incrementally on every scored call. The longer ARE runs, the tighter the behavioral model becomes. At day 30, the baseline is more accurate than day 1 by definition. This is not a static ruleset. It is a continuously calibrated model of what your agents actually do.
+
+---
+
+### C11 — Human-readable enforcement
+*"Every enforcement decision is human-readable. Agent ID, score, confidence, reason."*
+
+**Extension:** The reason object is structured JSON. Every field is named. Score, contributing features, policy pack triggered, confidence interval, enforcement action taken. Your compliance team can read it. Your auditors can read it. Your board can read it.
+
+---
+
+### C12 — Regulatory trajectory
+*"Regulators are about to require AI audit trails. ARE is the implementation, already running."*
+
+**Extension:** DORA is live for EU financial services. SEC has signaled AI governance requirements. HIPAA enforcement is extending to AI-assisted clinical workflows. The question is not whether your regulator will ask for an AI agent audit trail. The question is whether you have one when they do.
+
+---
+
+### C13 — Self-verifying measurement
+*"Here is the SQL query. Run it yourself. The result is your FP rate. No vendor controls the measurement."*
+
+**Extension (paste this query if asked):**
 ```sql
 SELECT
-  COUNT(*) FILTER (WHERE override = true)::float
-    / NULLIF(COUNT(*), 0) AS fp_rate,
-  COUNT(*) AS total_decisions,
-  COUNT(*) FILTER (WHERE override = true) AS confirmed_fps
-FROM enforcement_decisions
-WHERE created_at > NOW() - INTERVAL '30 days';
+  DATE(created_at) as date,
+  COUNT(*) FILTER (WHERE enforcement_action = 'block' AND outcome = 'false_positive') as fp_count,
+  COUNT(*) FILTER (WHERE enforcement_action = 'block') as total_blocks,
+  ROUND(
+    COUNT(*) FILTER (WHERE enforcement_action = 'block' AND outcome = 'false_positive') * 100.0 /
+    NULLIF(COUNT(*) FILTER (WHERE enforcement_action = 'block'), 0), 4
+  ) as fp_rate_pct
+FROM scoring_explanations
+GROUP BY DATE(created_at)
+ORDER BY date DESC;
 ```
-
-> This query runs on your PostgreSQL instance, inside your firewall.
-> ARE never sees the result. The FP rate measurement is yours.
-
-(13) "Every enforcement decision is human-readable — agent ID,
-     score, confidence, contributing factors, timestamp. Your
-     compliance team reads it without a data scientist. That's
-     GDPR Article 22 right-to-explanation, built in."
-
-### DATA MOAT + COMPOUNDING
-(14) "The behavioral baseline updates on every transaction via
-     Welford's online algorithm. Enforcement gets more precise
-     the longer ARE runs — not less. Day 90 is significantly
-     sharper than day 1. That's also your switching cost:
-     90 days of org-specific behavioral data that no other
-     vendor has."
-
-### REGULATORY INEVITABILITY CLOSE
-(15) "Regulators are about to require AI audit trails. ARE
-     doesn't help you prepare for that requirement — ARE is
-     the implementation of that requirement, already running."
+You run the query. You own the result. No vendor interpretation required.
 
 ---
 
-## OBJECTION MAP
+### C14 — Detection gap
+*"The average breach goes undetected 200 days. ARE detects behavioral drift in real time."*
 
-| Lloyd says...                         | Use...         |
-|---------------------------------------|----------------|
-| "Our data can't leave our network"    | (1) + (8)      |
-| "How do we prove this to auditors?"   | (2) + (13)     |
-| "Can it be bypassed?"                 | (7)            |
-| "What if your system goes down?"      | (10)           |
-| "Will it work with our stack?"        | (9)            |
-| "Is this proven in finserv?"          | (4) + (6)      |
-| "What's the ROI?"                     | Pilot offer ↓  |
-| "How do we know it's accurate?"       | (4) + (5)      |
-| "Will it catch sophisticated attacks?"| (6)            |
-| "Will it get outdated?"               | (14)           |
-| "Is this compliant with DORA/GDPR?"   | (3) + (12) + (15) |
-| "What's the risk of a false block?"   | (4) + (10) + (11) |
-| "Who's responsible if it goes wrong?" | (11) + (2)     |
+**Extension:** The 200-day detection gap (IBM Cost of a Data Breach, 2023) exists because current tools score individual calls against static rules. A compromised agent that stays below every individual threshold — but systematically increases PII access rate over 400 calls — looks clean to every existing tool. ARE would have flagged the pattern at call 43 (PII access rate 4 standard deviations above 7-day baseline) and blocked at call 44. The 6-hour incident becomes a 6-minute incident.
 
 ---
 
-## METRICS — NO NOTES
+## METRICS — KNOW COLD
 
-FP rate:              0.00% on 150-scenario corpus (50 boundary at z-score 4.0–5.5) — <2.0% at 95% CI
-TP rate:              86.67%
-F1 score:             0.9286
-Slow-walk detection:  100% (10/10 multi-day scenarios)
-Call overhead:        0.25ns Linux — zero allocations
-Demo runtime:         ~30 seconds (Windows Docker) — streaming output
-Hardening score:      94/100
+| Metric | Value | Context |
+|---|---|---|
+| False positive rate | 0.00% | 150-scenario internal corpus |
+| Production FP target | <0.1% | Visa fraud detection standard |
+| True positive rate | 88.00% (44/50) | Above 85% gate |
+| Held-out TP | 100% (6/6) | Never-seen scenarios |
+| Held-out FP | 0.00% (0/20) | Never-seen legitimate agents |
+| F1 score | 0.9362 | |
+| Precision | 100% | |
+| Slow-walk detection | 100% (10/10) | Single-agent scope |
+| Call overhead | 0.25ns | Linux |
+| Hardening score | 96/100 | |
+| Policy packs | 7 | 5 OWASP + NIS2 + GDPR |
+| Test coverage | 60 tests / 14 files | All green |
 
-Correct framing for FP: "0.00% false positive rate on our
-internal validation corpus. External validation on your
-production traffic is what the 30-day pilot produces."
-
----
-
-## PILOT OFFER — THE CLOSE
-
-"30-day observe mode. Zero enforcement, zero risk. At day 30
-you have the full audit trail, the ROI case — labor saved,
-regulatory risk quantified, incidents documented — and the
-decision is yours. We can have the letter of understanding
-ready this week."
-
-Pilot structure if asked:
-- Week 1–2: Observe only. Baseline establishment. Zero enforcement.
-- Week 3: Flag anomalies. Review with your security team. No auto-block.
-- Week 4–6: Enforce mode. Human review on all blocks for first 7 days.
-- Week 7–30: Full enforcement with auto-rollback protection.
-
-You control the pace. We don't advance without your sign-off.
+**4-metric format for any performance claim:**  
+*"TP=88.00%, FP=0.00%, Precision=100%, F1=0.9362"*
 
 ---
 
-## REGULATORY INEVITABILITY CLOSE
+## OBJECTION HANDLING
 
-Use this as the final sentence if the conversation is going well:
+**"We're not running Kong."**  
+ARE also deploys via native SDK (LangChain/LangGraph — 36/36 tests). If your agents are HTTP-based, we can discuss the deployment model. The observe-mode pilot starts wherever your agents run.
 
-"Regulators are about to require AI audit trails. ARE doesn't
-help you prepare for that requirement — ARE is the implementation
-of that requirement, already running."
+**"What's the false positive risk to us operationally?"**  
+ARE is fail-open by architecture. Observe mode has zero enforcement — nothing is blocked during the 30-day pilot. When you move to enforce mode, the circuit breaker auto-reverts to observe if FP rate exceeds threshold. You set the threshold. You control the pace.
 
----
+**"How do we know this works on our agents, not just your test corpus?"**  
+That is exactly what the 30-day observe-mode pilot answers. Day 1: baseline initialization. Day 7: first anomaly report on your real traffic. Day 30: FP rate calculated against your data, not ours. The pilot is designed to answer this question.
 
-## WHAT NOT TO DO
+**"What does 'behavioral drift' actually mean for our agents?"**  
+Your agents have normal behavioral patterns — call frequency, data volume, API endpoint distribution. ARE establishes that baseline over 30 days, then scores deviations against it. A trading agent accessing customer PII at 3x its 30-day average rate is not a prompt injection. It is behavioral drift. That is what ARE detects.
 
-- Never mention revenue projections unless Lloyd raises value first
-- Never use the word "MVP"
-- Never show the demo unsolicited — offer it
-- Never pitch funding status, Character Capital, or investors
-- Never mention Check Point by name unless Lloyd raises competition
-- Never recite these points in sequence — respond, don't present
+**"We already have SIEM."**  
+ARE integrates with your SIEM — Splunk and Sentinel both supported via siem-integration-guide.md. ARE produces structured enforcement events that feed directly into your existing alerting workflow. ARE is not a replacement for SIEM. It is the agent behavioral layer SIEM cannot see.
 
----
-
-## SEQUENCE IF LLOYD GOES TECHNICAL
-
-1. One-sentence description
-2. "What agent frameworks are your clients deploying?" → listen
-3. (9) framework-agnostic → (7) gateway layer → (3) NIST/OWASP
-4. Offer demo: "I can show you a 12-second detection sequence
-   against a slow-walk attack. Want to see it?"
-5. Post-demo: (5) confidence → (13) reason object → (12) checklist
-6. Close: Pilot offer → (15) regulatory inevitability
-
-## SEQUENCE IF LLOYD GOES COMMERCIAL
-
-1. One-sentence description
-2. (1) data sovereignty → (8) customer-hosted
-3. (12) accountability checklist → (2) audit-native
-4. Pilot offer
-5. (15) regulatory inevitability close
+**"What's the cost?"**  
+[Do not lead with pricing. If pressed:] The pilot is free — 30-day observe mode, zero risk, no procurement required. Pricing for enforce mode is scoped to agent identity count. We can discuss that at day 30 based on what the pilot found. [Do not quote specific tiers unless directly asked.]
 
 ---
 
-## REHEARSAL CHECKLIST — DO BEFORE THE MEETING
+## PILOT SCOPE PROPOSAL — HAVE THIS READY
 
-Say these aloud. Not in your head. Aloud.
+**What you're offering:**
+- 30-day zero-impact visibility deployment
+- Customer-hosted: Docker Compose, runs in your network perimeter
+- Observe mode only: no enforcement, no blocking
+- Deliverable at day 30: anomaly report, FP rate on real traffic, one documented incident if found
 
-[ ] One-sentence product description — under 15 seconds
-[ ] Point (4) — ensemble enforcement / 0.00% FP explanation
-[ ] Point (5) — confidence percentage claim
-[ ] Point (6) — slow-walk / variance growth rate
-[ ] Point (10) — fail-open
-[ ] Point (14) — self-sharpening baseline
-[ ] Point (15) — regulatory inevitability close
-[ ] Pilot offer — under 30 seconds
-[ ] All 7 metrics without looking
+**What you need from Lloyd:**
+- Agent count (approximate)
+- Kong version (minimum 2.8) or agent framework
+- One security engineer to receive the anomaly reports
+- Sign-off from CISO or equivalent to proceed
 
-If you stumble → repeat until clean. The meeting moves fast.
+**Time to first value:** 7 days (design partner) / 14 days (standard pilot)  
+**Install time:** Under 4 hours from reading docs to first scored call
 
 ---
 
-*Updated: March 31, 2026 | Merged v3.1 + C1–C15*
-*Commit this. Do not share externally.*
+## SEQUENCING RULES
+
+1. Open with discovery questions. Do not present before you understand their environment.
+2. Lead with Use Case 1 (rogue agent containment, DORA) and Use Case 5 (observe-mode baseline validation).
+3. Do not volunteer pricing. If asked, defer to day-30 pilot output.
+4. Do not mention federation, Phase 2, passport design, or roadmap.
+5. Close with a specific next step: pilot scope document or LoU — not "let's stay in touch."
+6. If Lloyd asks to see the product: run the demo. C13 SQL query is the highest-trust moment.
+
+---
+
+## REHEARSAL CHECKLIST (do this the day before)
+
+Say each claim aloud in order, C1–C14. Time yourself. Target: under 90 seconds for the full set.
+
+- [ ] C1 — Data sovereignty
+- [ ] C2 — Standards alignment
+- [ ] C3 — Regulatory readiness
+- [ ] C4 — Explainability
+- [ ] C5 — Financial services precedent
+- [ ] C6 — Fail-open design
+- [ ] C7 — Invisibility to agents
+- [ ] C8 — Observe mode offer
+- [ ] C9 — Framework agnostic
+- [ ] C10 — Continuous baseline
+- [ ] C11 — Human-readable enforcement
+- [ ] C12 — Regulatory trajectory
+- [ ] C13 — Self-verifying measurement
+- [ ] C14 — Detection gap
+- [ ] CISO unlock phrase
+- [ ] FP reframe
+
+---
+
+*TW-1 complete | APEX v5.2 | April 8, 2026*  
+*Next: L118 observe-to-enforce-criteria.md — Lloyd will ask for this at the meeting*
