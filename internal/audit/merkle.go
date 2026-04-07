@@ -72,7 +72,7 @@ func hashLeaf(id, agentID, action, prevHash string, ts time.Time) string {
 // enforcement_decisions table.
 func BuildMerkleTree(db *sql.DB, windowStart, windowEnd time.Time) (*MerkleTree, error) {
 	rows, err := db.Query(`
-		SELECT id, agent_id, action, prev_hash, created_at
+		SELECT id, agent_did, decision, prev_hash, created_at
 		FROM enforcement_decisions
 		WHERE created_at >= $1 AND created_at <= $2
 		ORDER BY created_at ASC, id ASC
@@ -168,9 +168,9 @@ func GenerateProof(db *sql.DB, decisionID string, windowStart, windowEnd time.Ti
 
 	// Find the leaf for this decision
 	row := db.QueryRow(`
-		SELECT id, agent_id, action, prev_hash, created_at
-		FROM enforcement_decisions
-		WHERE id = $1
+		SELECT id, agent_did, decision, prev_hash, created_at
+                FROM enforcement_decisions
+                WHERE id = $1
 	`, decisionID)
 
 	var id, agentID, action, prevHash string
