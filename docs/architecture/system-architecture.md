@@ -298,5 +298,42 @@ Scoring service horizontal scaling
 
 ---
 
+## RAFT CONSENSUS — DEPLOYMENT TOPOLOGY NOTE
+
+### Phase 1 — Single-Node (current deployment)
+
+ARE Phase 1 runs as a single Docker container.
+Raft consensus is NOT active in this topology.
+Ceiling decisions are made directly by the scoring service.
+This is correct, documented, and intentional.
+
+Do not attempt to activate Raft in Phase 1.
+`internal/consensus/raft_ceiling.go` compiles and is wired
+but requires 3+ nodes to function as designed.
+
+### Phase 2 — Multi-Node (after first enterprise pilot)
+
+Raft activates when 3+ scoring service instances are deployed
+behind a load balancer with shared Redis and PostgreSQL.
+
+Quorum requirement: ceil((n+1)/2) nodes must agree on any
+ceiling change. A single compromised or misconfigured node
+cannot unilaterally raise or lower an agent's score ceiling.
+
+Activation trigger: RAFT_ENABLED=true + RAFT_PEERS=node1,node2,node3
+in docker-compose or Helm values.yaml.
+
+### Why This Matters for Regulated Enterprises
+
+A single-node ceiling decision can be overridden by a
+compromised administrator. Raft consensus requires quorum —
+the same principle banks use for dual-control on high-value
+transactions. This is the Phase 2 governance upgrade.
+
+DORA Article 10 — ICT change management: quorum enforcement
+on ceiling changes provides documented multi-party authorization.
+
+---
+
 *Document owner: AgentRepEngine Engineering*  
 *Next review: Phase 2 completion*
