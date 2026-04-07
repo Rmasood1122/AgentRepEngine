@@ -232,8 +232,8 @@ UNAPPLIED BUILD TASKS — L135–L143 (before Lloyd, low effort):
 [ ] L143: Verify handler.lua validates JWT exp claim — fix if not            30 min
 
 UNAPPLIED TIER 1 TASKS (from LEARNING_INTELLIGENCE v3.1 — before Lloyd):
-[ ] TW-0:         Feature vector storage verification (15 min) ★ CRITICAL
-[ ] TW-PRE-2:     Org-scoped baseline key verification (20 min) ★ CRITICAL
+[x] TW-0:         Feature vector storage verification ✅ PASS — scoring_explanations 19 columns confirmed
+[x] TW-PRE-2:     Org-scoped baseline verification ✅ PASS — org_id+agent_did+feature UNIQUE constraint confirmed
 [ ] TW-1:         Lloyd_meeting_prep.md — 13 talking points (60 min)
 [ ] TW-REHEARSAL: Say C1–C12 aloud (20 min)
 [ ] TW-2:         LoU staged curriculum + Article 22 note (60 min)
