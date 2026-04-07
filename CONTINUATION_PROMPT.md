@@ -32,8 +32,8 @@ REPO
 https://github.com/Rehanrana11/AgentRepEngine
 Branch: master (push with git push origin master — NOT main)
 CURRENT STATE — April 07, 2026
-HEAD: 0fdde3e
-go test ./... — ALL GREEN ✅ (with SCORING_API_KEY=are-internal-key-change-in-production)
+HEAD: fc1c400
+go test ./... — ALL GREEN ✅ (20 packages passing)
 SESSION CLOSE RECORD
   Session date:     April 07, 2026
   Messages:         ~300+
@@ -41,14 +41,16 @@ SESSION CLOSE RECORD
   Last action:      10-item roadmap executed — all Category A + B complete
   Irreversible:     YES ✅ — G-COMMERCIAL structural, 8 commits pushed
 RECENT COMMITS
-75ece6a docs: M1 FP claim language — remaining 7 files committed
-2a8d14c docs: audit-trail-architecture.md — hash chain + Merkle hierarchy defined
-03740bb docs: M1 FP claim language upgrade complete — zero bare 0.00% claims
-24e627d docs: CONTINUATION_PROMPT pruned — single task master established
-47490a0 docs: connectivity audit — 20 orphaned docs moved to docs/archive/
-7168eb1 docs: nuclear build wiring audit — all 6 components verified WIRED
-998cf45 fix: score band threshold 700→800 — APEX v5.2 authoritative
-c9e3e20 docs: G-COMMERCIAL gate added to CONTINUATION_PROMPT header
+fc1c400 test: full compliance chain integration test — 7/7 steps pass, Merkle column fix (agent_id→agent_did, action→decision)
+0241818 docs: session 2 close — Sprint1 5/9 complete, all tests green, HEAD b2096b9
+b2096b9 docs: redis-failover — 4-scenario unavailability matrix, CISO statements, Lloyd one-liner
+6ecc9e9 test: Kong/service contract test — 9 tests, schema drift prevention, fail-open validation, 800 TRUSTED boundary
+c653f71 feat: generate-evidence-package.sh — unified auditor ZIP, hash chain + Merkle proofs + DORA report + OSCAL bundle
+8545b34 feat: cmd/oscal-generate — OSCAL SOC2/NIST/DORA evidence bundle CLI, GRC tool ready
+f795eb8 feat: cmd/verify-decision — Merkle selective proof CLI, HIPAA §164.528 / GDPR Art.22 selective disclosure
+ecac02f docs: ZK-STARK claim qualified — Phase1 SHA-256 stub noted, Phase2 production prover path documented
+bf4e956 docs: Raft single-node fallback documented — Phase1 vs Phase2 topology, activation trigger, DORA mapping
+75dd202 docs: BUILD_INTELLIGENCE updated — nuclear packages documented, file map current, Section 10 added
 
 Tests: ALL GREEN ✅
 
