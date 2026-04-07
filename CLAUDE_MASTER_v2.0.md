@@ -58,7 +58,7 @@ Policy violations override the score instantly:
 - Permission escalation > 2: -150 + HIGH_RISK VERIFY
 
 Score bands:
-  700–1000 → TRUSTED → ALLOW
+  800–1000 → TRUSTED → ALLOW
   500–699  → MONITORED → ALLOW + active audit
   200–499  → RESTRICTED → THROTTLE + human review on HIGH_RISK
   0–199    → BLOCKED → synthetic response (never 403)

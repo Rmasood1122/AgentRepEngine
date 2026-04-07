@@ -213,7 +213,7 @@ score bands to ATP protocol states from the research corpus.
 
 | Score Range | ATP State | Enforcement Action | Conflict Severity Γ |
 |-------------|-----------|-------------------|---------------------|
-| 700–1000 | RESOLVE | ALLOW + passive log | Γ < 0.3 |
+| 800–1000 | RESOLVE | ALLOW + passive log | Γ < 0.3 |
 | 400–699 | VERIFY | ALLOW + active audit + human review on HIGH_RISK | 0.3 ≤ Γ < 0.7 |
 | 200–399 | RESTRICT | THROTTLE + human-in-loop | 0.5 ≤ Γ < 0.7 |
 | 0–199 | DEFER | Synthetic response (not 403) | Γ ≥ 0.7 |

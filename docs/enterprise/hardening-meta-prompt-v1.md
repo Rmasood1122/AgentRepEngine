@@ -343,7 +343,7 @@ STEP 1: Define Γ in config/scoring_weights.yaml:
     # Γ(C_o) = Σ(weight_i * unresolved_conflicts_i)
     # Monotonic: adding conflicts never decreases severity
     # Maps to ATP states:
-    #   Γ < 0.3 → RESOLVE (score 700-1000)
+    #   Γ < 0.3 → RESOLVE (score 800-1000)
     #   0.3 ≤ Γ < 0.7 → VERIFY (score 400-699)
     #   Γ ≥ 0.7 → DEFER (score 0-399)
     weights:
@@ -360,7 +360,7 @@ STEP 2: Reference Γ in scoring service:
   // Used to validate ATP state transition is correct
 
 STEP 3: Document mapping in APEX spec:
-  Score 700–1000 = RESOLVE state (Γ < 0.3)
+  Score 800–1000 = RESOLVE state (Γ < 0.3)
   Score 400–699  = VERIFY state  (0.3 ≤ Γ < 0.7)
   Score 0–399    = DEFER state   (Γ ≥ 0.7)
 
@@ -404,7 +404,7 @@ H2 — SCORE BAND → ATP STATE MAPPING [1 day | Score: +1]
 Finding: No document maps numerical scores to ATP states.
 
 Fix: Add to APEX spec, docs/architecture/, and README:
-  Score 700–1000 = ATP RESOLVE state → ALLOW
+  Score 800–1000 = ATP RESOLVE state → ALLOW
   Score 400–699  = ATP VERIFY state  → ALLOW + human review on HIGH_RISK
   Score 0–399    = ATP DEFER state   → THROTTLE or BLOCK
 
@@ -432,7 +432,7 @@ Finding: Probation has 48h timer but exit criteria undefined.
 Fix: Document and enforce:
   Exit probation when ALL true:
     1. probation_expires_at < NOW()
-    2. current_score ≥ 700
+    2. current_score ≥ 800
     3. zero HIGH_RISK events during probation window
   Any HIGH_RISK event resets probation_expires_at += 48h
 

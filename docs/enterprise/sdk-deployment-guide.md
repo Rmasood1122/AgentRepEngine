@@ -194,7 +194,7 @@ curl http://localhost:8080/health
 
 | Score | Band | Enforcement Action |
 |---|---|---|
-| 700–1000 | TRUSTED | ALLOW — pass through |
+| 800–1000 | TRUSTED | ALLOW — pass through |
 | 500–699 | MONITORED | ALLOW + active audit logging |
 | 200–499 | RESTRICTED | THROTTLE + human review on HIGH_RISK |
 | 0–199 | BLOCKED | Synthetic response (never 403) |
