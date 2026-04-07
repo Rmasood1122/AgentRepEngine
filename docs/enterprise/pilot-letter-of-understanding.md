@@ -277,6 +277,75 @@ ARE's reason_object satisfies this requirement automatically:
 }
 ```
 
+
+
+---
+
+## PILOT ROLLOUT SCHEDULE
+
+### Phase 1 — Observe Mode (Weeks 1–2)
+Zero enforcement. Baseline establishment only.
+
+- ARE deployed in observe mode
+- All agent traffic scored but no enforcement actions taken
+- Behavioral baselines built per agent (target: ≥100 samples per agent)
+- fp_candidates table populated for human review
+- Weekly review meeting: Lloyd + ARE team review flagged decisions
+- Gate: 14 consecutive days clean (zero auto-rollback events)
+
+### Phase 2 — Supervised Review (Week 3)
+Anomalies flagged. Human review required. No auto-block.
+
+- ARE flags HIGH_RISK decisions for human review
+- Security team reviews each flag within 24 hours
+- Confirmed TPs documented. Confirmed FPs documented.
+- FP rate calculated from fp_candidates table
+- Gate: FP rate < 2% on production traffic
+
+### Phase 3 — Enforce Mode, HIGH_RISK Only (Weeks 4–6)
+Selective enforcement on highest-risk operations only.
+
+- Enforcement activated on HIGH_RISK operations only:
+  PII bulk export, cross-tenant probe, permission escalation
+- Human review required on every block for first 7 days
+- Auto-rollback active: FP spike → automatic return to observe
+- Gate: ≥1 confirmed true positive, CISO written sign-off
+
+### Phase 4 — Full Enforcement (Weeks 7–12)
+Full enforcement with auto-rollback protection.
+
+- All policy packs active
+- Auto-rollback protects against miscalibration
+- Monthly threshold review with ARE team
+- Day-30 and day-90 case study reports produced
+
+---
+
+## PILOT SUCCESS CRITERIA
+
+All three must be met before the pilot is considered successful:
+
+1. **FP rate ≤ 2%** on production traffic (measured from fp_candidates table)
+2. **≥ 1 confirmed true positive** enforcement event (human-reviewed)
+3. **Audit trail accepted** by security team (cmd/verify-chain returns VALID)
+
+---
+
+## GDPR ARTICLE 22 / HUMAN OVERSIGHT NOTE
+
+The staged rollout with explicit CISO sign-off at each phase constitutes
+the human oversight mechanism required for GDPR Article 22 compliance review.
+
+No automated enforcement advances without a documented human authorization.
+Every phase transition requires written CISO approval stored in the audit trail.
+
+ARE does not make fully automated decisions affecting agents without human
+oversight at each enforcement boundary. The observe → enforce transition
+is always a human decision, documented and auditable.
+
+*This staged rollout structure satisfies GDPR Article 22, DORA Article 9
+(human oversight of automated systems), and NIST AI RMF MG-4.1.*
+
 No additional tooling required. No data scientist required.
 Your compliance team reads it directly.
 
