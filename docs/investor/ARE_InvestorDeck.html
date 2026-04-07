@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentRepEngine — Investor Deck</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --black: #080a0e;
+    --white: #f0f2f5;
+    --accent: #00e5a0;
+    --accent2: #0057ff;
+    --red: #ff3b5c;
+    --dim: #3a3f4a;
+    --mid: #6b7280;
+    --card: #10141c;
+    --border: #1e2330;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  .deck {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    padding: 48px 64px;
+    flex-direction: column;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .slide.active {
+    display: flex;
+    opacity: 1;
+  }
+
+  /* NAV */
+  .nav {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 100;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 12px 24px;
+    border-radius: 100px;
+  }
+
+  .nav button {
+    background: none;
+    border: none;
+    color: var(--mid);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 12px;
+    border-radius: 20px;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+
+  .nav button:hover { color: var(--white); background: var(--dim); }
+  .nav button.prev, .nav button.next {
+    color: var(--accent);
+    font-size: 16px;
+    padding: 4px 8px;
+  }
+
+  .slide-counter {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--mid);
+    letter-spacing: 0.1em;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  /* SLIDE 1 — COVER */
+  .s1-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .s1-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(52px, 7vw, 96px);
+    font-weight: 800;
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    margin-bottom: 32px;
+  }
+
+  .s1-title span { color: var(--accent); }
+
+  .s1-sub {
+    font-size: 18px;
+    color: var(--mid);
+    font-weight: 300;
+    max-width: 520px;
+    line-height: 1.6;
+    margin-bottom: 48px;
+  }
+
+  .s1-meta {
+    display: flex;
+    gap: 40px;
+  }
+
+  .s1-meta-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+  }
+
+  .s1-meta-item span {
+    display: block;
+    color: var(--white);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  .s1-grid {
+    position: absolute;
+    right: 64px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    width: 340px;
+  }
+
+  .s1-stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 24px;
+  }
+
+  .s1-stat-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .s1-stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--mid);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* SECTION HEADERS */
+  .slide-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .slide-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 40px;
+  }
+
+  .slide-title em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  /* TWO-COL LAYOUT */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 28px;
+    position: relative;
+  }
+
+  .card-accent {
+    border-left: 3px solid var(--accent);
+  }
+
+  .card-red {
+    border-left: 3px solid var(--red);
+  }
+
+  .card-blue {
+    border-left: 3px solid var(--accent2);
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .card-body {
+    font-size: 14px;
+    color: var(--mid);
+    line-height: 1.6;
+  }
+
+  .card-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .card-num.red { color: var(--red); }
+  .card-num.blue { color: var(--accent2); }
+
+  /* METRIC ROW */
+  .metric-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .metric {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 20px;
+    text-align: center;
+  }
+
+  .metric-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .metric-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--mid);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  th {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--mid);
+    text-transform: uppercase;
+    text-align: left;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--white);
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  td.accent { color: var(--accent); font-family: 'DM Mono', monospace; font-size: 12px; }
+  td.red { color: var(--red); }
+  td.dim { color: var(--mid); font-size: 12px; }
+
+  /* LIST */
+  .check-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .check-list li {
+    display: flex;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--mid);
+    line-height: 1.5;
+    align-items: flex-start;
+  }
+
+  .check-list li::before {
+    content: '→';
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* QUOTE BLOCK */
+  .quote {
+    border-left: 3px solid var(--accent);
+    padding: 20px 24px;
+    background: var(--card);
+    font-size: 18px;
+    font-style: italic;
+    color: var(--white);
+    line-height: 1.5;
+    margin-bottom: 24px;
+  }
+
+  .quote-attr {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--mid);
+    letter-spacing: 0.1em;
+    margin-top: 12px;
+    font-style: normal;
+  }
+
+  /* TAG */
+  .tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    margin-right: 8px;
+    margin-bottom: 8px;
+  }
+
+  .tag.red { border-color: var(--red); color: var(--red); }
+  .tag.blue { border-color: var(--accent2); color: var(--accent2); }
+
+  /* TIMELINE */
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 120px 1px 1fr;
+    gap: 0 24px;
+    min-height: 56px;
+  }
+
+  .tl-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--mid);
+    letter-spacing: 0.08em;
+    text-align: right;
+    padding-top: 4px;
+  }
+
+  .tl-line {
+    background: var(--border);
+    position: relative;
+  }
+
+  .tl-line::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: absolute;
+    top: 6px;
+    left: -3.5px;
+  }
+
+  .tl-content {
+    padding-bottom: 20px;
+    padding-top: 2px;
+  }
+
+  .tl-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .tl-body {
+    font-size: 12px;
+    color: var(--mid);
+    line-height: 1.5;
+  }
+
+  /* BACKGROUND ELEMENTS */
+  .bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  .bg-glow {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,160,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* DOI BADGE */
+  .doi-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--mid);
+  }
+
+  .doi-badge span { color: var(--accent); }
+
+  /* PROGRESS DOTS */
+  .progress {
+    position: fixed;
+    right: 32px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 100;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--dim);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .dot.active {
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  /* KEYBOARD HINT */
+  .kbd-hint {
+    position: fixed;
+    top: 24px;
+    right: 64px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+  }
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- SLIDE 1: COVER -->
+  <div class="slide active" id="slide-1">
+    <div class="bg-grid"></div>
+    <div class="bg-glow" style="top:-100px;left:-100px;"></div>
+
+    <div class="s1-eyebrow">Pre-Seed Round — April 2026</div>
+    <div class="s1-title">Agent<span>Rep</span><br>Engine</div>
+    <div class="s1-sub">Runtime behavioral trust enforcement for AI agents in regulated enterprise environments.</div>
+    <div class="s1-meta">
+      <div class="s1-meta-item">COMPANY<span>Naseem A2A Research Lab / Call2leads Inc.</span></div>
+      <div class="s1-meta-item">FOUNDER<span>Rehan Masood</span></div>
+      <div class="s1-meta-item">STAGE<span>Pre-Seed · $500K–$1M</span></div>
+    </div>
+
+    <div class="s1-grid">
+      <div class="s1-stat">
+        <div class="s1-stat-val">0.00%</div>
+        <div class="s1-stat-label">False Positive Rate</div>
+      </div>
+      <div class="s1-stat">
+        <div class="s1-stat-val">88%</div>
+        <div class="s1-stat-label">True Positive Rate</div>
+      </div>
+      <div class="s1-stat">
+        <div class="s1-stat-val">0.9362</div>
+        <div class="s1-stat-label">F1 Score</div>
+      </div>
+      <div class="s1-stat">
+        <div class="s1-stat-val">96/100</div>
+        <div class="s1-stat-label">Hardening Score</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: PROBLEM -->
+  <div class="slide" id="slide-2">
+    <div class="slide-label">The Problem</div>
+    <div class="slide-title">AI agents are <em>ungoverned</em><br>at runtime</div>
+    <div class="three-col">
+      <div class="card card-red">
+        <div class="card-num red">200</div>
+        <div class="card-title">Days undetected</div>
+        <div class="card-body">Average breach goes undetected 200 days. Agent behavioral drift is invisible to existing tools.</div>
+      </div>
+      <div class="card card-red">
+        <div class="card-num red">0</div>
+        <div class="card-title">Published FP rates</div>
+        <div class="card-body">No AI agent security product has published a production false positive rate. The category has no measurement standard.</div>
+      </div>
+      <div class="card card-red">
+        <div class="card-num red">$4.9M</div>
+        <div class="card-title">Avg breach cost</div>
+        <div class="card-body">IBM 2023. DORA, SEC, and HIPAA regulators are now requiring documented AI agent controls. Most enterprises have none.</div>
+      </div>
+    </div>
+    <div style="margin-top:32px;">
+      <div class="quote">
+        "Every competitor scores the call. We score the agent. That difference is everything."
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;">
+        <span class="tag">DORA Art. 9</span>
+        <span class="tag">SEC AI Governance</span>
+        <span class="tag">HIPAA</span>
+        <span class="tag">OWASP LLM Top 10</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: SOLUTION -->
+  <div class="slide" id="slide-3">
+    <div class="slide-label">The Solution</div>
+    <div class="slide-title">Runtime trust enforcement<br>at the <em>gateway layer</em></div>
+    <div class="two-col">
+      <div>
+        <ul class="check-list">
+          <li><strong>Kong plugin — no SDK required.</strong> Any HTTP-based agent framework. Install in under 4 hours.</li>
+          <li><strong>Z-score anomaly detection</strong> against a 30-day rolling behavioral baseline per agent identity.</li>
+          <li><strong>Ensemble enforcement</strong> — score AND policy must both flag before blocking. Architectural FP elimination.</li>
+          <li><strong>Hash-chained audit trail</strong> — tamper-evident, cryptographically non-repudiable, customer-verifiable.</li>
+          <li><strong>Fail-open by design.</strong> ARE misconfiguration cannot take down your agent fleet.</li>
+          <li><strong>30-day observe mode.</strong> Zero enforcement. Full visibility. No procurement gauntlet.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="card card-accent" style="margin-bottom:16px;">
+          <div class="card-title">Behavioral Grounding</div>
+          <div class="card-body">RAG solved hallucination for LLM outputs. ARE solves the same problem one layer deeper — for agent actions. The behavioral history is the ground truth.</div>
+        </div>
+        <div class="card card-blue">
+          <div class="card-title">Published IP</div>
+          <div class="card-body" style="margin-bottom:12px;">Peer-reviewed. Anchored on Zenodo.</div>
+          <div class="doi-badge">DOI <span>10.5281/zenodo.19169185</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: METRICS -->
+  <div class="slide" id="slide-4">
+    <div class="slide-label">Validation Metrics</div>
+    <div class="slide-title">Production-grade <em>measurement</em><br>before first enterprise</div>
+    <div class="metric-row">
+      <div class="metric">
+        <div class="metric-val">0.00%</div>
+        <div class="metric-label">False Positive Rate</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val">88.00%</div>
+        <div class="metric-label">True Positive Rate</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val">100%</div>
+        <div class="metric-label">Precision</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val">0.9362</div>
+        <div class="metric-label">F1 Score</div>
+      </div>
+    </div>
+    <div class="two-col">
+      <table>
+        <thead>
+          <tr><th>Test Set</th><th>TP</th><th>FP</th><th>Result</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Internal corpus (150 scenarios)</td><td class="accent">44/50</td><td class="accent">0/100</td><td class="accent">PASS</td></tr>
+          <tr><td>Held-out TP (never seen)</td><td class="accent">6/6</td><td>—</td><td class="accent">100%</td></tr>
+          <tr><td>Held-out FP (never seen)</td><td>—</td><td class="accent">0/20</td><td class="accent">0.00%</td></tr>
+          <tr><td>Slow-walk detection</td><td class="accent">10/10</td><td>—</td><td class="accent">100%</td></tr>
+        </tbody>
+      </table>
+      <div>
+        <div class="card card-accent">
+          <div class="card-title">Production Target</div>
+          <div class="card-body">We target below <strong style="color:var(--accent)">0.1% FP</strong> in production — the Visa fraud detection standard. No AI agent security product has published a production FP rate. We will.<br><br>Self-verifiable: one SQL query, customer runs it, customer owns the result.</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:20px;font-family:'DM Mono',monospace;font-size:11px;color:var(--mid);">
+      60 tests · 14 files · All green · Call overhead 0.25ns Linux · Hardening score 96/100
+    </div>
+  </div>
+
+  <!-- SLIDE 5: MARKET -->
+  <div class="slide" id="slide-5">
+    <div class="slide-label">Market</div>
+    <div class="slide-title">Regulated enterprises<br>deploying <em>AI agents at scale</em></div>
+    <div class="two-col">
+      <div>
+        <div class="card card-accent" style="margin-bottom:16px;">
+          <div class="card-num">$12B</div>
+          <div class="card-title">AI Security TAM by 2028</div>
+          <div class="card-body">Agent-specific behavioral enforcement is a new layer. No incumbent owns it. Check Point/Lakera focuses on prompt filtering. ARE scores behavioral history.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">ICP — Regulated Enterprise</div>
+          <div class="card-body">
+            <div style="margin-bottom:8px;"><span class="tag">Financial Services</span><span class="tag">DORA</span></div>
+            <div style="margin-bottom:8px;"><span class="tag blue">Healthcare</span><span class="tag blue">HIPAA</span></div>
+            <div><span class="tag red">Capital Markets</span><span class="tag red">SEC</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <ul class="check-list">
+          <li><strong>DORA is live</strong> for EU financial services. Article 9 requires documented ICT risk management for AI agents.</li>
+          <li><strong>SEC has signaled</strong> AI governance requirements for registered investment advisers.</li>
+          <li><strong>HIPAA enforcement</strong> extending to AI-assisted clinical workflows.</li>
+          <li><strong>Agent counts are small</strong> — 50–2,000 per enterprise. Every agent can be known completely. ACV scales with agent count, not seat count.</li>
+          <li><strong>Grok (xAI) publicly co-signed</strong> ARE five times. Public record asset.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: COMPETITION -->
+  <div class="slide" id="slide-6">
+    <div class="slide-label">Competitive Landscape</div>
+    <div class="slide-title">Every competitor<br>scores <em>the call</em></div>
+    <table>
+      <thead>
+        <tr>
+          <th>Vendor</th>
+          <th>Layer</th>
+          <th>Behavioral History</th>
+          <th>Gateway Deploy</th>
+          <th>Audit Trail</th>
+          <th>ARE Advantage</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Check Point / Lakera</strong></td>
+          <td class="dim">Application</td>
+          <td class="red">No</td>
+          <td class="red">No</td>
+          <td class="dim">Limited</td>
+          <td class="accent">ARE scores history. CP filters the call.</td>
+        </tr>
+        <tr>
+          <td><strong>Gen Digital ADR</strong></td>
+          <td class="dim">Endpoint</td>
+          <td class="red">No</td>
+          <td class="red">No</td>
+          <td class="dim">Partial</td>
+          <td class="accent">ARE is gateway-layer. No agent awareness.</td>
+        </tr>
+        <tr>
+          <td><strong>Microsoft AGT</strong></td>
+          <td class="dim">Application</td>
+          <td class="red">No</td>
+          <td class="red">Azure only</td>
+          <td class="dim">Azure only</td>
+          <td class="accent">ARE governs every non-Azure agent. Complement, not compete.</td>
+        </tr>
+        <tr>
+          <td><strong>SIEM (Splunk/Sentinel)</strong></td>
+          <td class="dim">Log layer</td>
+          <td class="red">No</td>
+          <td class="red">No</td>
+          <td class="accent">Yes</td>
+          <td class="accent">ARE feeds SIEM. Not a replacement.</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--accent)">AgentRepEngine</strong></td>
+          <td class="accent">Gateway</td>
+          <td class="accent">30-day rolling</td>
+          <td class="accent">Any Kong env</td>
+          <td class="accent">Hash-chained</td>
+          <td class="accent">—</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:24px;font-size:13px;color:var(--mid);">
+      "We stop bad agents — the ones that look clean on every individual call but are systematically draining your systems over hundreds of sessions. Deploy in a day. First value in 7 days."
+    </div>
+  </div>
+
+  <!-- SLIDE 7: GTM -->
+  <div class="slide" id="slide-7">
+    <div class="slide-label">Go-To-Market</div>
+    <div class="slide-title">30-day free observe mode.<br><em>No procurement gauntlet.</em></div>
+    <div class="two-col">
+      <div>
+        <div class="card card-accent" style="margin-bottom:16px;">
+          <div class="card-title">The Motion</div>
+          <div class="card-body" style="line-height:1.8;">
+            <strong style="color:var(--white)">1.</strong> CISO hears about a DORA audit trail requirement<br>
+            <strong style="color:var(--white)">2.</strong> ARE is the implementation, already running<br>
+            <strong style="color:var(--white)">3.</strong> 30-day observe-mode pilot — no enforcement, full visibility<br>
+            <strong style="color:var(--white)">4.</strong> Day 30: one documented anomaly report, measured FP rate<br>
+            <strong style="color:var(--white)">5.</strong> CISO signs LoU. ARE advances to enforce mode on their sign-off.<br>
+            <strong style="color:var(--white)">6.</strong> Case study becomes the next 20 customer intros
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">ACV Ladder</div>
+          <div class="card-body" style="line-height:2;">
+            <span class="tag">Observe</span> $50K ACV · CISO buys<br>
+            <span class="tag">Enforce</span> $100K ACV · Security eng upgrades<br>
+            <span class="tag blue">Intelligence</span> $150K ACV · CFO renews
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card card-blue" style="margin-bottom:16px;">
+          <div class="card-title">Active Pipeline</div>
+          <div class="card-body" style="line-height:2;">
+            <strong style="color:var(--white)">Lloyd Lemish</strong> — NWN Technical SA · April 28<br>
+            <strong style="color:var(--white)">Andrew Gyamfi</strong> — Translucent AI Head of Security<br>
+            <strong style="color:var(--white)">Niamh Muldoon</strong> — BNY Mellon EMEA CISO<br>
+            <strong style="color:var(--white)">Unmukt Raizada</strong> — TrustEvals.ai ex-Goldman/JPM<br>
+            <strong style="color:var(--white)">Andy Watkin-Child</strong> — DORA/SEC specialist
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Distribution Unlock</div>
+          <div class="card-body">Kong Marketplace listing creates inbound from 5,000+ enterprise Kong deployments. Every Microsoft AGT deployment creates an ARE need for non-Azure agents.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: TRACTION -->
+  <div class="slide" id="slide-8">
+    <div class="slide-label">Traction</div>
+    <div class="slide-title">Phase 1 complete.<br><em>T8 commercial gate</em> in progress.</div>
+    <div class="two-col">
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="tl-date">Mar 2026</div>
+          <div class="tl-line"></div>
+          <div class="tl-content">
+            <div class="tl-title">Phase 1 Complete — 96/100 hardening</div>
+            <div class="tl-body">60 tests, 14 files, all green. Kong plugin, Redis AOF, hash-chain verification binary, OSCAL SOC2 evidence bundle.</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="tl-date">Mar 2026</div>
+          <div class="tl-line"></div>
+          <div class="tl-content">
+            <div class="tl-title">Published IP — Zenodo DOI</div>
+            <div class="tl-body">DOI 10.5281/zenodo.19169185. Peer-reviewed behavioral trust enforcement methodology.</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="tl-date">Mar 2026</div>
+          <div class="tl-line"></div>
+          <div class="tl-content">
+            <div class="tl-title">Grok (xAI) — 5 public co-signs</div>
+            <div class="tl-body">Public record validation from xAI's flagship model. Not a communication channel — a trust signal.</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="tl-date">Apr 2026</div>
+          <div class="tl-line"></div>
+          <div class="tl-content">
+            <div class="tl-title">T8 — NWN pilot meeting</div>
+            <div class="tl-body">Lloyd Lemish, NWN Technical Solutions Architect. April 28. First commercial gate.</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="tl-date">Jun 2026</div>
+          <div class="tl-line"></div>
+          <div class="tl-content">
+            <div class="tl-title">AIAI New York — BNY Mellon</div>
+            <div class="tl-body">Kuntal Dutta (BNY Mellon Global Head of Information Security) confirmed speaker.</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card card-accent" style="margin-bottom:16px;">
+          <div class="card-title">SDK Coverage</div>
+          <div class="card-body">LangChain / LangGraph native SDK: 36/36 tests passing. Any HTTP-based agent framework via Kong plugin.</div>
+        </div>
+        <div class="card card-blue" style="margin-bottom:16px;">
+          <div class="card-title">Compliance Stack Built</div>
+          <div class="card-body">NIST OSCAL 1.1.2 SOC2/DORA assessment. SPHINCS+ PQC signatures (FIPS 205). ZK-STARK enforcement proofs. Raft consensus for quorum decisions. TEE attestation (NIST SP 800-190).</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Character Capital G6</div>
+          <div class="card-body">Pre-seed application submitted. Decision ~April 13.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: MOAT -->
+  <div class="slide" id="slide-9">
+    <div class="slide-label">Defensibility</div>
+    <div class="slide-title">The moat compounds<br>with <em>every enforcement decision</em></div>
+    <div class="three-col">
+      <div class="card card-accent">
+        <div class="card-title">Behavioral Data Moat</div>
+        <div class="card-body">Every enforcement decision with its reason object is a labeled training example. Phase 1 data trains Phase 2 classifier. First enterprise deployment creates data no competitor can replicate.</div>
+      </div>
+      <div class="card card-blue">
+        <div class="card-title">Published Standard</div>
+        <div class="card-body">DOI-anchored methodology. Agent Behavioral Passport design (Phase 2) becomes the industry specification. First to publish owns the vocabulary regulators adopt.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Gateway Position</div>
+        <div class="card-body">Below the application layer. Agents cannot see ARE. Cannot route around it. Not an SDK to be disabled. Not a header to be spoofed. Structural, not contractual.</div>
+      </div>
+    </div>
+    <div style="margin-top:24px;" class="two-col">
+      <div class="card">
+        <div class="card-title">Phase 2 — Agent Behavioral Passport</div>
+        <div class="card-body">Pre-deployment scope declaration + runtime enforcement + post-period certificate = complete agent lifecycle. Enterprise agent counts are small (50–2,000). Every agent can be known completely.</div>
+      </div>
+      <div class="card card-accent">
+        <div class="card-title">Switching Cost</div>
+        <div class="card-body">At 90 days of production data, ARE's behavioral baseline is calibrated to your specific agent fleet. No competitor can replicate 90 days of your agents' behavioral history. Switching cost compounds monthly.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: USE OF FUNDS -->
+  <div class="slide" id="slide-10">
+    <div class="slide-label">Use of Funds</div>
+    <div class="slide-title">$500K–$1M pre-seed<br><em>one enterprise, one incident</em></div>
+    <div class="two-col">
+      <div>
+        <table>
+          <thead>
+            <tr><th>Allocation</th><th>Amount</th><th>Outcome</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Engineering (Phase 2 build)</td><td class="accent">$200K</td><td class="dim">Agent Behavioral Passport + peer cluster detection</td></tr>
+            <tr><td>First enterprise pilot</td><td class="accent">$100K</td><td class="dim">Lloyd LoU → one documented blocked incident</td></tr>
+            <tr><td>Compliance validation</td><td class="accent">$100K</td><td class="dim">SOC2 Type II audit + DORA attestation</td></tr>
+            <tr><td>GTM (conferences + outreach)</td><td class="accent">$75K</td><td class="dim">Leaders in AI, Momentum AI, AIAI New York</td></tr>
+            <tr><td>Operations (12 months)</td><td class="accent">$25K</td><td class="dim">Infrastructure, tooling, legal</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="card card-accent" style="margin-bottom:16px;">
+          <div class="card-title">6-Month Prime Directive</div>
+          <div class="card-body">Ship runtime trust enforcement to one regulated enterprise. Document one blocked production incident. That case study becomes the entire sales deck for the next 20 customers.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">12-Month Target</div>
+          <div class="card-body">3 paying enterprises. $300K ARR. Series A readiness: one published case study with documented blocked incident, positive unit economics on pilot cohort.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 11: CLOSE -->
+  <div class="slide" id="slide-11">
+    <div class="bg-grid"></div>
+    <div class="bg-glow" style="bottom:-100px;right:-100px;"></div>
+    <div style="max-width:680px;">
+      <div class="slide-label">The Ask</div>
+      <div class="slide-title" style="font-size:clamp(40px,5vw,72px);">$500K–$1M<br><em>to close the first enterprise</em></div>
+      <div style="font-size:16px;color:var(--mid);line-height:1.7;margin-bottom:40px;">
+        Phase 1 is complete. The product is built, tested, and hardened. The first commercial meeting is April 28. The raise runs in parallel — not after. One documented blocked incident changes the entire trajectory.
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:40px;">
+        <div class="card card-accent">
+          <div class="card-title">What exists today</div>
+          <div class="card-body">Working product · 60 green tests · Published IP · 0.00% FP · Active pipeline · DORA/SOC2/NIST compliance stack</div>
+        </div>
+        <div class="card card-blue">
+          <div class="card-title">What this closes</div>
+          <div class="card-body">First enterprise LoU · First documented blocked incident · Case study · Series A readiness</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
+        <div class="doi-badge">DOI <span>10.5281/zenodo.19169185</span></div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--mid);">github.com/Rehanrana11/AgentRepEngine</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end deck -->
+
+<!-- PROGRESS DOTS -->
+<div class="progress" id="progress"></div>
+
+<!-- NAV -->
+<div class="nav">
+  <button class="prev" onclick="prevSlide()">←</button>
+  <span class="slide-counter" id="counter">1 / 11</span>
+  <button class="next" onclick="nextSlide()">→</button>
+</div>
+
+<div class="kbd-hint">← → to navigate</div>
+
+<script>
+  const totalSlides = 11;
+  let current = 1;
+
+  // Build dots
+  const progress = document.getElementById('progress');
+  for (let i = 1; i <= totalSlides; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === 1 ? ' active' : '');
+    dot.onclick = () => goTo(i);
+    progress.appendChild(dot);
+  }
+
+  function goTo(n) {
+    document.getElementById('slide-' + current).classList.remove('active');
+    document.querySelectorAll('.dot')[current - 1].classList.remove('active');
+    current = Math.max(1, Math.min(totalSlides, n));
+    document.getElementById('slide-' + current).classList.add('active');
+    document.querySelectorAll('.dot')[current - 1].classList.add('active');
+    document.getElementById('counter').textContent = current + ' / ' + totalSlides;
+  }
+
+  function nextSlide() { goTo(current + 1); }
+  function prevSlide() { goTo(current - 1); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextSlide();
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prevSlide();
+  });
+</script>
+</body>
+</html>
