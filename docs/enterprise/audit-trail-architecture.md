@@ -115,7 +115,7 @@ Component           DORA    SOC2    HIPAA   SEC     NIST    GDPR    EU AI
 Hash Chain ✅        Art.17  CC7.2   §164.3  17a-4   MG-2.2  Art.5   Art.9
 Merkle Proofs ✅     RTS     CC7.3   §164.5  —       —       Art.22  Art.86
 SPHINCS+ PQC ✅      RTS'26  —       HTI-1   —       800-208 —       —
-ZK-STARK ✅          —       —       §164.5  —       —       Art.22  Art.86
+ZK-STARK (Phase1 stub) ✅  —  —  §164.5  —  —  Art.22  Art.86
 OSCAL Bundle ✅      —       CC1-9   —       —       All     —       —
 Reason Object ✅     Art.28  CC6.1   —       15c3-5  EX-1.1  Art.22  Art.13
 Auto-rollback ✅     Art.11  A1.3    §164.3  —       MG-4.1  —       —
