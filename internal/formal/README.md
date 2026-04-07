@@ -41,3 +41,16 @@ specification ... is true
 | C2 (human oversight) | SOC2 | CC7.2 |
 | C3 (auto-rollback) | NIST AI RMF | MS-2.5 |
 | L1 (no permanent isolation) | GDPR | Article 22 (automated decisions) |
+## Running TLA+ / TLC
+```bash
+tlc internal/formal/ceiling_invariant.tla -config internal/formal/ceiling_invariant.tla
+```
+
+Or via TLA+ Toolbox IDE — open `ceiling_invariant.tla`, run TLC Model Checker.
+
+### Model parameters (keep small for TLC termination)
+### Invariants verified
+- `TypeInvariant` — all variables remain well-typed
+- `ScoreInBounds` — score always in [0, 1000]
+- `CeilingHolds` — ceiling-active agent never exceeds ceiling value
+- `FPRollbackPreservesCeiling` — auto-rollback never clears a ceiling
