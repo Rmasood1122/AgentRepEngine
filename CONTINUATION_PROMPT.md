@@ -32,7 +32,7 @@ REPO
 https://github.com/Rehanrana11/AgentRepEngine
 Branch: master (push with git push origin master — NOT main)
 CURRENT STATE — April 07, 2026
-HEAD: fc1c400
+HEAD: 89fc78d
 go test ./... — ALL GREEN ✅ (20 packages passing)
 SESSION CLOSE RECORD
   Session date:     April 07, 2026
@@ -41,16 +41,16 @@ SESSION CLOSE RECORD
   Last action:      10-item roadmap executed — all Category A + B complete
   Irreversible:     YES ✅ — G-COMMERCIAL structural, 8 commits pushed
 RECENT COMMITS
+89fc78d docs: M2 adversarial baseline poisoning research note — attack class definition, two-layer defense, experimental results
+7ebf321 docs: M3 SIEM integration — Splunk HEC + Sentinel specs, CEF format, KQL queries, dashboard panels, Defender XDR
+a325994 docs: TW-2 — LoU staged curriculum added, 4-phase rollout, success criteria, GDPR Article 22 human oversight note
+27cab0b docs: PL-SECURITY-ATTESTATION — 5-section security attestation, key management/data residency/access/incident/compliance
+fcaeb37 docs: L142 — API key rotation procedure added to prerequisites-checklist
+002a1af feat: TW-6 variance growth rate wired to scoring pipeline — slow-walk early warning active, -150 penalty on HIGH_RISK
+6f0a585 feat: update_continuation.sh — automated session state capture, HEAD+tests+commits auto-updated
 fc1c400 test: full compliance chain integration test — 7/7 steps pass, Merkle column fix (agent_id→agent_did, action→decision)
 0241818 docs: session 2 close — Sprint1 5/9 complete, all tests green, HEAD b2096b9
 b2096b9 docs: redis-failover — 4-scenario unavailability matrix, CISO statements, Lloyd one-liner
-6ecc9e9 test: Kong/service contract test — 9 tests, schema drift prevention, fail-open validation, 800 TRUSTED boundary
-c653f71 feat: generate-evidence-package.sh — unified auditor ZIP, hash chain + Merkle proofs + DORA report + OSCAL bundle
-8545b34 feat: cmd/oscal-generate — OSCAL SOC2/NIST/DORA evidence bundle CLI, GRC tool ready
-f795eb8 feat: cmd/verify-decision — Merkle selective proof CLI, HIPAA §164.528 / GDPR Art.22 selective disclosure
-ecac02f docs: ZK-STARK claim qualified — Phase1 SHA-256 stub noted, Phase2 production prover path documented
-bf4e956 docs: Raft single-node fallback documented — Phase1 vs Phase2 topology, activation trigger, DORA mapping
-75dd202 docs: BUILD_INTELLIGENCE updated — nuclear packages documented, file map current, Section 10 added
 
 Tests: ALL GREEN ✅
 
