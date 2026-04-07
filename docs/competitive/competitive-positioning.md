@@ -195,7 +195,7 @@ Recite these without hesitation in every conversation:
 
 | Metric | Value | Context |
 |--------|-------|---------|
-| FP rate | 0.00% | 150-scenario corpus, 50 boundary scenarios, <2.0% at 95% CI [F] |
+| FP rate | 0.00% on internal corpus | 150-scenario corpus, 50 boundary scenarios, <2.0% at 95% CI. Production target: <0.1% (Visa standard) [F] |
 | TP rate | 88% (44/50) | Above 85% gate [F] |
 | Held-out TP | 100% (6/6) | Unseen scenarios [F] |
 | Slow-walk detection | 100% | 10/10 scenarios [F] |
@@ -217,7 +217,7 @@ Recite these without hesitation in every conversation:
 
 ARE wins on: behavioral history, slow-walk detection, gateway-layer
 enforcement, examiner-verifiable audit trail, 4-hour install,
-0.00% false positive rate.
+0.00% false positive rate on internal validation corpus. Production target: <0.1% — Visa fraud detection standard.
 
 Compete on your strengths. Acknowledge their strengths.
 Never get into a feature comparison on their terrain.

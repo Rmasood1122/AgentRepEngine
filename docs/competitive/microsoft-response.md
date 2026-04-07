@@ -178,7 +178,7 @@ requirement. Throughput is a solved problem.
 
 **ARE's current metrics:**
 - Slow-walk detection rate: 100% (10/10 scenarios) [F]
-- False positive rate: 0.00% on 150-scenario corpus including 50 boundary scenarios at z-score 4.0–5.5 — bounding FP below 2.0% at 95% CI [F]
+- False positive rate: 0.00% on 150-scenario internal validation corpus including 50 boundary scenarios at z-score 4.0–5.5 — bounding FP below 2.0% at 95% CI [F]
 - Call overhead: 0.25ns on Linux production [F]
 
 **For Lloyd:**
@@ -241,7 +241,7 @@ environment. Rules are table stakes. Behavioral history is the moat."
 | DORA Article 11 examiner-verifiable | ✅ Hash-chain     | ❌ Self-reported   |
 | 4-hour install, no DID setup        | ✅ JWT/RS256      | ❌ DID/Ed25519     |
 | Behavioral certification authority  | ✅ 24x product    | ❌ Not claimed     |
-| 0.00% false positive rate           | ✅ Validated      | ❌ Not disclosed   |
+| 0.00% FP on internal corpus. <0.1% production target | ✅ Validated | ❌ Not disclosed |
 | Latency                             | 0.25ns–2ms (behavioral) | <0.1ms (stateless) |
 | Price                               | $50K–$150K ACV   | Free / $15/user/mo|
 

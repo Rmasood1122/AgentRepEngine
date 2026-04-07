@@ -49,7 +49,7 @@ of the framework.
 | MAP 2.1 — Scientific findings are applied | Behavioral scoring via velocity + z-score anomaly detection. Per-agent individual baseline. Peer cluster deviation in every reason object. Exponential decay model with 7-day half-life. |
 | MAP 2.3 — AI system risks are documented | Honest Maturity Statement. Known gaps documented with closure timelines. No hidden limitations. |
 | MAP 3.5 — Risk to third parties | Data residency: all behavioral telemetry stays in customer Kubernetes cluster. No cross-tenant data sharing in Phase 1. Tier 1 metadata-only telemetry by default. |
-| MAP 5.1 — Likelihood of AI risks | Attack corpus: 20 attack scenarios across OWASP LLM Top 10. TP rate: 86.67%. FP rate: 0.00% on 150-scenario corpus (50 boundary scenarios at z-score 4.0–5.5) — bounding FP below 2.0% at 95% CI. |
+| MAP 5.1 — Likelihood of AI risks | Attack corpus: 20 attack scenarios across OWASP LLM Top 10. TP rate: 88.00%. FP rate: 0.00% on 150-scenario internal corpus (50 boundary scenarios at z-score 4.0–5.5) — bounding FP below 2.0% at 95% CI. |
 
 ---
 

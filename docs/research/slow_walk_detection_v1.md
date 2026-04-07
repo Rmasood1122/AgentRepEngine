@@ -18,7 +18,7 @@ the statistical foundation underlying detection.
 
 **Key results:**
 - 100% slow-walk detection rate (10/10 scenarios)
-- 0.00% false positive rate on legitimate agent traffic
+- 0.00% false positive rate on 150-scenario internal validation corpus
 - Detection latency: sub-second at gateway layer
 - Evasion scenarios tested: 3-day to 7-day attack windows
 
@@ -140,7 +140,7 @@ out-of-sample detection performance.
 | SW-010 | 4-day lateral movement preparation | Layer 1 + Layer 2 | ✅ |
 
 **Slow-walk detection rate: 100% (10/10)**
-**False positive rate on legitimate traffic: 0.00% (0/100 scenarios)**
+**False positive rate on internal validation corpus: 0.00% (0/150 scenarios)**
 
 ### Held-Out Validation — Key Scenarios
 ```
@@ -203,7 +203,7 @@ Each org's agents are measured against their own population.
 | Rolling average | ❌ Baseline contaminated | Low |
 | Pure z-score (point-in-time) | ⚠️ Partial — detects late | Medium |
 | SIEM correlation rules | ⚠️ Requires manual tuning | High |
-| ARE (z-score + VGR) | ✅ 100% detection | 0.00% |
+| ARE (z-score + VGR) | ✅ 100% detection | 0.00% on internal corpus |
 
 The combination of Welford's online algorithm with variance
 growth rate monitoring provides detection that neither
