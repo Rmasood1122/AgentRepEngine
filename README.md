@@ -90,12 +90,12 @@ Installation time: under 4 hours, customer-hosted, no external dependencies.
 | GDPR Article 22 | Human-in-the-loop enforcement validation at every stage |
 | SOC2 CC7.2 | System monitoring with Prometheus + SIEM integration |
 
-## Ensemble enforcement — why 0.00% false positives
+## Ensemble enforcement — why ARE targets below 0.1% false positives in production
 
 ARE requires two independent detection systems to agree before any agent is
 blocked: the behavioral attention engine (score-based) AND OWASP LLM Top 10
 enforcement policies (rule-based). A single miscalibrated metric cannot block
-a legitimate agent. This is the architectural reason ARE achieves 0.00% false
+a legitimate agent. This is the architectural reason ARE achieves 0.00% false positives on our 150-scenario internal validation corpus —
 positive rate on its held-out validation corpus.
 
 ## Adversarial baseline poisoning (novel attack class)

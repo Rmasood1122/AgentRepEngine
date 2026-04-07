@@ -98,7 +98,7 @@ precision and recall. It is the metric a security auditor will ask
 for because it cannot be gamed by optimizing only one dimension.
 
 **Current validated metrics (held-out corpus):**
-TP rate: 86.67% | FP rate: 0.00% | Precision: 100% | F1: 0.9286
+TP rate: 88.00% | FP rate: 0.00% on internal corpus | Precision: 100% | F1: 0.9362
 Measured on held-out validation corpus (20% stratified sample,
 never used for threshold calibration).
 

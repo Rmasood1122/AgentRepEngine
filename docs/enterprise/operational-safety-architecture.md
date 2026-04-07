@@ -195,7 +195,7 @@ Maps directly to:
 
 ---
 
-### Ensemble Enforcement — Why 0.00% False Positives
+### Ensemble Enforcement — Why ARE Targets Below 0.1% False Positives in Production
 
 ARE's behavioral enforcement requires two independent detection
 systems to agree before any agent is blocked:
@@ -208,7 +208,7 @@ systems to agree before any agent is blocked:
 Both must flag independently before enforcement triggers.
 A single miscalibrated metric cannot block a legitimate agent.
 This is why ARE achieves the following on held-out validation corpus:
-TP rate: 86.67% | FP rate: 0.00% | Precision: 100% | F1: 0.9286
+TP rate: 88.00% | FP rate: 0.00% on internal corpus | Precision: 100% | F1: 0.9362
 Measured on held-out validation corpus (20% stratified sample,
 never used for threshold calibration). Zero legitimate agents
 blocked across all enterprise workflow scenarios tested.

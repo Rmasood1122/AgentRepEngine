@@ -125,7 +125,7 @@ Every agent request scored against its own 30-day baseline.
 Z-score anomaly detection.
 Enforcement at the gateway — before data leaves your environment.
 
-0.00% false positive rate. 100% slow-walk detection.
+0.00% false positive rate on internal validation corpus. Production target: below 0.1% — the Visa fraud detection standard. 100% slow-walk detection.
 
 5/ The reason object every CISO wants:
 

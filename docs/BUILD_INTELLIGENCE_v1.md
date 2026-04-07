@@ -83,7 +83,7 @@ In order of business consequence. Not technical elegance.
 5. THE ~60-SECOND STREAMING DEMO
    scripts/demo.sh runs end-to-end in ~60 seconds with streaming output.
    Shows: JWT identity → behavioral scoring → BLOCKED → reason object
-          → hash chain verified → FP rate 0.00%
+          eval_harness/      FP gate (0.00% on internal corpus) + TP gate (88.00%)
    Each step prints live with sleep 0.5 pacing — the viewer sees progress.
    This is the entire sales motion in ~60 seconds.
    Every claim is demonstrated live. Nothing is asserted.
@@ -329,7 +329,7 @@ migrations/
   001_initial.sql    Schema + INSERT-only enforcement on enforcement_decisions
 
 tests/
-  eval_harness/      FP gate (0.00%) + TP gate (86.67%)
+  eval_harness/      FP gate (0.00% on internal corpus) + TP gate (88.00%)
   fp_scenarios/      100 legitimate scenarios
   attack_corpus/     30 attack scenarios + 10 slow-walk scenarios
 

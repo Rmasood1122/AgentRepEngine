@@ -158,7 +158,7 @@ You run the query. You own the result. No vendor interpretation required.
 | Production FP target | <0.1% | Visa fraud detection standard |
 | True positive rate | 88.00% (44/50) | Above 85% gate |
 | Held-out TP | 100% (6/6) | Never-seen scenarios |
-| Held-out FP | 0.00% (0/20) | Never-seen legitimate agents |
+| Held-out FP | 0.00% (0/20) | Never-seen legitimate agents — internal corpus only |
 | F1 score | 0.9362 | |
 | Precision | 100% | |
 | Slow-walk detection | 100% (10/10) | Single-agent scope |
@@ -168,7 +168,7 @@ You run the query. You own the result. No vendor interpretation required.
 | Test coverage | 60 tests / 14 files | All green |
 
 **4-metric format for any performance claim:**  
-*"TP=88.00%, FP=0.00%, Precision=100%, F1=0.9362"*
+*"TP=88.00%, FP=0.00% on internal corpus, Precision=100%, F1=0.9362. Production target: <0.1% — Visa standard."*
 
 ---
 
