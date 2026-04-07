@@ -227,15 +227,35 @@ Total learnings: 143 (L135–L143 recovered from session 17223a4a)
 Next learning number: L144
 Next MASTER_LEARNINGS number: L100
 GENERATE not called — L144 waiting for paste next session.
+ACTIVE TASKS — BEFORE LLOYD (April 28)
+#1  [ ] B3 — FP claim language upgrade (M1) — grep + replace    1 hr
+#2  [ ] B5 — Audit trail architecture doc                       30 min
+#3  [ ] B1 — Observe-to-enforce criteria doc                     1 hr
+#4  [ ] B4 — Gen Digital ADR competitive response                2 hrs
+#5  [ ] B2 — Pilot case study template                           2 hrs
+#6  [ ] TW-1 — Lloyd_meeting_prep.md 14 talking points           1 hr
+#7  [ ] TW-REHEARSAL — say C1–C14 aloud                         20 min
+#8  [ ] TW-2 — LoU staged curriculum update                      1 hr
+#9  [ ] L134 — Investor deck metrics update                     30 min
+#10 [ ] C-Corp conversion email to attorney                     30 min
 
-NEXT SESSION PRIORITIES (in order)
-1. Check Character Capital G6 response (~April 13)
-2. Check replies: Gyamfi, Raizada, Watkin-Child
-3. Confirm Lloyd exact date (April 28 — resolve Leaders in AI Summit conflict)
-4. TW-1 — Lloyd_meeting_prep.md (60 min) — highest priority doc
-5. L118 — observe-to-enforce-criteria.md (60 min) — Lloyd will ask for this
-6. L132 — pilot-case-study-template.md (2 hrs) — must exist before pilot
-7. docs/architecture/agent-behavioral-passport-design.md (2 hrs) — Phase 2 design
-8. Zenodo paper: Agent Behavioral Passport Standard v1.0 (2 hrs)
-9. L134 — investor deck metrics update (30 min) — before April 21
-10. L144 — next learning session
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DEFERRED — AFTER LLOYD LOU SIGNED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+These exist. They are not lost. They do not block current work.
+Activate when Lloyd LoU is signed.
+
+[ ] cmd/verify-decision — Merkle selective proof CLI            3 hrs
+[ ] cmd/oscal-generate — OSCAL bundle CLI                       3 hrs
+[ ] scripts/generate-evidence-package.sh                        2 hrs
+[ ] Two-speed baseline (L104)                                   4 hrs
+[ ] FP corpus expansion 150→300 scenarios                       4 hrs
+[ ] Vendor package: MSA + pilot scope + data brief              3 hrs
+[ ] Secondary investor list — 10 names                          2 hrs
+[ ] Adversarial baseline poisoning research note (Zenodo)       6 hrs
+[ ] Splunk Add-on spec                                          2 hrs
+[ ] Sentinel connector spec                                     2 hrs
+[ ] Cornell Tech / NYU Tandon outreach                          1 hr
+[ ] Agent behavioral passport design doc                        2 hrs
+[ ] scripts/update_continuation.sh automation                   2 hrs
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
