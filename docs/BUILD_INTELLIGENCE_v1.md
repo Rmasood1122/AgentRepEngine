@@ -327,16 +327,25 @@ config/
 
 migrations/
   001_initial.sql    Schema + INSERT-only enforcement on enforcement_decisions
-
 tests/
-  eval_harness/      FP gate (0.00% on internal corpus) + TP gate (88.00%)
-  fp_scenarios/      100 legitimate scenarios
-  attack_corpus/     30 attack scenarios + 10 slow-walk scenarios
+  eval_harness/      FP gate (0.00% internal corpus) + TP gate (88.00%)
+  fp_scenarios/      150 legitimate scenarios (100 base + 50 boundary)
+  attack_corpus/     50 attack scenarios + 10 slow-walk scenarios
+  held_out/          20 held-out FP + 6 held-out TP — never used for tuning
 
 docs/
-  enterprise/        8 CISO documents including pilot LOU
-  compliance/        NIST AI RMF mapping
-  architecture/      Scoring model + APEX Laws → ATP mapping
+  enterprise/        CISO documents — pilot LoU, observe-to-enforce,
+                     audit-trail-architecture, case study template,
+                     prerequisites, operational-safety-architecture
+  compliance/        NIST AI RMF mapping, OSCAL evidence bundles
+  architecture/      Scoring model, system architecture
+  competitive/       gen-digital-adr-response, competitive-positioning,
+                     microsoft-response
+  ops/               SPRINT_ROADMAP, ARE_GAP_CLOSURE_ROADMAP,
+                     chain-verification, redis-failover, capacity,
+                     key-management, kong-compatibility
+  regulatory/        dora-examiner-protocol
+  research/          slow_walk_detection_v1
   specs/             reason_object_v1.json schema
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -420,7 +429,67 @@ Demo:
   time bash scripts/demo.sh 2>&1 | tail -5
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 10 — NUCLEAR BUILD PACKAGES (added post-March 22)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+These packages were added in the nuclear build sprint (late March 2026).
+All verified WIRED via grep April 7, 2026.
+
+internal/audit/merkle.go
+  Merkle tree over enforcement_decisions.
+  BuildMerkleTree() + GenerateProof() + ExportMerkleRoot()
+  Integrated with SPHINCS+: SignAuditEvent() takes merkleLeaf param.
+  CLI entry point: cmd/verify-decision (TODO Sprint 1)
+  Compliance: HIPAA §164.528, GDPR Article 22 selective disclosure
+
+internal/audit/pqc_signer.go
+  SPHINCS+-SHA2-256s-simple API (Phase 1: HMAC-SHA256 stub)
+  Production replacement: github.com/cloudflare/circl/sign/sphincsplus
+  SignAuditEvent() takes merkleLeaf — PQC and Merkle are integrated
+  Compliance: NIST SP 800-208, FIPS 205
+
+internal/zkp/composite_proof.go
+  ZK-STARK API-compatible proof (Phase 1: SHA-256 stub)
+  Production replacement: starkware/cairo or matter-labs/bellman
+  Prove() + VerifyProof() callable today
+  Compliance: GDPR Article 22, EU AI Act Article 86
+
+internal/consensus/raft_ceiling.go
+  Raft consensus for ceiling decisions (Phase 2: multi-node only)
+  Phase 1 single-node: ceiling decisions made directly by scoring service
+  Raft activates when 3+ scoring service instances deployed
+  Do NOT attempt to activate Raft in Phase 1 single-node deployment
+
+internal/attestation/software_tee.go
+  Software TEE attestation (Phase 1: software simulation stub)
+  Production replacement: edgelesssys/ego (SGX) or google/go-tpm
+  GenerateQuote() + VerifyQuote() callable today
+  Wired to: cmd/dora-verify ✅
+  Compliance: NIST SP 800-190, DORA Art.9
+
+internal/compliance/oscal.go
+  OSCAL 1.1.2 SOC2/NIST evidence bundle generator
+  GenerateOSCALBundle() takes AREEvidenceInput → full OSCAL JSON
+  CLI entry point: cmd/oscal-generate (TODO Sprint 1)
+  Compliance: SOC2 CC1-CC9, NIST AI RMF
+
+cmd/dora-verify/ ✅ EXISTS
+  DORA Article 17 formatted evidence report
+  References TEE attestation. Callable today.
+
+cmd/verify-chain/ ✅ EXISTS
+  Hash chain sequential integrity verification
+  Customer-runnable. No vendor trust required.
+
+THREE CLI ENTRY POINTS REMAINING (Sprint 1):
+  cmd/verify-decision  → internal/audit/merkle.go GenerateProof()
+  cmd/oscal-generate   → internal/compliance/oscal.go GenerateOSCALBundle()
+  scripts/generate-evidence-package.sh → unified auditor ZIP
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 END OF BUILD_INTELLIGENCE v1.0
-Built March 17–22, 2026 | 58 commits | 5,587 lines of Go
-Upload to Claude project as: BUILD_INTELLIGENCE_v1.md
+Built March 17–22, 2026 + nuclear sprint March–April 2026
+Last updated: April 7, 2026
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
