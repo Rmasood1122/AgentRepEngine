@@ -228,11 +228,26 @@ Next learning number: L144
 Next MASTER_LEARNINGS number: L100
 GENERATE not called — L144 waiting for paste next session.
 ACTIVE TASKS — BEFORE LLOYD (April 28)
+SESSION 2 COMPLETE — April 7, 2026
+Commits: b2096b9 HEAD
+All tests: GREEN ✅
+
 #1  [x] B3 — FP claim language upgrade ✅ 03740bb + 75ece6a
 #2  [x] B5 — Audit trail architecture doc ✅ 2a8d14c
 #3  [x] B1 — Observe-to-enforce criteria ✅ already committed
 #4  [x] B4 — Gen Digital ADR competitive response ✅ already committed
 #5  [x] B2 — Pilot case study template ✅ already committed
+── SPRINT 1 PROGRESS (5/9 complete) ──────────────────────────
+[x] S1-A-1 cmd/verify-decision ✅ f795eb8
+[x] S1-A-2 cmd/oscal-generate ✅ 8545b34
+[x] S1-A-3 generate-evidence-package.sh ✅ c653f71
+[x] S1-B-1 Kong contract test ✅ 6ecc9e9
+[x] S1-B-2 Redis failover matrix ✅ b2096b9
+[ ] S1-B-3 Full compliance chain integration test    3 hrs
+[ ] S1-C-1 Helm chart (if Lloyd confirms K8s)        3 hrs
+[ ] S1-C-2 SIEM format (ask Lloyd what SIEM)         1 hr
+[ ] S1-D-1 update_continuation.sh automation         2 hrs
+──────────────────────────────────────────────────────────────
 #6  [ ] TW-1 — Lloyd_meeting_prep.md 14 talking points           1 hr
 #7  [ ] TW-REHEARSAL — say C1–C14 aloud                         20 min
 #8  [ ] TW-2 — LoU staged curriculum update                      1 hr
