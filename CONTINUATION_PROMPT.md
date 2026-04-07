@@ -1,4 +1,29 @@
 AgentRepEngine — CONTINUATION PROMPT
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+G-COMMERCIAL — FIRES FIRST. EVERY SESSION. NO EXCEPTIONS.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before anything else opens, answer every line:
+
+TIER 0 — BLOCKS EVERYTHING
+[ ] Lloyd Lemish — meeting April 28 confirmed ✅ | materials ready?
+
+TIER 1 — EXECUTE BEFORE ANY SESSION WORK
+[ ] Andrew Gyamfi — reply received? | next step taken?
+[ ] Andy Watkin-Child — reply received? | next step taken?
+[ ] Unmukt Raizada — reply received? | next step taken?
+
+TIER 2 — EXECUTE WITHIN 48 HRS OF TIER 1
+[ ] Paul Vann (Validia CEO) — message sent?
+[ ] Turner Novak — domain verified? email sent?
+[ ] C-Corp conversion — email sent to attorney?
+[ ] Sovren Software — follow-up sent?
+
+RULE: Any unchecked box = that action executes before session opens.
+      Not negotiable. Not overridable. No exceptions.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Next session starts here
 APEX VERSION
 APEX v5.2 + ZROS v2.7 + MASTER_LEARNINGS v2.1 DELTA + LEARNING_INTELLIGENCE v3.1
