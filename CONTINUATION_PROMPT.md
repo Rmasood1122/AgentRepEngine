@@ -7,256 +7,168 @@ REPO
 https://github.com/Rehanrana11/AgentRepEngine
 Branch: master (push with git push origin master — NOT main)
 CURRENT STATE — April 07, 2026
-HEAD: 883fbd1
+HEAD: 0fdde3e
 go test ./... — ALL GREEN ✅ (with SCORING_API_KEY=are-internal-key-change-in-production)
 SESSION CLOSE RECORD
   Session date:     April 07, 2026
-  Messages:         ~120
-  Duration:         ~5 hrs
-  Last action:      git push origin master — Week 2+3 nuclear build complete, 883fbd1
+  Messages:         ~180
+  Duration:         ~8 hrs
+  Last action:      TW-0 + TW-PRE-2 verified, CONTINUATION_PROMPT updated
   Irreversible:     YES ✅
 RECENT COMMITS
+0fdde3e docs: TW-0 + TW-PRE-2 both PASS — feature vector + org-scoped baseline verified
+ffd8922 docs: CONTINUATION_PROMPT — L135-L143 recovered, all unapplied tasks documented
+8355048 chore: CONTINUATION_PROMPT — Week 2+3 nuclear build complete, HEAD 883fbd1
 883fbd1 feat: OSCAL SOC2 evidence bundle — NIST OSCAL 1.1.2 SOC2/DORA compliance assessment
 03626ba feat: Software TEE attestation — NIST SP 800-190/DORA Art.9 enclave quote verification
 0d4a454 feat: ZK-STARK composite proof — GDPR Art.22/DORA Art.17 zero-knowledge enforcement
 a6b2a6d feat: SPHINCS+ PQC signatures — FIPS 205 audit event signing NIST Level 1
 13d13ee feat: Raft consensus — quorum ceiling decisions DORA Art.10/NIST SP 800-207
-d83b73d feat: TLA+ ceiling invariant — DORA Art.10/NIST ZTA ceiling score proof
-ff5f0b3 feat: LTL formal verification — SIR state machine safety+liveness NuSMV
-e95d17e feat: Merkle audit tree — DORA Art.17/SOC2 CC7.2 tamper-evident root
-b458fd6 fix: NIS2 YAML threshold structure + policy count test update
-
-Previous session:
-87cfc48 docs: maintenance window procedure — freeze, mode switch, verification, rollback
-90f592f docs: FP corpus independence methodology — proves 0.00% is not overfit
-d4b9cc6 docs: per-archetype adaptive threshold guide — 7 archetypes, bias audit results
-26e3f21 feat: NIS2 proportionality + GDPR data transfer policy packs
-e89cd42 feat: GDPR plain language reason + DORA article classifier in ReasonObject
-04ee471 feat: VRF threshold randomization — per-agent jitter defeats threshold probing
-eb01bcd feat: SIR state machine — SIR lifecycle, human clear, probation, Redis persistence
 
 Tests: ALL GREEN ✅
 
 PENDING — NOT YET DONE (commercial actions)
-⚠ AVOIDANCE PATTERN NAMED: All items below have been on this list 3-7+ sessions.
-Engineering substitution for direct contact is the documented pattern. Named.
-Andrew Gyamfi (Translucent AI) — Boardy message for direct email — SITTING BUYER — NOT CONTACTED
-Unmukt Raizada (TrustEvals.ai) — LinkedIn direct — NOT CONTACTED
-Andy Watkin-Child — LinkedIn direct — NOT CONTACTED
-Paul Vann (Validia CEO) — LinkedIn message — window may have closed (was April 4 hackathon)
+⚠ AVOIDANCE PATTERN: Engineering substitution for direct contact. Named repeatedly.
+Andrew Gyamfi (Translucent AI) — Boardy message SENT April 7 ✅
+Unmukt Raizada (TrustEvals.ai) — LinkedIn SENT April 7 ✅
+Andy Watkin-Child — LinkedIn SENT April 7 ✅
+Paul Vann (Validia CEO) — LinkedIn message — NOT SENT
 Sri Rajan — LinkedIn message drafted — NOT SENT
 Rock Lambros — LinkedIn message drafted — NOT SENT
 David Matousek — LinkedIn message drafted — NOT SENT
 Turner Novak — email domain UNVERIFIED (bana vs banana) — NOT SENT
-M1 Language upgrade (13 phrase replacements) — NOT DONE — before Lloyd
-TW-REHEARSAL (say C1–C12 aloud) — NOT DONE — do before Lloyd meeting
+M1 Language upgrade (13 phrase replacements) — NOT DONE
+TW-REHEARSAL (say C1–C14 aloud) — NOT DONE
 Secondary investor list (10 names) — NOT BUILT
 C-Corp conversion email — NOT SENT
 Sovren Software follow-up — inbound signal, never followed up
-Lloyd meeting — rescheduled ~April 21 (confirm exact date — conflicts with Leaders in AI Summit)
+Lloyd meeting — rescheduled ~April 28 (3 weeks from April 7)
+Character Capital Labs G6 — decision ~April 13
 
-REMAINING ENGINEERING
-(Tier 1 — after LoU signed)
-L133 — scripts/hackathon-demo.sh + README demo link (2 hrs)
-L134 — Investor deck metrics update: F1=0.9362, 17 packages, M5 claims (30 min)
-#11 FP measurement methodology 7-layer update — 1 hr
-#10 Conformal prediction confidence bounds — 2 hrs (lowest priority)
+KEY DECISIONS FROM APRIL 7 SESSION
+FP framing change [F]: Stop leading with 0.00%. Lead with Visa standard.
+  "ARE targets below 0.1% FP in production — matching Visa's fraud detection standard.
+  No AI agent security product has published a production FP rate. We will."
+  The 0.00% is a synthetic corpus result. The production target is the claim.
 
-NUCLEAR BUILD — WEEK 1: ✅ COMPLETE
-[x] SIR state machine (internal/scoring/sir_state.go) — eb01bcd
-[x] VRF threshold randomization (internal/scoring/vrf_threshold.go) — 04ee471
-[x] GDPR plain language reason (explainability.go) — e89cd42
-[x] DORA tier classifier (explainability.go) — e89cd42
-[x] NIS2 proportionality YAML (config/policy_packs/) — 26e3f21
-[x] GDPR transfer YAML (config/policy_packs/) — 26e3f21
-[x] #7 per-archetype threshold doc — d4b9cc6
-[x] #8 FP corpus independence doc — 90f592f
-[x] #9 maintenance-window-procedure.md — 87cfc48
+Passport concept confirmed [F]: Agent Behavioral Passport is real Phase 2 direction.
+  L113 already in LEARNINGS_DELTA. internal/trust/passport.go stub exists in repo.
+  Core insight: enterprise agent counts are small (50–2,000). Every agent can be
+  known completely. Pre-deployment scope declaration + runtime enforcement +
+  post-period certificate = complete agent lifecycle.
+  Status: design doc not yet written. Zenodo paper not yet written.
+  Phase: Phase 2 — after Lloyd LoU signed. NOT before.
 
-NUCLEAR BUILD — WEEK 2: ✅ COMPLETE
-[x] Merkle audit tree (internal/audit/merkle.go) — e95d17e
-[x] LTL formal verification NuSMV (internal/formal/sir_recovery.smv) — ff5f0b3
-[x] TLA+ ceiling invariant (internal/formal/ceiling_invariant.tla) — d83b73d
-[x] Raft consensus (internal/consensus/raft_ceiling.go) — 13d13ee
+Red team evaluation [F]: 84/100 confidence. Real product, real problem.
+  4 partial survivals all trace to same root: no production data yet.
+  Lloyd pilot is the only thing that closes the gap. No document fixes this.
 
-NUCLEAR BUILD — WEEK 3: ✅ COMPLETE
-[x] SPHINCS+ PQC signatures (internal/audit/pqc_signer.go) — a6b2a6d
-[x] ZK-STARK composite proof (internal/zkp/composite_proof.go) — 0d4a454
-[x] Software TEE attestation (internal/attestation/software_tee.go) — 03626ba
-[x] OSCAL SOC2 evidence bundle (internal/compliance/oscal.go) — 883fbd1
+UNAPPLIED BUILD TASKS — L135–L143 (before Lloyd):
+[x] TW-0:     Feature vector storage ✅ PASS — scoring_explanations 19 cols
+[x] TW-PRE-2: Org-scoped baseline ✅ PASS — org_id+agent_did UNIQUE constraint
+[ ] L139: Add C14 "200-day detection gap" to Lloyd_meeting_prep.md     15 min
+[ ] L141: Add timestamp manipulation to TW-4 scope                     15 min
+[ ] L142: Add API key rotation to prerequisites-checklist.md           30 min
+[ ] L143: Verify handler.lua validates JWT exp claim                   30 min
 
-CONDITIONAL (blocked on Lloyd prerequisites response)
-Helm chart — only if NWN confirms Kubernetes environment
-Sprint 1 (certification/report.go Generate()) — only after Lloyd LoU signed
+UNAPPLIED TIER 1 TASKS (from LEARNING_INTELLIGENCE v3.1):
+[ ] TW-1:         Lloyd_meeting_prep.md — 14 talking points            60 min
+[ ] TW-REHEARSAL: Say C1–C14 aloud                                     20 min
+[ ] TW-2:         LoU staged curriculum + Article 22 note              60 min
+[ ] TW-5:         tests/held_out/ creation                             30 min
+[ ] TW-7:         4-metric F1 reporting across all docs                30 min
+[ ] TW-9:         evaluation-harness-methodology.md                    60 min
+[ ] TW-11:        prerequisites-checklist.md updates                   45 min
+[ ] TW-3:         Attack corpus expansion 30→50+ scenarios            120 min
+[ ] TW-4:         Kong payload validation + timestamp check            60 min
+[ ] TW-6:         Variance growth rate trigger in policy.go           120 min
+
+UNAPPLIED PHASE 0 DOC TASKS (from LEARNINGS_DELTA):
+[ ] L117: Fix score band threshold inconsistency in docs               30 min
+[ ] L118: observe-to-enforce-criteria.md                               60 min
+[ ] L110: Self-verifying SQL as C13 in Lloyd_meeting_prep.md           30 min
+[ ] L111: FP claim Tier 2 update everywhere                            30 min
+[ ] L127: Governance vs enforcement language audit                     30 min
+[ ] L121: ARE SOC2(b) framing in docs                                  30 min
+[ ] L132: pilot-case-study-template.md                                  2 hrs
+[ ] L133: scripts/hackathon-demo.sh + README demo link                  2 hrs
+[ ] L134: investor deck metrics update                                 30 min
+
+PHASE 2 DESIGN TASKS (after Lloyd LoU signed):
+[ ] docs/architecture/agent-behavioral-passport-design.md              2 hrs
+[ ] Zenodo paper: Agent Behavioral Passport Standard v1.0              2 hrs
+[ ] Cornell Tech / NYU Tandon outreach for corpus validation           30 min
+
+NUCLEAR BUILD — ALL COMPLETE ✅
+Week 1: SIR, VRF, GDPR, NIS2, threshold docs, FP corpus, maintenance
+Week 2: Merkle, LTL formal, TLA+, Raft consensus
+Week 3: SPHINCS+, ZK-STARK, TEE attestation, OSCAL SOC2
 
 PHASE 1 STATUS
-Task                        Status
-T0 Evaluation harness       ✅ Done — 0.00% FP / 88.00% TP
-T1 JWT identity library     ✅ Done — G-IDENTITY passed
-T2 Kong gateway plugin      ✅ Done — RS256 verified end-to-end
-T3 Redis + Postgres store   ✅ Done — health ok
-T4 Velocity + z-score       ✅ Done — G-SCORE passed
-T5 7 YAML policy packs      ✅ Done — 5 OWASP + NIS2 + GDPR
-T6 Explainability engine    ✅ Done — G-EXPLAIN passed + GDPR plain language + DORA article
-T7 Replay / forensics       ✅ Done — SOC2 export
-T8 First enterprise deploy  🟡 IN PROGRESS — Lloyd meeting rescheduled ~April 21
-T9 Open header spec draft   ✅ Done — internal draft
-CAT-1 Technical hardening   ✅ Done — all 10 failures addressed
-TW-0 Feature vector storage ✅ Done — scoring_explanations 19 columns
-U-01 Gen Digital ADR        ✅ Done
-SIR state machine           ✅ Done — eb01bcd
-VRF threshold randomization ✅ Done — 04ee471
-GDPR plain language         ✅ Done — e89cd42
-NIS2 + GDPR policy packs    ✅ Done — 26e3f21
-Per-archetype threshold doc ✅ Done — d4b9cc6
-FP corpus independence doc  ✅ Done — 90f592f
-Maintenance window proc     ✅ Done — 87cfc48
-Merkle audit tree           ✅ Done — e95d17e
-LTL formal verification     ✅ Done — ff5f0b3
-TLA+ ceiling invariant      ✅ Done — d83b73d
-Raft consensus              ✅ Done — 13d13ee
-SPHINCS+ PQC signatures     ✅ Done — a6b2a6d
-ZK-STARK composite proof    ✅ Done — 0d4a454
-Software TEE attestation    ✅ Done — 03626ba
-OSCAL SOC2 evidence bundle  ✅ Done — 883fbd1
-L112 Daily FP metrics job   ✅ Done — 0b44755
-L116 Entra bridge           ✅ Done — 8d1fd72
-L126 DORA verify binary     ✅ Done — f178ce6
-L120 Vendor risk + DPA      ✅ Done — df2f669
-L131 SDK deployment guide   ✅ Done — f311249
+T0–T7: ✅ All complete
+T8: 🟡 IN PROGRESS — Lloyd meeting ~April 28
+T9: ✅ Done
 
 METRICS — KNOW COLD
-FP rate:              0.00% on 100-scenario internal corpus
-TP rate:              88.00% (44/50) — above 85% gate
-Held-Out TP:          100.00% (6/6)
-Held-Out FP:          0.00% (0/20)
-F1 score:             0.9362 (updated — regression suite confirmed)
-Precision:            100%
-Slow-walk detection:  100% (10/10 scenarios) — single-agent scope
-Call overhead:        0.25ns Linux — zero allocations
-Demo runtime:         ~30 seconds Windows Docker
-Hardening score:      96/100+
-Bias audit:           0.00% FP across all 7 agent archetypes
-Policy packs:         7 total (5 OWASP + NIS2 + GDPR)
+FP rate:             0.00% on 150-scenario internal corpus
+                     Production target: <0.1% (Visa standard) [H]
+TP rate:             88.00% (44/50) — above 85% gate
+Held-Out TP:         100.00% (6/6)
+Held-Out FP:         0.00% (0/20)
+F1 score:            0.9362
+Precision:           100%
+Slow-walk detection: 100% (10/10) — single-agent scope
+Call overhead:       0.25ns Linux
+Hardening score:     96/100+
+Policy packs:        7 total (5 OWASP + NIS2 + GDPR)
 
 COMMERCIAL STATUS
-T8: IN PROGRESS — Lloyd meeting rescheduled ~April 21 — CONFIRM DATE (conflicts with Leaders in AI Summit)
-Character Capital Labs G6: Decision expected ~April 13
+Lloyd (NWN):              ~April 28 — confirm exact date
+Character Capital G6:     Decision ~April 13
 Leaders in AI Summit NYC: April 21–22
-Momentum AI NYC: April 27–28
-AIAI New York: June 4 (Kuntal Dutta confirmed speaker — BNY Mellon)
+Momentum AI NYC:          April 27–28
+AIAI New York:            June 4 (Kuntal Dutta — BNY Mellon)
 
 PIPELINE
-Contact                         Status
-Lloyd Lemish (NWN)              Meeting rescheduled ~April 21 — CONFIRM EXACT DATE
-Andrew Gyamfi (Translucent AI)  Sitting buyer — Boardy message not sent — PRIORITY
-Andy Watkin-Child               Advisory board + DORA intros — outreach not sent — PRIORITY
-Unmukt Raizada (TrustEvals.ai)  FinServ validation — outreach not sent — PRIORITY
-Paul Vann (Validia CEO)         Post-hackathon follow-up — LinkedIn not sent
-Niamh Muldoon (BNY Mellon)      Messaged — no reply yet
-Bettina Briz (Boardy)           Relationship-building phase — not continued
-Sri Rajan                       LinkedIn message drafted — NOT SENT
-Rock Lambros                    LinkedIn message drafted — NOT SENT
-David Matousek                  LinkedIn message drafted — NOT SENT
-Turner Novak                    Domain unverified — NOT SENT
-Character Capital Labs G6       Decision ~April 13
+Lloyd Lemish (NWN)              ~April 28 — confirm date
+Andrew Gyamfi (Translucent AI)  Boardy message sent April 7 — awaiting reply
+Andy Watkin-Child               LinkedIn sent April 7 — awaiting reply
+Unmukt Raizada (TrustEvals.ai)  LinkedIn sent April 7 — awaiting reply
+Paul Vann (Validia CEO)         Not sent
+Niamh Muldoon (BNY Mellon)      Messaged — no reply
+Bettina Briz (Boardy)           Relationship-building — not continued
+Sri Rajan                       Drafted — not sent
+Rock Lambros                    Drafted — not sent
+David Matousek                  Drafted — not sent
+Turner Novak                    Domain unverified — not sent
+Character Capital G6            Decision ~April 13
 
 INFRASTRUCTURE STATUS
-Component       Status
-Docker          Running — all containers healthy
-PostgreSQL      agentrepengine-postgres-1, port 5433
-Redis           agentrepengine-redis-1, AOF+RDB, 512mb noeviction, are_admin ACL
-Scoring service Running on :8080
-Kong            Running — min version 2.8 required
-Go build        Clean — go build ./... passes
-Tests           ALL GREEN — go test ./... ✅ 883fbd1
+Tests:          ALL GREEN — go test ./... ✅ 0fdde3e
+Docker:         All containers healthy
+PostgreSQL:     port 5433 — agentrepengine-postgres-1
+Redis:          AOF+RDB, 512mb noeviction, are_admin ACL
+Scoring:        :8080
+Kong:           min version 2.8
 
-Redis ACL note: default user is OFF. Use:
-docker exec agentrepengine-redis-1 redis-cli --no-auth-warning --user are_admin -a are_redis_dev KEYS "*"
-PostgreSQL note: port 5433 — NOT 5432
-Connect: docker exec agentrepengine-postgres-1 psql -U are -d agentrepengine -c "..."
+Redis: docker exec agentrepengine-redis-1 redis-cli --no-auth-warning --user are_admin -a are_redis_dev KEYS "*"
+PG:    docker exec agentrepengine-postgres-1 psql -U are -d agentrepengine -c "..."
 
 ENVIRONMENT
-Scoring language : Go 1.24
-Gateway          : Kong (Lua) — min version 2.8
-Shell            : Git Bash on Windows (MINGW64)
-Runtime          : Docker Desktop on Windows
-Python           : 3.14 — C:/Users/rmaso/AppData/Local/Python/pythoncore-3.14-64/python.exe
-Editor           : VS Code (always use: code <filename>)
-GitHub           : https://github.com/Rehanrana11/AgentRepEngine.git
-Push command     : git push origin master (NOT main)
-Linux test cmd   : MSYS_NO_PATHCONV=1 docker run --rm -v "//c/Users/rmaso/AgentRepEngine:/app" -w /app golang:1.24-alpine go test ./...
-⚠ Git Bash path mangling: use MSYS_NO_PATHCONV=1 for docker run commands
-⚠ Python file encoding: always use encoding='utf-8' in open() calls
-⚠ Paste safety: never paste Claude's explanation text into terminal.
-Only paste contents of code blocks. [200~ prefix = bracketed paste error.
-⚠ Never split file content across multiple code blocks. One file = one complete paste.
+Shell:   Git Bash on Windows (MINGW64)
+Runtime: Docker Desktop on Windows
+Go:      1.24
+Python:  C:/Users/rmaso/AppData/Local/Python/pythoncore-3.14-64/python.exe
+Editor:  VS Code (code <filename>)
+GitHub:  https://github.com/Rehanrana11/AgentRepEngine.git
+Push:    git push origin master (NOT main)
+Linux test: MSYS_NO_PATHCONV=1 docker run --rm -v "//c/Users/rmaso/AgentRepEngine:/app" -w /app golang:1.24-alpine go test ./...
+⚠ Git Bash path mangling: MSYS_NO_PATHCONV=1 for docker run
+⚠ Python files: always encoding='utf-8'
+⚠ Paste safety: only paste code blocks into terminal
+⚠ One file = one complete paste, never split
 
-12 COMPRESSED LLOYD CLAIMS — C1–C12
-C1  "Enforcement at your gateway. Data never leaves. Auditors verify themselves."
-C2  "ARE implements the NIST/OWASP standard for AI agent security."
-C3  "Passes every item on the regulatory accountability checklist. Out of the box."
-C4  "94% confident this agent is anomalous — based on 30 days of its own baseline."
-C5  "Financial services proved this architecture works. ARE applies it to agents."
-C6  "Fails open. Agents keep running. SOC sees it before you ask."
-C7  "Below the application layer. Agents can't see it. Can't route around it."
-C8  "30-day observe mode. At day 30: ROI quantified, incidents documented, decision yours."
-C9  "LangChain, LlamaIndex, custom. If it goes through Kong, ARE sees it."
-C10 "The baseline updates on every transaction. Enforcement gets more precise the longer it runs."
-C11 "Every enforcement decision is human-readable. Agent ID, score, confidence, reason."
-C12 "Regulators are about to require AI audit trails. ARE is the implementation, already running."
-CISO unlock phrase: "You control the pace — we don't advance to enforce mode without your sign-off after 14 days of clean observe."
-
-LEARNING INTELLIGENCE
-Version: v3.1 (uploaded to Claude Project March 31)
-Total learnings: 143 (L103–L143 — PenTest+ PT0-003 complete)
-Next learning number: L144
-Next MASTER_LEARNINGS number: L100
-NOTE: GENERATE not yet called — L144 waiting for paste next session.
-
-L135–L143 RECOVERED (PenTest+ PT0-003 — all COMPOUND):
-L135 — RAG/behavioral grounding analogy — Klarna/Intercom proof points → TW-1 + C13
-L136 — Low-and-slow recon = slow-walk baseline poisoning → TW-1 talking point
-L137 — ARP poisoning = agent identity spoofing → TW-1 identity argument
-L138 — Credential stuffing = stolen JWT replay → TW-1 identity argument
-L139 — OWASP #9 logging failures — 200-day breach gap → TW-1 + C14 claim
-L140 — SSRF/business logic = agent scope escalation → validates HIGH_RISK triggers
-L141 — SQL injection/XSS = agent payload injection → expands TW-4 scope
-L142 — API security/cloud misconfig = ARE deployment surface → prereqs checklist
-L143 — JWT session management = ARE identity hardening → handler.lua exp check
-
-UNAPPLIED BUILD TASKS — L135–L143 (before Lloyd, low effort):
-[ ] L139: Add C14 "200-day detection gap" to Lloyd_meeting_prep.md          15 min
-[ ] L141: Add timestamp manipulation to TW-4 scope                          15 min
-[ ] L142: Add API key rotation to prerequisites-checklist.md                30 min
-[ ] L143: Verify handler.lua validates JWT exp claim — fix if not            30 min
-
-UNAPPLIED TIER 1 TASKS (from LEARNING_INTELLIGENCE v3.1 — before Lloyd):
-[x] TW-0:         Feature vector storage verification ✅ PASS — scoring_explanations 19 columns confirmed
-[x] TW-PRE-2:     Org-scoped baseline verification ✅ PASS — org_id+agent_did+feature UNIQUE constraint confirmed
-[ ] TW-1:         Lloyd_meeting_prep.md — 13 talking points (60 min)
-[ ] TW-REHEARSAL: Say C1–C12 aloud (20 min)
-[ ] TW-2:         LoU staged curriculum + Article 22 note (60 min)
-[ ] TW-5:         tests/held_out/ creation (30 min) ★ UNLOCKS PL-16
-[ ] TW-7:         4-metric F1 reporting across all docs (30 min)
-[ ] TW-9:         evaluation-harness-methodology.md (60 min)
-[ ] TW-11:        prerequisites-checklist.md updates (45 min)
-[ ] TW-3:         Attack corpus expansion 30→50+ scenarios (120 min)
-[ ] TW-4:         Kong payload validation + timestamp check (60 min)
-[ ] TW-6:         Variance growth rate trigger in policy.go (120 min)
-
-UNAPPLIED PHASE 0 DOC TASKS (from LEARNINGS_DELTA — before Lloyd):
-[ ] L117: Fix score band threshold inconsistency (700 vs 800) in docs        30 min
-[ ] L118: docs/enterprise/observe-to-enforce-criteria.md (new)               60 min
-[ ] L110: Self-verifying SQL as C13 in Lloyd_meeting_prep.md                 30 min
-[ ] L111: FP claim Tier 2 update everywhere ("150 scenarios, <2% at 95% CI") 30 min
-[ ] L127: Governance vs enforcement language audit across docs                30 min
-[ ] L121: ARE SOC2(b) framing in docs                                        30 min
-[ ] L132: docs/enterprise/pilot-case-study-template.md (new)                 2 hrs
-[ ] L133: scripts/hackathon-demo.sh + README demo link                       2 hrs ← after LoU
-[ ] L134: Investor deck metrics update (F1=0.9362, 17 packages)              30 min ← before April 21
-
-LLOYD CLAIMS — UPDATED C1–C14
+LLOYD CLAIMS — C1–C14
 C1  "Enforcement at your gateway. Data never leaves. Auditors verify themselves."
 C2  "ARE implements the NIST/OWASP standard for AI agent security."
 C3  "Passes every item on the regulatory accountability checklist. Out of the box."
@@ -271,22 +183,24 @@ C11 "Every enforcement decision is human-readable. Agent ID, score, confidence, 
 C12 "Regulators are about to require AI audit trails. ARE is the implementation, already running."
 C13 "Here is the SQL query. Run it yourself. The result is your FP rate. No vendor controls the measurement."
 C14 "The average breach goes undetected 200 days. ARE detects behavioral drift in real time."
-CISO unlock phrase: "You control the pace — we don't advance to enforce mode without your sign-off after 14 days of clean observe."
+CISO unlock: "You control the pace — we don't advance to enforce mode without your sign-off."
+FP reframe:  "We target the Visa standard — below 0.1% FP in production."
+
+LEARNING INTELLIGENCE
+Version: v3.1
+Total learnings: 143 (L135–L143 recovered from session 17223a4a)
+Next learning number: L144
+Next MASTER_LEARNINGS number: L100
+GENERATE not called — L144 waiting for paste next session.
 
 NEXT SESSION PRIORITIES (in order)
-
-COMMERCIAL (do before any build work):
-1. Lloyd — confirm exact rescheduled date (April 21 conflicts with Leaders in AI Summit — resolve NOW)
-2. Andrew Gyamfi — Boardy message for direct email — SITTING BUYER — DO FIRST
-3. Unmukt Raizada — LinkedIn direct
-4. Andy Watkin-Child — LinkedIn direct
-
-BUILD (after at least one commercial action taken):
-5. TW-0 — feature vector storage verification (15 min, zero risk)
-6. TW-PRE-2 — org-scoped baseline verification (20 min)
-7. TW-1 — Lloyd_meeting_prep.md (60 min) — includes C13, C14 from L139
-8. TW-REHEARSAL — say C1–C14 aloud (20 min)
-9. L118 — observe-to-enforce-criteria.md (60 min) — Lloyd will ask for this
-10. L132 — pilot-case-study-template.md (2 hrs) — must exist before pilot starts
-11. L134 — investor deck metrics update (30 min) — before April 21
-12. L144 — next learning session (paste content or say GENERATE)
+1. Check Character Capital G6 response (~April 13)
+2. Check replies: Gyamfi, Raizada, Watkin-Child
+3. Confirm Lloyd exact date (April 28 — resolve Leaders in AI Summit conflict)
+4. TW-1 — Lloyd_meeting_prep.md (60 min) — highest priority doc
+5. L118 — observe-to-enforce-criteria.md (60 min) — Lloyd will ask for this
+6. L132 — pilot-case-study-template.md (2 hrs) — must exist before pilot
+7. docs/architecture/agent-behavioral-passport-design.md (2 hrs) — Phase 2 design
+8. Zenodo paper: Agent Behavioral Passport Standard v1.0 (2 hrs)
+9. L134 — investor deck metrics update (30 min) — before April 21
+10. L144 — next learning session
