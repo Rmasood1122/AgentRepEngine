@@ -405,6 +405,21 @@ function AgentReputationHandler:log(conf)
     end
 
     -- Validate event type
+    -- L141: Timestamp manipulation defense
+    -- Server-side timestamp is always authoritative. Client-submitted timestamps
+    -- are never trusted for baseline scoring. The event timestamp is set here,
+    -- at the gateway layer, not derived from any client-supplied field.
+    -- Attack vector closed: backdated event injection cannot poison the
+    -- behavioral baseline because ARE never accepts client time.
+    local event_timestamp = ngx.time()
+    -- L141: Timestamp manipulation defense
+    -- Server-side timestamp is always authoritative. Client-submitted timestamps
+    -- are never trusted for baseline scoring. The event timestamp is set here,
+    -- at the gateway layer, not derived from any client-supplied field.
+    -- Attack vector closed: backdated event injection cannot poison the
+    -- behavioral baseline because ARE never accepts client time.
+    local event_timestamp = ngx.time()
+
     local event_type = "http_request"
     local et_valid, et_err = validate_event_type(event_type)
     if not et_valid then
@@ -423,6 +438,15 @@ function AgentReputationHandler:log(conf)
     local clean_payload = sanitize_payload(raw_payload)
 
     local event_payload = cjson.encode({
+        local event_payload = cjson.encode({
+        agent_did      = sanitize_string(agent_did, 256),
+        org_id         = sanitize_string(org_id, 128),
+        event_type     = event_type,
+        timestamp      = event_timestamp,
+        payload        = clean_payload,
+        privacy_tier   = 1,
+        schema_version = "v1",
+    })
         agent_did    = sanitize_string(agent_did, 256),
         org_id       = sanitize_string(org_id, 128),
         event_type   = event_type,
@@ -434,6 +458,7 @@ function AgentReputationHandler:log(conf)
     -- Capture values for timer closure — conf userdata not safe across async boundary
     local scoring_url  = conf.scoring_service_url or "http://scoring-service:8080"
     local payload_copy = event_payload
+    timestamp = event_timestamp
     local api_key_copy = conf.api_key or ""
 
     -- resty.http is available in timer context — correct fix for log phase
