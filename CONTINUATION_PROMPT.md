@@ -7,15 +7,26 @@ REPO
 https://github.com/Rehanrana11/AgentRepEngine
 Branch: master (push with git push origin master — NOT main)
 CURRENT STATE — April 07, 2026
-HEAD: 87cfc48
+HEAD: 883fbd1
 go test ./... — ALL GREEN ✅ (with SCORING_API_KEY=are-internal-key-change-in-production)
 SESSION CLOSE RECORD
   Session date:     April 07, 2026
-  Messages:         ~80
-  Duration:         ~3 hrs
-  Last action:      git push origin master — 7 commits pushed eb01bcd..87cfc48
+  Messages:         ~120
+  Duration:         ~5 hrs
+  Last action:      git push origin master — Week 2+3 nuclear build complete, 883fbd1
   Irreversible:     YES ✅
 RECENT COMMITS
+883fbd1 feat: OSCAL SOC2 evidence bundle — NIST OSCAL 1.1.2 SOC2/DORA compliance assessment
+03626ba feat: Software TEE attestation — NIST SP 800-190/DORA Art.9 enclave quote verification
+0d4a454 feat: ZK-STARK composite proof — GDPR Art.22/DORA Art.17 zero-knowledge enforcement
+a6b2a6d feat: SPHINCS+ PQC signatures — FIPS 205 audit event signing NIST Level 1
+13d13ee feat: Raft consensus — quorum ceiling decisions DORA Art.10/NIST SP 800-207
+d83b73d feat: TLA+ ceiling invariant — DORA Art.10/NIST ZTA ceiling score proof
+ff5f0b3 feat: LTL formal verification — SIR state machine safety+liveness NuSMV
+e95d17e feat: Merkle audit tree — DORA Art.17/SOC2 CC7.2 tamper-evident root
+b458fd6 fix: NIS2 YAML threshold structure + policy count test update
+
+Previous session:
 87cfc48 docs: maintenance window procedure — freeze, mode switch, verification, rollback
 90f592f docs: FP corpus independence methodology — proves 0.00% is not overfit
 d4b9cc6 docs: per-archetype adaptive threshold guide — 7 archetypes, bias audit results
@@ -23,14 +34,6 @@ d4b9cc6 docs: per-archetype adaptive threshold guide — 7 archetypes, bias audi
 e89cd42 feat: GDPR plain language reason + DORA article classifier in ReasonObject
 04ee471 feat: VRF threshold randomization — per-agent jitter defeats threshold probing
 eb01bcd feat: SIR state machine — SIR lifecycle, human clear, probation, Redis persistence
-
-Previous session:
-7f37999 feat: NWN demo dashboard — HIPAA SOX DORA panels for Lloyd
-227c580 feat: two-speed baseline — ATTACK vs LEGITIMATE_CHANGE
-d4bfb77 feat: multi-agent causal chain — HIPAA breach attribution
-87f23a1 feat: agent identity continuity seal — HIPAA breach detection
-7b32849 feat: US regulatory evidence package — HIPAA SOX FFIEC DORA
-8742dae feat: ceiling override scoring model — DORA Art.10/NIST ZTA compliant
 
 Tests: ALL GREEN ✅
 
@@ -50,6 +53,7 @@ TW-REHEARSAL (say C1–C12 aloud) — NOT DONE — do before Lloyd meeting
 Secondary investor list (10 names) — NOT BUILT
 C-Corp conversion email — NOT SENT
 Sovren Software follow-up — inbound signal, never followed up
+Lloyd meeting — rescheduled ~April 21 (confirm exact date — conflicts with Leaders in AI Summit)
 
 REMAINING ENGINEERING
 (Tier 1 — after LoU signed)
@@ -69,17 +73,17 @@ NUCLEAR BUILD — WEEK 1: ✅ COMPLETE
 [x] #8 FP corpus independence doc — 90f592f
 [x] #9 maintenance-window-procedure.md — 87cfc48
 
-NUCLEAR BUILD — WEEK 2 (Days 5–10):
-[ ] Merkle audit tree (internal/audit/merkle.go) — 6 hrs
-[ ] LTL formal verification NuSMV (internal/formal/sir_recovery.smv) — 4 hrs
-[ ] TLA+ ceiling invariant (internal/formal/ceiling_invariant.tla) — 4 hrs
-[ ] Raft consensus (internal/consensus/raft_ceiling.go) — 8 hrs
+NUCLEAR BUILD — WEEK 2: ✅ COMPLETE
+[x] Merkle audit tree (internal/audit/merkle.go) — e95d17e
+[x] LTL formal verification NuSMV (internal/formal/sir_recovery.smv) — ff5f0b3
+[x] TLA+ ceiling invariant (internal/formal/ceiling_invariant.tla) — d83b73d
+[x] Raft consensus (internal/consensus/raft_ceiling.go) — 13d13ee
 
-NUCLEAR BUILD — WEEK 3 (Days 11–15):
-[ ] SPHINCS+ PQC signatures (internal/audit/pqc_signer.go) — 6 hrs
-[ ] ZK-STARK composite proof (internal/zkp/composite_proof.go) — 8 hrs
-[ ] Software TEE attestation (internal/attestation/software_tee.go) — 4 hrs
-[ ] OSCAL SOC2 evidence bundle (internal/compliance/oscal.go) — 3 hrs
+NUCLEAR BUILD — WEEK 3: ✅ COMPLETE
+[x] SPHINCS+ PQC signatures (internal/audit/pqc_signer.go) — a6b2a6d
+[x] ZK-STARK composite proof (internal/zkp/composite_proof.go) — 0d4a454
+[x] Software TEE attestation (internal/attestation/software_tee.go) — 03626ba
+[x] OSCAL SOC2 evidence bundle (internal/compliance/oscal.go) — 883fbd1
 
 CONDITIONAL (blocked on Lloyd prerequisites response)
 Helm chart — only if NWN confirms Kubernetes environment
@@ -95,7 +99,7 @@ T4 Velocity + z-score       ✅ Done — G-SCORE passed
 T5 7 YAML policy packs      ✅ Done — 5 OWASP + NIS2 + GDPR
 T6 Explainability engine    ✅ Done — G-EXPLAIN passed + GDPR plain language + DORA article
 T7 Replay / forensics       ✅ Done — SOC2 export
-T8 First enterprise deploy  🟡 IN PROGRESS — Lloyd meeting week of April 7
+T8 First enterprise deploy  🟡 IN PROGRESS — Lloyd meeting rescheduled ~April 21
 T9 Open header spec draft   ✅ Done — internal draft
 CAT-1 Technical hardening   ✅ Done — all 10 failures addressed
 TW-0 Feature vector storage ✅ Done — scoring_explanations 19 columns
@@ -107,6 +111,14 @@ NIS2 + GDPR policy packs    ✅ Done — 26e3f21
 Per-archetype threshold doc ✅ Done — d4b9cc6
 FP corpus independence doc  ✅ Done — 90f592f
 Maintenance window proc     ✅ Done — 87cfc48
+Merkle audit tree           ✅ Done — e95d17e
+LTL formal verification     ✅ Done — ff5f0b3
+TLA+ ceiling invariant      ✅ Done — d83b73d
+Raft consensus              ✅ Done — 13d13ee
+SPHINCS+ PQC signatures     ✅ Done — a6b2a6d
+ZK-STARK composite proof    ✅ Done — 0d4a454
+Software TEE attestation    ✅ Done — 03626ba
+OSCAL SOC2 evidence bundle  ✅ Done — 883fbd1
 L112 Daily FP metrics job   ✅ Done — 0b44755
 L116 Entra bridge           ✅ Done — 8d1fd72
 L126 DORA verify binary     ✅ Done — f178ce6
@@ -128,7 +140,7 @@ Bias audit:           0.00% FP across all 7 agent archetypes
 Policy packs:         7 total (5 OWASP + NIS2 + GDPR)
 
 COMMERCIAL STATUS
-T8: IN PROGRESS — Lloyd meeting week of April 7 — contact today
+T8: IN PROGRESS — Lloyd meeting rescheduled ~April 21 — CONFIRM DATE (conflicts with Leaders in AI Summit)
 Character Capital Labs G6: Decision expected ~April 13
 Leaders in AI Summit NYC: April 21–22
 Momentum AI NYC: April 27–28
@@ -136,7 +148,7 @@ AIAI New York: June 4 (Kuntal Dutta confirmed speaker — BNY Mellon)
 
 PIPELINE
 Contact                         Status
-Lloyd Lemish (NWN)              Meeting week of April 7 — contact TODAY April 7
+Lloyd Lemish (NWN)              Meeting rescheduled ~April 21 — CONFIRM EXACT DATE
 Andrew Gyamfi (Translucent AI)  Sitting buyer — Boardy message not sent — PRIORITY
 Andy Watkin-Child               Advisory board + DORA intros — outreach not sent — PRIORITY
 Unmukt Raizada (TrustEvals.ai)  FinServ validation — outreach not sent — PRIORITY
@@ -157,7 +169,7 @@ Redis           agentrepengine-redis-1, AOF+RDB, 512mb noeviction, are_admin ACL
 Scoring service Running on :8080
 Kong            Running — min version 2.8 required
 Go build        Clean — go build ./... passes
-Tests           ALL GREEN — go test ./... ✅ 87cfc48
+Tests           ALL GREEN — go test ./... ✅ 883fbd1
 
 Redis ACL note: default user is OFF. Use:
 docker exec agentrepengine-redis-1 redis-cli --no-auth-warning --user are_admin -a are_redis_dev KEYS "*"
@@ -197,19 +209,20 @@ CISO unlock phrase: "You control the pace — we don't advance to enforce mode w
 
 LEARNING INTELLIGENCE
 Version: v3.1 (uploaded to Claude Project March 31)
-Total learnings: 134 (L103–L134 extracted April 6)
-Next learning number: L135
+Total learnings: 143 (L103–L143 extracted — PenTest+ PT0-003 session complete)
+Next learning number: L144
 Next MASTER_LEARNINGS number: L100
+NOTE: GENERATE not yet called for L144 — wait for paste or explicit command next session.
 
 NEXT SESSION PRIORITIES (in order)
 
-1. Lloyd — contact TODAY April 7 to confirm meeting (LinkedIn)
-2. Andrew Gyamfi — Boardy message for direct email — SITTING BUYER — DO TODAY
+1. Lloyd — confirm rescheduled date (~April 21 conflicts with Leaders in AI Summit — resolve)
+2. Andrew Gyamfi — Boardy message for direct email — SITTING BUYER — DO FIRST
 3. Unmukt Raizada — LinkedIn direct — DO TODAY
 4. Andy Watkin-Child — LinkedIn direct — DO TODAY
 5. TW-REHEARSAL — say C1–C12 aloud before Lloyd meeting
 6. M1 language upgrade — 13 phrase replacements across docs (1 hr)
 7. Turner Novak — verify domain (bana vs banana) then email
 8. Sri Rajan / Rock Lambros / David Matousek — send drafted messages
-9. Week 2 nuclear build — Merkle audit tree (internal/audit/merkle.go) — 6 hrs
-10. L134 — Investor deck metrics update (before Leaders in AI Summit April 21)
+9. L134 — Investor deck metrics update (before Leaders in AI Summit April 21)
+10. L144 — next learning session (paste content or say GENERATE)
