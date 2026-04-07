@@ -143,6 +143,52 @@ We give your auditors direct access to verify them.
 | OWASP LLM Top 10 | LLM06, LLM08 | ✅ Full |
 | SOC2 | CC6, CC7 | ✅ Full |
 
+## API Key Rotation Procedure
+
+### SCORING_API_KEY Rotation (required before pilot go-live)
+
+The default SCORING_API_KEY (`are-internal-key-change-in-production`) must be
+rotated before any enterprise pilot. Failure to rotate creates an open scoring
+endpoint accessible to anyone who reads the default config.
+
+**Rotation steps:**
+
+1. Generate new key:
+```bash
+   openssl rand -hex 32
+```
+
+2. Update docker-compose.yml:
+```yaml
+   SCORING_API_KEY=your-new-key-here
+```
+
+3. Update Kong plugin config with new key
+
+4. Restart scoring service:
+```bash
+   docker compose restart scoring-service
+```
+
+5. Verify old key rejected:
+```bash
+   curl -H "X-API-Key: are-internal-key-change-in-production" \
+     http://localhost:8080/score/test
+   # Expected: 401 Unauthorized
+```
+
+6. Verify new key accepted:
+```bash
+   curl -H "X-API-Key: your-new-key-here" \
+     http://localhost:8080/health
+   # Expected: 200 OK
+```
+
+### RS256 Key Rotation
+
+See `docs/ops/key-management.md` for RS256 private key rotation procedure.
+Full JWT reissuance required for all agents after rotation.
+
 ---
 
 *AgentRepEngine v1.0 | Naseem A2A Research Lab*
