@@ -1,4 +1,68 @@
-AgentRepEngine — CONTINUATION PROMPT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FILE HIERARCHY — CLAUDE ATTENTION ROUTING
+Read this first. Every session. Non-negotiable.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ACTIVE FILES — full attention, apply every session:
+  1. CONTINUATION_PROMPT.md     ← THIS FILE — live state, tasks, pipeline
+  2. CLAUDE_MASTER v2.0         ← product truth, four numbers, architecture
+  3. APEX_REASONING_ENGINE v1.0 ← how to think, 7 experts, quality gate
+  4. ZROS v2.7                  ← anti-rework laws, failure taxonomy, L7 done
+  5. BUILD_INTELLIGENCE v1.0    ← what the code actually does
+  6. APEX v5.2                  ← strategy, gates, modes, prime directive
+  7. SESSION_PROTOCOL v1.0      ← session sequence A1→C2
+  8. DECISION_AUDIT v1.0        ← [H] claim tracking, monthly verification
+
+ARCHIVE FILES — reference only, do not generate tasks from these:
+  - LEARNING_INTELLIGENCE v3.1  ← learning history, 73 learnings
+  - LEARNINGS_DELTA v1.0        ← session extracts L103–L134
+  - MASTER_LEARNINGS v2.1 DELTA ← March 22 learnings, absorbed into active files
+  - ARE_MASTER_ROADMAP v2       ← superseded roadmap, tasks extracted here
+  - EXECUTION_ROADMAP v1        ← superseded by ARE_MASTER_ROADMAP v2
+  - SPRINT_ROADMAP              ← Sprint 0 complete, Sprint 1 gated on LoU
+  - 24X_STRATEGY                ← value framing reference, M5–M8 Phase 2+ only
+  - APEX_11X L1–L11             ← principles absorbed into boot sequence below
+
+SINGLE TASK LIST RULE:
+  A task that exists in an ARCHIVE file but NOT in this file
+  does not exist for this session. To activate it: add it here first.
+  Never pull tasks from archive files directly into session work.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+APEX ACTIVATE — FULL SESSION BOOT SEQUENCE
+Fires every session. Every step. No exceptions.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 1 — G-COMMERCIAL (L8)
+  Answer every line of the TIER 0/1/2 checklist before anything else opens.
+  Any unchecked box = that action executes before session opens.
+  Not negotiable. Not overridable. No exceptions.
+
+STEP 2 — L1 SESSION CLOSE COMMITMENT
+  State at session open: "This session closes only when one irreversible
+  real-world action is named and confirmed executed."
+  Irreversible = message sent, meeting confirmed, code pushed, doc published.
+  Drafts don't count. Decisions to send don't count. Intentions don't count.
+
+STEP 3 — L2 TWO-OPTION ENFORCEMENT
+  Every recommendation ends: "Option A or Option B — which?"
+  Never more than 2 options. Never open-ended asks.
+  Forces decision. Kills avoidance loops.
+
+STEP 4 — L4 DRIFT CHECK (Mondays only)
+  If today is Monday: run APEX DRIFT before any other work.
+  Paste last 7 days of committed actions. Claude outputs drift score 0–10.
+  If drift score > 5: first task is top restoration action. Nothing else opens.
+
+STEP 5 — L6 ADVERSARIAL GATE
+  Before any [H] claim becomes a plan, name the strongest case it is wrong.
+  If no fatal flaw found → label [H-VALIDATED], proceed.
+  If fatal flaw found → resolve before committing to the plan.
+
+STEP 6 — PHASE CONFIRM
+  State: "Phase 1. T8 open. Lloyd April 28. Engineering complete.
+  This session is [COMMERCIAL / ENGINEERING / STRATEGIC / MIXED]."
+  If MIXED: commercial action happens first, always.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 G-COMMERCIAL — FIRES FIRST. EVERY SESSION. NO EXCEPTIONS.
@@ -24,22 +88,22 @@ RULE: Any unchecked box = that action executes before session opens.
       Not negotiable. Not overridable. No exceptions.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Next session starts here
-APEX VERSION
-APEX v5.2 + ZROS v2.7 + MASTER_LEARNINGS v2.1 DELTA + LEARNING_INTELLIGENCE v3.1
-First command: APEX ACTIVATE
-REPO
-https://github.com/Rehanrana11/AgentRepEngine
-Branch: master (push with git push origin master — NOT main)
 CURRENT STATE — April 07, 2026
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+APEX VERSION: APEX v5.2 + ZROS v2.7 + MASTER_LEARNINGS v2.1 DELTA + LEARNING_INTELLIGENCE v3.1
+REPO: https://github.com/Rehanrana11/AgentRepEngine
+Branch: master (push with git push origin master — NOT main)
 HEAD: 89fc78d
 go test ./... — ALL GREEN ✅ (20 packages passing)
+
 SESSION CLOSE RECORD
   Session date:     April 07, 2026
   Messages:         ~300+
   Duration:         ~12 hrs
   Last action:      10-item roadmap executed — all Category A + B complete
   Irreversible:     YES ✅ — G-COMMERCIAL structural, 8 commits pushed
+
 RECENT COMMITS
 89fc78d docs: M2 adversarial baseline poisoning research note — attack class definition, two-layer defense, experimental results
 7ebf321 docs: M3 SIEM integration — Splunk HEC + Sentinel specs, CEF format, KQL queries, dashboard panels, Defender XDR
@@ -54,99 +118,79 @@ b2096b9 docs: redis-failover — 4-scenario unavailability matrix, CISO statemen
 
 Tests: ALL GREEN ✅
 
-PENDING — NOT YET DONE (commercial actions)
-⚠ AVOIDANCE PATTERN: Engineering substitution for direct contact. Named repeatedly.
-Andrew Gyamfi (Translucent AI) — Boardy message SENT April 7 ✅
-Unmukt Raizada (TrustEvals.ai) — LinkedIn SENT April 7 ✅
-Andy Watkin-Child — LinkedIn SENT April 7 ✅
-Paul Vann (Validia CEO) — LinkedIn message — NOT SENT
-Sri Rajan — LinkedIn message drafted — NOT SENT
-Rock Lambros — LinkedIn message drafted — NOT SENT
-David Matousek — LinkedIn message drafted — NOT SENT
-Turner Novak — email domain UNVERIFIED (bana vs banana) — NOT SENT
-M1 Language upgrade (13 phrase replacements) — NOT DONE
-TW-REHEARSAL (say C1–C14 aloud) — NOT DONE
-Secondary investor list (10 names) — NOT BUILT
-C-Corp conversion email — NOT SENT
-Sovren Software follow-up — inbound signal, never followed up
-Lloyd meeting — rescheduled ~April 28 (3 weeks from April 7)
-Character Capital Labs G6 — decision ~April 13
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ACTIVE TASKS — THIS SESSION (pull ONLY from here)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-KEY DECISIONS FROM APRIL 7 SESSION
+COMMERCIAL — BEFORE LLOYD (April 28) — DO FIRST
+[ ] TW-REHEARSAL: Say C1–C14 aloud                                 20 min  ← HUMAN ONLY
+[ ] Andrew Gyamfi — reply received? If yes: schedule pilot call    15 min
+[ ] Andy Watkin-Child — reply received? If yes: request DORA intro 15 min
+[ ] Unmukt Raizada — reply received? If yes: schedule call         15 min
+[ ] Paul Vann (Validia CEO) — LinkedIn message sent?               15 min
+[ ] Turner Novak — verify domain (banana capital), email sent?     15 min
+[ ] Sri Rajan — LinkedIn message sent?                             15 min
+[ ] Rock Lambros — LinkedIn message sent?                          15 min
+[ ] David Matousek — LinkedIn message sent?                        15 min
+[ ] M1 Language upgrade — 13 phrase replacements in all docs       60 min
+[ ] C-Corp conversion — email sent to attorney?                    30 min
+[ ] Sovren Software — follow-up sent?                              15 min
+
+ENGINEERING — BEFORE LLOYD (April 28) — AFTER COMMERCIAL
+[ ] TW-1: Lloyd_meeting_prep.md — 14 talking points               60 min
+[ ] L139: Add C14 "200-day detection gap" to Lloyd_meeting_prep    15 min
+[ ] TW-2: LoU staged curriculum update                             60 min
+[ ] TW-9: evaluation-harness-methodology.md                        60 min
+
+EVENTS
+[ ] Leaders in AI Summit NYC April 21–22 — activation plan + contact list
+[ ] Momentum AI NYC April 27–28 — activation plan
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DEFERRED — AFTER LLOYD LOU SIGNED (do not touch before)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[ ] cmd/verify-decision — Merkle selective proof CLI               3 hrs
+[ ] cmd/oscal-generate — OSCAL bundle CLI                          3 hrs
+[ ] scripts/generate-evidence-package.sh                           2 hrs
+[ ] Two-speed baseline tuning (L104)                               4 hrs
+[ ] FP corpus expansion 150→300 scenarios                          4 hrs
+[ ] Vendor package: MSA + pilot scope + data brief                 3 hrs
+[ ] Secondary investor list — 10 names                             2 hrs
+[ ] Adversarial baseline poisoning research note (Zenodo)          6 hrs
+[ ] Splunk Add-on spec                                             2 hrs
+[ ] Sentinel connector spec                                        2 hrs
+[ ] Cornell Tech / NYU Tandon outreach                             1 hr
+[ ] Agent behavioral passport design doc                           2 hrs
+[ ] docs/architecture/agent-behavioral-passport-design.md          2 hrs
+[ ] Zenodo paper: Agent Behavioral Passport Standard v1.0          2 hrs
+[ ] scripts/update_continuation.sh full automation                 2 hrs
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KEY DECISIONS — APRIL 7 SESSION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 FP framing change [F]: Stop leading with 0.00%. Lead with Visa standard.
   "ARE targets below 0.1% FP in production — matching Visa's fraud detection standard.
   No AI agent security product has published a production FP rate. We will."
   The 0.00% is a synthetic corpus result. The production target is the claim.
 
 Passport concept confirmed [F]: Agent Behavioral Passport is real Phase 2 direction.
-  L113 already in LEARNINGS_DELTA. internal/trust/passport.go stub exists in repo.
+  internal/trust/passport.go stub exists in repo. L113 in LEARNINGS_DELTA.
   Core insight: enterprise agent counts are small (50–2,000). Every agent can be
   known completely. Pre-deployment scope declaration + runtime enforcement +
   post-period certificate = complete agent lifecycle.
-  Status: design doc not yet written. Zenodo paper not yet written.
-  Phase: Phase 2 — after Lloyd LoU signed. NOT before.
+  Design doc not yet written. Zenodo paper not yet written.
+  Phase 2 ONLY — after Lloyd LoU signed. NOT before.
 
 Red team evaluation [F]: 84/100 confidence. Real product, real problem.
   4 partial survivals all trace to same root: no production data yet.
   Lloyd pilot is the only thing that closes the gap. No document fixes this.
 
-UNAPPLIED BUILD TASKS — L135–L143 (before Lloyd):
-[x] TW-0:     Feature vector storage ✅ PASS — scoring_explanations 19 cols
-[x] TW-PRE-2: Org-scoped baseline ✅ PASS — org_id+agent_did UNIQUE constraint
-[ ] L139: Add C14 "200-day detection gap" to Lloyd_meeting_prep.md     15 min
-[ ] L141: Add timestamp manipulation to TW-4 scope                     15 min
-[ ] L142: Add API key rotation to prerequisites-checklist.md           30 min
-[ ] L143: Verify handler.lua validates JWT exp claim                   30 min
-
-UNAPPLIED TIER 1 TASKS (from LEARNING_INTELLIGENCE v3.1):
-[ ] TW-1:         Lloyd_meeting_prep.md — 14 talking points            60 min
-[ ] TW-REHEARSAL: Say C1–C14 aloud                                     20 min
-[ ] TW-2:         LoU staged curriculum + Article 22 note              60 min
-[ ] TW-5:         tests/held_out/ creation                             30 min
-[ ] TW-7:         4-metric F1 reporting across all docs                30 min
-[ ] TW-9:         evaluation-harness-methodology.md                    60 min
-[ ] TW-11:        prerequisites-checklist.md updates                   45 min
-[ ] TW-3:         Attack corpus expansion 30→50+ scenarios            120 min
-[ ] TW-4:         Kong payload validation + timestamp check            60 min
-[ ] TW-6:         Variance growth rate trigger in policy.go           120 min
-
-UNAPPLIED PHASE 0 DOC TASKS (from LEARNINGS_DELTA):
-[ ] L117: Fix score band threshold inconsistency in docs               30 min
-[ ] L118: observe-to-enforce-criteria.md                               60 min
-[ ] L110: Self-verifying SQL as C13 in Lloyd_meeting_prep.md           30 min
-[ ] L111: FP claim Tier 2 update everywhere                            30 min
-[ ] L127: Governance vs enforcement language audit                     30 min
-[ ] L121: ARE SOC2(b) framing in docs                                  30 min
-[ ] L132: pilot-case-study-template.md                                  2 hrs
-[ ] L133: scripts/hackathon-demo.sh + README demo link                  2 hrs
-[ ] L134: investor deck metrics update                                 30 min
-
-PHASE 2 DESIGN TASKS (after Lloyd LoU signed):
-[ ] docs/architecture/agent-behavioral-passport-design.md              2 hrs
-[ ] Zenodo paper: Agent Behavioral Passport Standard v1.0              2 hrs
-[ ] Cornell Tech / NYU Tandon outreach for corpus validation 
-TIER 2 TASKS (after LoU signed — full list in LEARNING_INTELLIGENCE v3.1 lines 352–551)
-Key items:
-[ ] PL-SIEM-VERIFY: audit trail format verification (45 min)
-[ ] PL-SECURITY-ATTESTATION: 5-section security doc (3 hrs)
-[ ] PL-2: three-tier Redis fallback (3 hrs)
-[ ] PL-6: Welford's algorithm baseline scalability (3 hrs)
-[ ] PL-12: burst/stress test 50 concurrent requests (2 hrs)
-[ ] PL-13: A/B threshold weight validation (1 hr)
-[ ] PL-16: per-agent-type FP bias audit (1 hr)
-[ ] PL-23: threshold change protocol doc (30 min)          30 min
-
-NUCLEAR BUILD — ALL COMPLETE ✅
-Week 1: SIR, VRF, GDPR, NIS2, threshold docs, FP corpus, maintenance
-Week 2: Merkle, LTL formal, TLA+, Raft consensus
-Week 3: SPHINCS+, ZK-STARK, TEE attestation, OSCAL SOC2
-
-PHASE 1 STATUS
-T0–T7: ✅ All complete
-T8: 🟡 IN PROGRESS — Lloyd meeting ~April 28
-T9: ✅ Done
-
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 METRICS — KNOW COLD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 FP rate:             0.00% on 150-scenario internal corpus
                      Production target: <0.1% (Visa standard) [H]
 TP rate:             88.00% (44/50) — above 85% gate
@@ -159,7 +203,10 @@ Call overhead:       0.25ns Linux
 Hardening score:     96/100+
 Policy packs:        7 total (5 OWASP + NIS2 + GDPR)
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 COMMERCIAL STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 Lloyd (NWN):              ~April 28 — confirm exact date
 Character Capital G6:     Decision ~April 13
 Leaders in AI Summit NYC: April 21–22
@@ -174,14 +221,44 @@ Unmukt Raizada (TrustEvals.ai)  LinkedIn sent April 7 — awaiting reply
 Paul Vann (Validia CEO)         Not sent
 Niamh Muldoon (BNY Mellon)      Messaged — no reply
 Bettina Briz (Boardy)           Relationship-building — not continued
-Sri Rajan                       Drafted — not sent
-Rock Lambros                    Drafted — not sent
-David Matousek                  Drafted — not sent
-Turner Novak                    Domain unverified — not sent
+Sri Rajan                       LinkedIn drafted — NOT SENT
+Rock Lambros                    LinkedIn drafted — NOT SENT
+David Matousek                  LinkedIn drafted — NOT SENT
+Turner Novak                    Domain unverified — NOT SENT
 Character Capital G6            Decision ~April 13
 
-INFRASTRUCTURE STATUS
-Tests:          ALL GREEN — go test ./... ✅ 0fdde3e
+AVOIDANCE PATTERN WARNING ⚠
+Engineering substitution for direct contact. Named repeatedly across sessions.
+Named contacts with unsent messages = session does not open until one is sent.
+This pattern has been named. Naming it is not fixing it. Structural fix:
+G-COMMERCIAL gate holds until a message is confirmed sent, not drafted.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LLOYD CLAIMS — C1–C14 (know cold before meeting)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+C1  "Enforcement at your gateway. Data never leaves. Auditors verify themselves."
+C2  "ARE implements the NIST/OWASP standard for AI agent security."
+C3  "Passes every item on the regulatory accountability checklist. Out of the box."
+C4  "94% confident this agent is anomalous — based on 30 days of its own baseline."
+C5  "Financial services proved this architecture works. ARE applies it to agents."
+C6  "Fails open. Agents keep running. SOC sees it before you ask."
+C7  "Below the application layer. Agents can't see it. Can't route around it."
+C8  "30-day observe mode. At day 30: ROI quantified, incidents documented, decision yours."
+C9  "LangChain, LlamaIndex, custom. If it goes through Kong, ARE sees it."
+C10 "The baseline updates on every transaction. Enforcement gets more precise the longer it runs."
+C11 "Every enforcement decision is human-readable. Agent ID, score, confidence, reason."
+C12 "Regulators are about to require AI audit trails. ARE is the implementation, already running."
+C13 "Here is the SQL query. Run it yourself. The result is your FP rate. No vendor controls the measurement."
+C14 "The average breach goes undetected 200 days. ARE detects behavioral drift in real time."
+CISO unlock: "You control the pace — we don't advance to enforce mode without your sign-off."
+FP reframe:  "We target the Visa standard — below 0.1% FP in production."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INFRASTRUCTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tests:          ALL GREEN — go test ./... ✅
 Docker:         All containers healthy
 PostgreSQL:     port 5433 — agentrepengine-postgres-1
 Redis:          AOF+RDB, 512mb noeviction, are_admin ACL
@@ -205,74 +282,17 @@ Linux test: MSYS_NO_PATHCONV=1 docker run --rm -v "//c/Users/rmaso/AgentRepEngin
 ⚠ Paste safety: only paste code blocks into terminal
 ⚠ One file = one complete paste, never split
 
-LLOYD CLAIMS — C1–C14
-C1  "Enforcement at your gateway. Data never leaves. Auditors verify themselves."
-C2  "ARE implements the NIST/OWASP standard for AI agent security."
-C3  "Passes every item on the regulatory accountability checklist. Out of the box."
-C4  "94% confident this agent is anomalous — based on 30 days of its own baseline."
-C5  "Financial services proved this architecture works. ARE applies it to agents."
-C6  "Fails open. Agents keep running. SOC sees it before you ask."
-C7  "Below the application layer. Agents can't see it. Can't route around it."
-C8  "30-day observe mode. At day 30: ROI quantified, incidents documented, decision yours."
-C9  "LangChain, LlamaIndex, custom. If it goes through Kong, ARE sees it."
-C10 "The baseline updates on every transaction. Enforcement gets more precise the longer it runs."
-C11 "Every enforcement decision is human-readable. Agent ID, score, confidence, reason."
-C12 "Regulators are about to require AI audit trails. ARE is the implementation, already running."
-C13 "Here is the SQL query. Run it yourself. The result is your FP rate. No vendor controls the measurement."
-C14 "The average breach goes undetected 200 days. ARE detects behavioral drift in real time."
-CISO unlock: "You control the pace — we don't advance to enforce mode without your sign-off."
-FP reframe:  "We target the Visa standard — below 0.1% FP in production."
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LEARNING INTELLIGENCE STATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-LEARNING INTELLIGENCE
-Version: v3.1
-Total learnings: 143 (L135–L143 recovered from session 17223a4a)
+Version: v3.1 | Total learnings: 143 (L135–L143 recovered)
 Next learning number: L144
 Next MASTER_LEARNINGS number: L100
 GENERATE not called — L144 waiting for paste next session.
-ACTIVE TASKS — BEFORE LLOYD (April 28)
-SESSION 2 COMPLETE — April 7, 2026
-Commits: b2096b9 HEAD
-All tests: GREEN ✅
 
-#1  [x] B3 — FP claim language upgrade ✅ 03740bb + 75ece6a
-#2  [x] B5 — Audit trail architecture doc ✅ 2a8d14c
-#3  [x] B1 — Observe-to-enforce criteria ✅ already committed
-#4  [x] B4 — Gen Digital ADR competitive response ✅ already committed
-#5  [x] B2 — Pilot case study template ✅ already committed
-── SPRINT 1 PROGRESS (5/9 complete) ──────────────────────────
-[x] S1-A-1 cmd/verify-decision ✅ f795eb8
-[x] S1-A-2 cmd/oscal-generate ✅ 8545b34
-[x] S1-A-3 generate-evidence-package.sh ✅ c653f71
-[x] S1-B-1 Kong contract test ✅ 6ecc9e9
-[x] S1-B-2 Redis failover matrix ✅ b2096b9
-[ ] S1-B-3 Full compliance chain integration test    3 hrs
-[ ] S1-C-1 Helm chart (if Lloyd confirms K8s)        3 hrs
-[ ] S1-C-2 SIEM format (ask Lloyd what SIEM)         1 hr
-[ ] S1-D-1 update_continuation.sh automation         2 hrs
-──────────────────────────────────────────────────────────────
-#6  [ ] TW-1 — Lloyd_meeting_prep.md 14 talking points           1 hr
-#7  [ ] TW-REHEARSAL — say C1–C14 aloud                         20 min
-#8  [ ] TW-2 — LoU staged curriculum update                      1 hr
-#9  [ ] L134 — Investor deck metrics update                     30 min
-#10 [ ] C-Corp conversion email to attorney                     30 min
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DEFERRED — AFTER LLOYD LOU SIGNED
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-These exist. They are not lost. They do not block current work.
-Activate when Lloyd LoU is signed.
-
-[ ] cmd/verify-decision — Merkle selective proof CLI            3 hrs
-[ ] cmd/oscal-generate — OSCAL bundle CLI                       3 hrs
-[ ] scripts/generate-evidence-package.sh                        2 hrs
-[ ] Two-speed baseline (L104)                                   4 hrs
-[ ] FP corpus expansion 150→300 scenarios                       4 hrs
-[ ] Vendor package: MSA + pilot scope + data brief              3 hrs
-[ ] Secondary investor list — 10 names                          2 hrs
-[ ] Adversarial baseline poisoning research note (Zenodo)       6 hrs
-[ ] Splunk Add-on spec                                          2 hrs
-[ ] Sentinel connector spec                                     2 hrs
-[ ] Cornell Tech / NYU Tandon outreach                          1 hr
-[ ] Agent behavioral passport design doc                        2 hrs
-[ ] scripts/update_continuation.sh automation                   2 hrs
+PHASE 1 STATUS
+T0–T7: ✅ All complete
+T8: 🟡 IN PROGRESS — Lloyd meeting ~April 28
+T9: ✅ Done
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
