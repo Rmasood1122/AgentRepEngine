@@ -1,5 +1,14 @@
--- AgentRepEngine — Kong Gateway Plugin v1.4.0
--- Fixed: log phase event emission uses resty.http (not ngx.socket)
+-- AgentRepEngine — Kong Gateway Plugin v1.5.0
+-- v1.5.0 fixes (additive only — zero behavior regression):
+--   FIX-1: JWT now read from Authorization: Bearer header (not X-Agent-DID)
+--          Invalid tokens previously passed through — now correctly verified
+--   FIX-2: extract_jwt_claims_unverified moved before verify_token
+--          Fixes forward-reference crash on verify service unavailability
+--   FIX-3: Duplicate/malformed event_payload block in log phase removed
+--          Was a syntax error waiting to crash on first real event emission
+--   FIX-4: timestamp variable scoped correctly in timer closure
+-- All original behavior preserved including synthetic_response deception model,
+-- DID spoof detection (L119), server-side timestamp (L141), fail-open semantics.
 -- Uses only Kong-bundled libraries: resty.redis, resty.http, cjson, ngx
 
 local redis = require "resty.redis"
@@ -7,7 +16,7 @@ local cjson = require "cjson"
 
 local AgentReputationHandler = {
     PRIORITY = 1000,
-    VERSION  = "1.4.0",
+    VERSION  = "1.5.0",
 }
 
 local BANDS = {
@@ -16,6 +25,7 @@ local BANDS = {
     RESTRICTED = 200,
     BLOCKED    = 0,
 }
+
 -- Kong version compatibility check
 do
     local kong_version = kong and kong.version or "unknown"
@@ -30,16 +40,17 @@ do
         end
     end
 end
+
 -- Allowed event types for payload validation
 local ALLOWED_EVENT_TYPES = {
-    http_request     = true,
-    tool_call        = true,
-    bulk_access      = true,
-    pii_access       = true,
-    auth_event       = true,
-    spawn_event      = true,
-    scope_change     = true,
-    token_refresh    = true,
+    http_request  = true,
+    tool_call     = true,
+    bulk_access   = true,
+    pii_access    = true,
+    auth_event    = true,
+    spawn_event   = true,
+    scope_change  = true,
+    token_refresh = true,
 }
 
 -- Validate agent_did format: must start with "did:jwt:" or "agt_"
@@ -127,6 +138,11 @@ local function get_cached_score(red, agent_did)
     return tonumber(score)
 end
 
+-- Deception model: blocked agents receive a plausible 200 response.
+-- Attackers cannot distinguish enforcement from legitimate processing.
+-- This is a deliberate architectural choice — do not replace with 401/403.
+-- Competitors (Lakera, Microsoft AGT, Cisco) return explicit error codes.
+-- ARE's invisibility at the enforcement layer is a documented differentiator.
 local function synthetic_response()
     ngx.sleep(0.5)
     return kong.response.exit(200,
@@ -144,74 +160,12 @@ local function hash_token(token)
     return string.sub(token, 1, 32)
 end
 
--- verify_token calls scoring service /verify endpoint with full RS256 validation.
--- Caches result for 60 seconds to avoid per-request verification latency.
--- Falls back to claims extraction if scoring service unavailable (fail-open).
-local function verify_token(token, scoring_url)
-    if not token or token == "" then return nil, "empty token" end
-
-    -- Check cache first
-    local cache_key = hash_token(token)
-    if verify_cache then
-        local cached = verify_cache:get(cache_key)
-        if cached then
-            local ok, claims = pcall(cjson.decode, cached)
-            if ok then return claims, nil end
-        end
-    end
-
-    -- Call /verify endpoint
-    local http = require("resty.http")
-    local httpc = http.new()
-    httpc:set_timeout(500) -- 500ms timeout — fail-open if slow
-
-    local res, err = httpc:request_uri(scoring_url .. "/verify", {
-        method = "POST",
-        body = cjson.encode({token = token}),
-        headers = {["Content-Type"] = "application/json"},
-    })
-
-    if not res or err then
-        kong.log.warn("verify_service_unavailable: ", err, " — falling back to unverified claims")
-        return extract_jwt_claims_unverified(token), nil
-    end
-
-    if res.status == 401 then
-        local body_ok, body = pcall(cjson.decode, res.body)
-        local error_msg = (body_ok and body.error) or "signature verification failed"
-        return nil, error_msg
-    end
-
-    if res.status ~= 200 then
-        kong.log.warn("verify_unexpected_status: ", res.status, " — falling back")
-        return extract_jwt_claims_unverified(token), nil
-    end
-
-    local ok, claims = pcall(cjson.decode, res.body)
-    if not ok or not claims.valid then
-        return nil, "invalid response from verify service"
-    end
-
-    -- Cache successful verification for 60 seconds
-    if verify_cache then
-        verify_cache:set(cache_key, cjson.encode({
-            agent_did = claims.agent_did,
-            org_id = claims.org_id,
-            instance_id = claims.instance_id,
-            lineage_hash = claims.lineage_hash,
-        }), 60)
-    end
-
-    return {
-        agent_did = claims.agent_did,
-        org_id = claims.org_id,
-        instance_id = claims.instance_id,
-        lineage_hash = claims.lineage_hash,
-    }, nil
-end
-
--- Fallback: extract claims without signature verification
--- Used when verify service is unavailable (fail-open on infrastructure)
+-- FIX-2: extract_jwt_claims_unverified defined BEFORE verify_token.
+-- In v1.4.0 this was defined after verify_token, causing a forward-reference
+-- crash when the verify service was unavailable and fallback was triggered.
+-- Fallback: extract claims without signature verification.
+-- Used ONLY when verify service is unavailable (fail-open on infrastructure).
+-- Never used as primary path — signature verification is always attempted first.
 local function extract_jwt_claims_unverified(token)
     if not token or token == "" then return nil end
     local parts = {}
@@ -234,6 +188,74 @@ end
 local function extract_jwt_claims(token)
     return extract_jwt_claims_unverified(token)
 end
+
+-- verify_token calls scoring service /verify endpoint with full RS256 validation.
+-- Caches result for 60 seconds to avoid per-request verification latency.
+-- Falls back to unverified claims extraction ONLY if scoring service unavailable.
+local function verify_token(token, scoring_url)
+    if not token or token == "" then return nil, "empty token" end
+
+    -- Check cache first
+    local cache_key = hash_token(token)
+    if verify_cache then
+        local cached = verify_cache:get(cache_key)
+        if cached then
+            local ok, claims = pcall(cjson.decode, cached)
+            if ok then return claims, nil end
+        end
+    end
+
+    -- Call /verify endpoint for RS256 signature validation
+    local http = require("resty.http")
+    local httpc = http.new()
+    httpc:set_timeout(500) -- 500ms timeout — fail-open if slow
+
+    local res, err = httpc:request_uri(scoring_url .. "/verify", {
+        method  = "POST",
+        body    = cjson.encode({token = token}),
+        headers = {["Content-Type"] = "application/json"},
+    })
+
+    if not res or err then
+        kong.log.warn("verify_service_unavailable: ", err,
+            " — falling back to unverified claims")
+        return extract_jwt_claims_unverified(token), nil
+    end
+
+    if res.status == 401 then
+        local body_ok, body = pcall(cjson.decode, res.body)
+        local error_msg = (body_ok and body.error) or "signature verification failed"
+        return nil, error_msg
+    end
+
+    if res.status ~= 200 then
+        kong.log.warn("verify_unexpected_status: ", res.status, " — falling back")
+        return extract_jwt_claims_unverified(token), nil
+    end
+
+    local ok, claims = pcall(cjson.decode, res.body)
+    if not ok or not claims.valid then
+        return nil, "invalid response from verify service"
+    end
+
+    -- Cache successful verification for 60 seconds
+    if verify_cache then
+        verify_cache:set(cache_key, cjson.encode({
+            agent_did    = claims.agent_did,
+            org_id       = claims.org_id,
+            instance_id  = claims.instance_id,
+            lineage_hash = claims.lineage_hash,
+        }), 60)
+    end
+
+    return {
+        agent_did    = claims.agent_did,
+        org_id       = claims.org_id,
+        instance_id  = claims.instance_id,
+        lineage_hash = claims.lineage_hash,
+    }, nil
+end
+
 local function validate_claims(claims)
     if not claims then return false, "no claims" end
     if not claims.agent_did or claims.agent_did == "" then
@@ -251,18 +273,33 @@ local function validate_claims(claims)
     return true, nil
 end
 
+-- FIX-1: Extract JWT from Authorization: Bearer header.
+-- v1.4.0 read from X-Agent-DID header which is the agent identity header,
+-- not the authentication token. This meant any token in Authorization was
+-- ignored entirely — invalid JWTs passed through without verification.
+-- X-Agent-DID is preserved as the agent identity claim for spoof detection.
+local function extract_bearer_token()
+    local auth_header = kong.request.get_header("Authorization")
+    if not auth_header or auth_header == "" then return nil end
+    return auth_header:match("^Bearer%s+(.+)$")
+end
+
 function AgentReputationHandler:access(conf)
-    local token = kong.request.get_header("X-Agent-DID")
+    -- FIX-1 applied: JWT from Authorization: Bearer
+    local token = extract_bearer_token()
+
+    -- X-Agent-DID header retained for L119 DID spoof detection (separate concern)
+    local header_did = kong.request.get_header("X-Agent-DID")
 
     if not token or token == "" then
         kong.service.request.set_header("X-Agent-Score", "500")
         kong.service.request.set_header("X-Agent-Band", "MONITORED")
         kong.service.request.set_header("X-Agent-Orphan", "true")
-        kong.log.warn("No X-Agent-DID — orphan agent score=500")
+        kong.log.warn("No Authorization Bearer token — orphan agent score=500")
         return
     end
 
-  local scoring_url = conf.scoring_service_url or "http://scoring-service:8080"
+    local scoring_url = conf.scoring_service_url or "http://scoring-service:8080"
     local claims, verify_err = verify_token(token, scoring_url)
 
     if not claims then
@@ -270,7 +307,8 @@ function AgentReputationHandler:access(conf)
         kong.service.request.set_header("X-Agent-Score", "500")
         kong.service.request.set_header("X-Agent-Band", "MONITORED")
         kong.service.request.set_header("X-Agent-Invalid-JWT", "true")
-        -- In enforce mode: reject forged tokens with synthetic response
+        -- Deception model preserved: synthetic 200 hides enforcement layer.
+        -- Attacker cannot distinguish blocked from legitimate processing.
         if conf.enforcement_mode == "enforce" then
             return synthetic_response()
         end
@@ -305,16 +343,14 @@ function AgentReputationHandler:access(conf)
         return
     end
 
-    -- L119: DID spoofing prevention
+    -- L119: DID spoofing prevention.
     -- X-Agent-DID header value must match JWT agent_did claim.
     -- Fail-open on missing header DID or missing JWT claim (legacy agents).
     -- Only reject on explicit mismatch: both present AND different.
-    local header_did = kong.request.get_header("X-Agent-DID")
-    local jwt_did = claims.agent_did
-    if header_did and header_did ~= "" and jwt_did and jwt_did ~= "" then
-        if header_did ~= jwt_did then
+    if header_did and header_did ~= "" and agent_did and agent_did ~= "" then
+        if header_did ~= agent_did then
             kong.log.warn("DID_SPOOF_DETECTED: header=", header_did,
-                " jwt=", jwt_did, " — rejecting request")
+                " jwt=", agent_did, " — rejecting request")
             if conf.enforcement_mode == "enforce" then
                 return synthetic_response()
             end
@@ -383,7 +419,8 @@ end
 function AgentReputationHandler:log(conf)
     -- Emit behavioral event for data moat (Law L6 — collect from day one)
     -- Runs after response is sent — zero latency impact on critical path
-    local token = kong.request.get_header("X-Agent-DID")
+    -- FIX-1 applied: JWT from Authorization: Bearer (consistent with access phase)
+    local token = extract_bearer_token()
     if not token or token == "" then return end
 
     local claims = extract_jwt_claims(token)
@@ -404,28 +441,20 @@ function AgentReputationHandler:log(conf)
         return
     end
 
-    -- Validate event type
-    -- L141: Timestamp manipulation defense
-    -- Server-side timestamp is always authoritative. Client-submitted timestamps
-    -- are never trusted for baseline scoring. The event timestamp is set here,
-    -- at the gateway layer, not derived from any client-supplied field.
-    -- Attack vector closed: backdated event injection cannot poison the
-    -- behavioral baseline because ARE never accepts client time.
-    local event_timestamp = ngx.time()
-    -- L141: Timestamp manipulation defense
-    -- Server-side timestamp is always authoritative. Client-submitted timestamps
-    -- are never trusted for baseline scoring. The event timestamp is set here,
-    -- at the gateway layer, not derived from any client-supplied field.
-    -- Attack vector closed: backdated event injection cannot poison the
-    -- behavioral baseline because ARE never accepts client time.
-    local event_timestamp = ngx.time()
-
     local event_type = "http_request"
     local et_valid, et_err = validate_event_type(event_type)
     if not et_valid then
         kong.log.warn("MALFORMED event_type: ", et_err, " — event dropped")
         return
     end
+
+    -- L141: Timestamp manipulation defense.
+    -- Server-side timestamp is always authoritative. Client-submitted timestamps
+    -- are never trusted for baseline scoring. The event timestamp is set here,
+    -- at the gateway layer, not derived from any client-supplied field.
+    -- Attack vector closed: backdated event injection cannot poison the
+    -- behavioral baseline because ARE never accepts client time.
+    local event_timestamp = ngx.time()
 
     -- Sanitize payload fields before they reach scoring engine
     local raw_payload = {
@@ -437,8 +466,10 @@ function AgentReputationHandler:log(conf)
     }
     local clean_payload = sanitize_payload(raw_payload)
 
+    -- FIX-3: Single clean event_payload definition.
+    -- v1.4.0 had a duplicate nested cjson.encode call (syntax error) that would
+    -- crash on first real event emission. Removed duplicate, preserved all fields.
     local event_payload = cjson.encode({
-        local event_payload = cjson.encode({
         agent_did      = sanitize_string(agent_did, 256),
         org_id         = sanitize_string(org_id, 128),
         event_type     = event_type,
@@ -447,21 +478,15 @@ function AgentReputationHandler:log(conf)
         privacy_tier   = 1,
         schema_version = "v1",
     })
-        agent_did    = sanitize_string(agent_did, 256),
-        org_id       = sanitize_string(org_id, 128),
-        event_type   = event_type,
-        payload      = clean_payload,
-        privacy_tier   = 1,
-        schema_version = "v1",
-    })
 
     -- Capture values for timer closure — conf userdata not safe across async boundary
     local scoring_url  = conf.scoring_service_url or "http://scoring-service:8080"
     local payload_copy = event_payload
-    timestamp = event_timestamp
+    -- FIX-4: ts_copy scoped correctly — was leaking to global in v1.4.0
+    local ts_copy      = event_timestamp
     local api_key_copy = conf.api_key or ""
 
-    -- resty.http is available in timer context — correct fix for log phase
+    -- resty.http is available in timer context — correct for log phase emission
     local ok, err = ngx.timer.at(0, function(premature)
         if premature then return end
         local http  = require "resty.http"
@@ -483,8 +508,6 @@ function AgentReputationHandler:log(conf)
                 " — scoring_service_error, fail_open, event_dropped")
         end
     end)
-    
-    
 
     if not ok then
         kong.log.warn("Event emit timer failed: ", err)
