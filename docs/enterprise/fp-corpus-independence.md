@@ -1,135 +1,163 @@
-# FP Corpus Independence — Methodology & Guarantees
-**AgentRepEngine — Phase 1**
-Version: 1.0 | Date: April 2026 | Status: Production
+# False Positive Corpus Independence Statement
+## AgentRepEngine (ARE) | Naseem A2A Research Lab
+## Version 1.0 | April 2026
 
 ---
 
-## The Problem This Document Solves
+## 1. Purpose
 
-A false positive rate of 0.00% is meaningless if the test corpus was used to tune
-the scoring model. This document proves the ARE FP measurement is independent —
-the evaluation corpus had zero influence on scoring parameter selection.
-
----
-
-## Corpus Structure
-
-ARE maintains three strictly separated corpora:
-
-### Corpus A — Training Baseline (internal, never published)
-- Purpose: Establish z-score baseline parameters (mean, std_dev per feature)
-- Contents: Synthetic behavioral traces generated from archetype definitions
-- Used for: `bootstrap_sample_threshold` calibration only
-- Influence on thresholds: NONE — z-score is computed against agent's own 30-day
-  personal baseline, not against this corpus
-
-### Corpus B — FP Evaluation Corpus (100 scenarios, `tests/fp_scenarios/`)
-- Purpose: Measure production false positive rate
-- Contents: 100 legitimate agent scenarios across 7 archetypes
-- Construction: Scenarios built from archetype behavioral definitions BEFORE
-  any threshold tuning. Scenario authors had no visibility into penalty weights.
-- Influence on thresholds: NONE — thresholds in `config/scoring_weights.yaml`
-  were set to OWASP/NIST reference values, not fit to this corpus
-
-### Corpus C — Held-Out Attack Corpus (50 scenarios + 6 held-out, `tests/held_out/`)
-- Purpose: Measure true positive rate on unseen attacks
-- Contents: Attack patterns not used during any development phase
-- Influence on model: NONE — held-out corpus was sealed before Phase 1 build began
+This document describes the construction methodology, behavioral coverage, and
+statistical properties of the corpus used to validate ARE's false positive rate.
+It is intended for security engineers, CISOs, and compliance reviewers conducting
+technical due diligence on ARE's enforcement claims.
 
 ---
 
-## Independence Proof — Chronological Record
+## 2. Construction Methodology
 
-| Date | Action | Independence Implication |
+### 2.1 Spec-First Protocol
+
+Every scenario in the FP validation corpus was constructed using a spec-first
+protocol:
+
+1. A behavioral specification was written describing a legitimate agent workflow
+   (agent type, action sequence, rate parameters, org context).
+2. The specification was committed to the repository before the scenario code
+   was written. The spec commit hash is referenced in each scenario file.
+3. The scenario was then implemented to match the spec — not to pass the scorer.
+
+This protocol prevents co-design bias: scenarios cannot be tuned to match the
+scorer's thresholds because the behavioral specification is locked before the
+implementation begins.
+
+### 2.2 Additive-Only Rule
+
+The corpus is append-only. No scenario has been modified or removed after
+initial commit. All 100 scenarios exist in their original form at their original
+commit hashes. This is verifiable via `git log tests/fp_scenarios/`.
+
+### 2.3 Scenario Authorship
+
+All 100 scenarios were authored by the ARE engineering team. No external party
+contributed scenarios. This is disclosed explicitly: the corpus is internally
+constructed and has not been independently validated by a third party. External
+validation on production traffic is available during the pilot engagement.
+
+---
+
+## 3. Behavioral Categories Covered
+
+The 100-scenario corpus spans the following legitimate agent behavioral patterns:
+
+| Category | Scenarios | Description |
 |---|---|---|
-| Phase 1 kickoff | Archetype definitions written | Corpus B not yet created |
-| Phase 1 T0 | Evaluation harness built | Thresholds not yet set |
-| Phase 1 T4 | Z-score + velocity thresholds set to OWASP defaults | Corpus B not consulted |
-| Phase 1 T0 complete | Corpus B scenarios finalized | Thresholds already locked |
-| Phase 1 hardening | Bias audit run against Corpus B | First time thresholds met corpus |
-| Result | 0.00% FP — no tuning required | Independence confirmed |
+| Normal operational baseline | 25 | Agents operating within 1σ of their established baseline |
+| Bursty-but-legitimate | 20 | Batch jobs, scheduled tasks, end-of-period processing spikes |
+| Cold-start agents | 15 | New agents with no prior baseline, day-1 behavior |
+| Sequential workflow agents | 15 | Slow, ordered, non-concurrent API call patterns |
+| High-frequency legitimate | 10 | Monitoring agents, trading bots, high-rate legitimate activity |
+| Cross-reference legitimate | 10 | Agents with approved multi-system access patterns |
+| Legacy behavioral patterns | 5 | Unusual endpoint ordering, non-standard but authorized sequences |
 
-**Key fact:** Thresholds were set to OWASP LLM Top 10 reference values before any
-scenario was run. The 0.00% result was not achieved by fitting thresholds to scenarios.
-
----
-
-## What Could Invalidate This Claim
-
-1. **If thresholds were adjusted after seeing FP results** — this would constitute
-   corpus contamination. ZROS L1 prevents this: every threshold change requires
-   a `score:` commit with documented justification. No such commits exist.
-
-2. **If scenario authors knew the penalty weights** — scenario construction was
-   done against archetype behavioral specs only, not against scoring parameters.
-
-3. **If the held-out corpus was used during development** — the held-out corpus
-   lives in `tests/held_out/` and was not referenced in any commit prior to
-   final evaluation. Git history is the proof.
+All 100 scenarios represent agents that ARE **must not block**. The corpus
+tests for false positives only — it is not an attack detection corpus.
 
 ---
 
-## Production FP Measurement (Live)
+## 4. Statistical Properties
 
-In production, FP rate is measured independently of the evaluation corpus:
-```sql
--- Live FP rate from production enforcement_decisions
-SELECT
-  ROUND(100.0 * COUNT(*) FILTER (WHERE override = true)
-    / NULLIF(COUNT(*) FILTER (WHERE decision = 'BLOCKED'), 0), 2) AS fp_rate_pct
-FROM enforcement_decisions
-WHERE created_at > NOW() - INTERVAL '7 days';
-```
+### 4.1 Observed Result
 
-- `override = true` = human reviewer confirmed the block was a false positive
-- This is set via the `/agent/{id}/clear` endpoint by SOC analysts
-- Target: ≤2% in production (G-FP hard stop)
-- Current (corpus): 0.00%
+Zero false positives across all 100 scenarios. No legitimate agent was blocked,
+throttled, or flagged for human review across any scenario in the corpus.
 
-Daily FP metrics are also written to `daily_fp_metrics` table by the retention job
-and exposed at `/health` as `fp_rate_7d`.
+### 4.2 Confidence Interval Disclosure
+
+A zero observed result on a finite corpus does not prove a zero population FP
+rate. The correct statistical statement is:
+
+> "Zero false positives on a 100-scenario internal validation corpus, bounding
+> the FP rate below **3.6% with 95% confidence** (Clopper-Pearson exact interval)."
+
+This is ARE's Tier 1 claim. It is the claim that is statistically defensible
+today.
+
+### 4.3 Path to Tier 2 Claim
+
+Expanding the corpus to 300 scenarios (200 additional, additive-only, spec-first)
+reduces the 95% CI upper bound to approximately 1.0%. This expansion is planned
+for the post-LoU sprint. Upon completion, the defensible claim becomes:
+
+> "Zero false positives on a 300-scenario internal validation corpus, bounding
+> the FP rate below **1.0% with 95% confidence**."
+
+### 4.4 Production Validation Path
+
+Neither the Tier 1 nor Tier 2 claim is a production FP rate. Production
+validation requires real agent traffic. The 30-day observe-mode pilot is
+designed to produce the first production FP measurement:
+
+> "Zero false positives on [enterprise]'s production traffic — [N] agents,
+> [M] requests, 30 days."
+
+This is Tier 3. It is the claim that closes the synthetic-to-production gap.
 
 ---
 
-## Held-Out Results (Final Evaluation)
+## 5. Boundary Scenario Coverage
 
-| Corpus | Scenarios | Result | Rate |
-|---|---|---|---|
-| Corpus B (FP) | 100 legitimate | 0 blocked | 0.00% FP |
-| Corpus C held-out FP | 20 legitimate | 0 blocked | 0.00% FP |
-| Corpus C held-out TP | 6 attacks | 6 detected | 100% TP |
-| Full attack corpus | 50 attacks | 44 detected | 88.00% TP |
+The corpus includes 20 boundary scenarios covering agents operating at
+z-score 2.5–3.5 — the zone immediately below the enforcement threshold.
+These are the scenarios most likely to expose threshold sensitivity and
+co-design bias.
 
-F1 score: **0.9362** (Precision: 100%, Recall: 88%)
+All 20 boundary scenarios produce zero false positives at the current
+threshold configuration (`z_score_threshold: 3.0` in `config/scoring_weights.yaml`).
 
 ---
 
-## Re-Validation Protocol
+## 6. Independent Verification
 
-Before every enforce-mode go-live, run full independent validation:
+The full corpus is available for review at:
+`tests/fp_scenarios/` (scenarios) and `tests/fp_scenarios/specs/` (specifications)
+
+The eval harness that produced the reported result is at:
+`tests/eval_harness/`
+
+Any reviewer can reproduce the result by running:
 ```bash
-# FP corpus
-go test ./tests/fp_scenarios/... -v
-
-# Held-out corpus
-go test ./tests/held_out/... -v
-
-# Bias audit across archetypes
-go test ./tests/fp_scenarios/... -run TestFPBiasAudit -v
-
-# Attack corpus
-go test ./tests/attack_corpus/... -v
+go test ./tests/eval_harness/... -v
 ```
 
-All four must pass before enforce mode is authorized (G-FP hard stop).
+The test output includes per-scenario pass/fail, the aggregate FP count,
+and the Clopper-Pearson confidence interval calculation.
 
 ---
 
-## Auditor Statement
+## 7. What This Document Does Not Claim
 
-This document is provided for security auditors, enterprise buyers, and regulators
-evaluating ARE's false positive claims. The Git commit history at
-`github.com/Rehanrana11/AgentRepEngine` provides a verifiable chronological record
-that corpus construction preceded threshold finalization.
+- This document does not claim ARE has a zero FP rate in production.
+- This document does not claim the corpus was constructed by an independent party.
+- This document does not claim the synthetic scenarios represent the full
+  distribution of legitimate enterprise agent behavior.
+- The Zenodo DOI (10.5281/zenodo.19169185) establishes timestamped existence
+  of ARE's architectural framework. It does not validate the FP methodology.
 
-Published IP anchor: DOI 10.5281/zenodo.19169185
+These gaps are closed by production pilot data. The 30-day observe-mode
+deployment is the designed mechanism for closing them.
+
+---
+
+## 8. Version History
+
+| Version | Date | Change |
+|---|---|---|
+| 1.0 | April 2026 | Initial release — 100-scenario corpus, Tier 1 claim |
+| 2.0 | Post-LoU | 300-scenario corpus, Tier 2 claim (planned) |
+| 3.0 | Post-pilot | Production FP rate, Tier 3 claim (planned) |
+
+---
+
+*AgentRepEngine is developed by Naseem A2A Research Lab / Call2leads Inc.*
+*Contact: rehanrana@call2leads.com*
+*IP anchor: DOI 10.5281/zenodo.19169185*
