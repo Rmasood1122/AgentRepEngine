@@ -83,7 +83,7 @@ The 0.00% FP rate is the enterprise unlock phrase — not the architecture,
 not the compliance alignment, not the OWASP mapping.
 
 Correct framing (never deviate from this):
-"0.00% false positive rate on our 100-scenario internal validation corpus.
+"0.00% false positive rate on our 150-scenario internal validation corpus.
 External validation on your production traffic is available during the pilot
 — we expect <1% on a well-configured environment."
 
@@ -96,7 +96,7 @@ The number stays. The framing protects credibility (L77).
 
 ```
 0.00%   FP rate on 100-scenario internal corpus
-86.67%  TP rate on 30-scenario attack corpus (TP=86.67%, Precision=100%, F1=0.9286)
+88.00%  TP rate on 50-scenario attack corpus (TP=88.00%, Precision=100%, F1=0.9362)
 100%    Slow-walk detection via score + HIGH_RISK VERIFY (10 scenarios, single-agent)
 ~60s    Full demo end-to-end (scripts/demo.sh — streaming output, not batch)
 ```
