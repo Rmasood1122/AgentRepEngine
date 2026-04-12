@@ -88,35 +88,31 @@ RULE: Any unchecked box = that action executes before session opens.
       Not negotiable. Not overridable. No exceptions.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CURRENT STATE — April 07, 2026
+CURRENT STATE — April 12, 2026
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 APEX VERSION: APEX v5.2 + ZROS v2.7 + MASTER_LEARNINGS v2.1 DELTA + LEARNING_INTELLIGENCE v3.1
+APEX MODE: ENTERPRISE (Mode 4) | SESSION TYPE: ENGINEERING
 REPO: https://github.com/Rehanrana11/AgentRepEngine
 Branch: master (push with git push origin master — NOT main)
-HEAD: 1f3fda4
+HEAD: 2fbb4a7
 go test ./... — ALL GREEN ✅ (21 packages passing)
+ZROS GATES: G-FP ✅ PASS | G-HARDEN ✅ PASS | G-IDENTITY ✅ PASS
 
 SESSION CLOSE RECORD
-  Session date:     April 07, 2026
-  Messages:         ~300+
-  Duration:         ~12 hrs
-  Last action:      10-item roadmap executed — all Category A + B complete
-  Irreversible:     YES ✅ — G-COMMERCIAL structural, 8 commits pushed
+  Session date:     April 12, 2026
+  Last action:      Claude OS dead zones closed — 3 systems committed, all eng weaknesses resolved
+  Irreversible:     YES ✅ — 4 commits pushed (5b612f2, 11aca5e, 2fbb4a7 + fp-corpus)
 
 RECENT COMMITS
-1f3fda4 docs: CLAUDE_MASTER — corpus 100→150, TP 86.67→88.00, F1 0.9286→0.9362, attack corpus 30→50
-2079b23 docs: ABP paper DOI 10.5281/zenodo.19535882 — published Zenodo April 2026
-a75485d docs: fp-measurement-methodology v1.0 — Clopper-Pearson CI, corpus construction, auditor SQL, self-rollback circuit breaker
-9911486 test: kong JWT deception model + orphan fail-open — locks handler.lua v1.5.0 behavior permanently
-48a22ee fix: handler.lua v1.5.0 — Authorization Bearer JWT verification, function order fix, event_payload dedup, timestamp scope fix
-1e55113 docs: attention architecture v1 — hierarchy declaration, boot sequence, all data preserved
-ac1f022 docs: session close — M2/M3/TW-2/TW-6/PL-SECURITY all complete, all tests green, HEAD 89fc78d
-89fc78d docs: M2 adversarial baseline poisoning research note — attack class definition, two-layer defense, experimental results
-7ebf321 docs: M3 SIEM integration — Splunk HEC + Sentinel specs, CEF format, KQL queries, dashboard panels, Defender XDR
-a325994 docs: TW-2 — LoU staged curriculum added, 4-phase rollout, success criteria, GDPR Article 22 human oversight note
-
-Tests: ALL GREEN ✅
+2fbb4a7 ops: Claude OS active systems — APEX_REASONING_ENGINE v1, SESSION_PROTOCOL v1, DECISION_AUDIT v1
+11aca5e docs: Claude OS orchestration meta prompt v1.0 + SWOT meta prompt v1.0
+5b612f2 docs: FP corpus independence statement — methodology, CI disclosure, Tier 1-3 claim ladder
+89fc78d docs: M2 adversarial baseline poisoning research note
+7ebf321 docs: M3 SIEM integration — Splunk HEC + Sentinel specs, CEF format, KQL queries
+a325994 docs: TW-2 — LoU staged curriculum added, 4-phase rollout, success criteria
+27cab0b docs: PL-SECURITY-ATTESTATION — 5-section security attestation
+002a1af feat: TW-6 variance growth rate wired to scoring pipeline — slow-walk early warning active
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ACTIVE TASKS — THIS SESSION (pull ONLY from here)
@@ -167,7 +163,9 @@ DEFERRED — AFTER LLOYD LOU SIGNED (do not touch before)
 [ ] scripts/update_continuation.sh full automation                 2 hrs
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-KEY DECISIONS — APRIL 7 SESSION
+KEY DECISIONS — APRIL 7 + APRIL 12 SESSIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KEY DECISIONS — APRIL 7 + APRIL 12 SESSIONS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 FP framing change [F]: Stop leading with 0.00%. Lead with Visa standard.
@@ -177,19 +175,32 @@ FP framing change [F]: Stop leading with 0.00%. Lead with Visa standard.
 
 Passport concept confirmed [F]: Agent Behavioral Passport is real Phase 2 direction.
   internal/trust/passport.go stub exists in repo. L113 in LEARNINGS_DELTA.
-  Core insight: enterprise agent counts are small (50–2,000). Every agent can be
-  known completely. Pre-deployment scope declaration + runtime enforcement +
-  post-period certificate = complete agent lifecycle.
-  Design doc not yet written. Zenodo paper not yet written.
   Phase 2 ONLY — after Lloyd LoU signed. NOT before.
 
 Red team evaluation [F]: 84/100 confidence. Real product, real problem.
   4 partial survivals all trace to same root: no production data yet.
   Lloyd pilot is the only thing that closes the gap. No document fixes this.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-METRICS — KNOW COLD
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Claude OS dead zones closed [F]: April 12, 2026
+  APEX_REASONING_ENGINE v1 → docs/ops/APEX_REASONING_ENGINE_v1.md
+  SESSION_PROTOCOL v1 → docs/ops/SESSION_PROTOCOL_v1.md
+  DECISION_AUDIT v1 → docs/ops/DECISION_AUDIT_v1.md
+  All 8 active systems now exist as files. Committed 2fbb4a7.
+  Upload all three to Claude Project before next session.
+  Next session: run "ORCHESTRATION ACTIVATE" with all 8 systems loaded.
+
+Engineering weaknesses resolved [F]: April 12, 2026
+  W-ENG-1: FP corpus independence doc → docs/enterprise/fp-corpus-independence.md ✅
+  W-ENG-2: SIEM SendBlocked() caller verified → score_store.go:222 ✅
+  W-ENG-3: Stress test 50 concurrent → 0 errors, all 3 tests pass ✅
+  W-ENG-4: Helm chart → BLOCKED pending Lloyd confirming K8s vs Docker Compose
+  W-ENG-5: Private key disclosure → paragraph ready for Lloyd meeting (verbal) ✅
+  T-ENG-1: Gen Digital ADR response → docs/competitive/gen-digital-adr-response.md ✅
+
+SWOT full analysis completed [F]: April 12, 2026
+  Probability Lloyd signs LoU April 28: 35% [ASS]
+  Single controlling assumption: Lloyd has pre-qualified enterprise client + budget path.
+  Highest leverage action before April 28: TW-REHEARSAL (say C1–C14 aloud) — UNCHECKED.━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 FP rate:             0.00% on 150-scenario internal corpus
                      Production target: <0.1% (Visa standard) [H]
@@ -221,10 +232,10 @@ Unmukt Raizada (TrustEvals.ai)  LinkedIn sent April 7 — awaiting reply
 Paul Vann (Validia CEO)         Not sent
 Niamh Muldoon (BNY Mellon)      Messaged — no reply
 Bettina Briz (Boardy)           Relationship-building — not continued
-Sri Rajan                       LinkedIn drafted — NOT SENT
-Rock Lambros                    LinkedIn drafted — NOT SENT
-David Matousek                  LinkedIn drafted — NOT SENT
-Turner Novak                    Domain unverified — NOT SENT
+Sri Rajan                       LinkedIn sent April 12 — awaiting reply
+Rock Lambros                    LinkedIn sent April 12 — awaiting reply
+David Matousek                  LinkedIn sent April 12 — awaiting reply
+Turner Novak                    LinkedIn sent April 12 — awaiting reply
 Character Capital G6            Decision ~April 13
 
 AVOIDANCE PATTERN WARNING ⚠
