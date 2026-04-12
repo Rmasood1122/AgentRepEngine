@@ -258,4 +258,4 @@ Welford, B.P. (1962). Note on a method for calculating corrected sums
 AgentRepEngine Research Note v1.0
 Naseem A2A Research Lab | April 7, 2026
 DOI: 10.5281/zenodo.19169185 (implementation)
-Second DOI pending — upload to Zenodo after pilot validation
+DOI: 10.5281/zenodo.19535882 | Published: April 2026 | Naseem A2A Research Lab
