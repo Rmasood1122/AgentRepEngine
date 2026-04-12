@@ -94,8 +94,8 @@ CURRENT STATE — April 07, 2026
 APEX VERSION: APEX v5.2 + ZROS v2.7 + MASTER_LEARNINGS v2.1 DELTA + LEARNING_INTELLIGENCE v3.1
 REPO: https://github.com/Rehanrana11/AgentRepEngine
 Branch: master (push with git push origin master — NOT main)
-HEAD: 89fc78d
-go test ./... — ALL GREEN ✅ (20 packages passing)
+HEAD: 1f3fda4
+go test ./... — ALL GREEN ✅ (21 packages passing)
 
 SESSION CLOSE RECORD
   Session date:     April 07, 2026
@@ -105,16 +105,16 @@ SESSION CLOSE RECORD
   Irreversible:     YES ✅ — G-COMMERCIAL structural, 8 commits pushed
 
 RECENT COMMITS
+1f3fda4 docs: CLAUDE_MASTER — corpus 100→150, TP 86.67→88.00, F1 0.9286→0.9362, attack corpus 30→50
+2079b23 docs: ABP paper DOI 10.5281/zenodo.19535882 — published Zenodo April 2026
+a75485d docs: fp-measurement-methodology v1.0 — Clopper-Pearson CI, corpus construction, auditor SQL, self-rollback circuit breaker
+9911486 test: kong JWT deception model + orphan fail-open — locks handler.lua v1.5.0 behavior permanently
+48a22ee fix: handler.lua v1.5.0 — Authorization Bearer JWT verification, function order fix, event_payload dedup, timestamp scope fix
+1e55113 docs: attention architecture v1 — hierarchy declaration, boot sequence, all data preserved
+ac1f022 docs: session close — M2/M3/TW-2/TW-6/PL-SECURITY all complete, all tests green, HEAD 89fc78d
 89fc78d docs: M2 adversarial baseline poisoning research note — attack class definition, two-layer defense, experimental results
 7ebf321 docs: M3 SIEM integration — Splunk HEC + Sentinel specs, CEF format, KQL queries, dashboard panels, Defender XDR
 a325994 docs: TW-2 — LoU staged curriculum added, 4-phase rollout, success criteria, GDPR Article 22 human oversight note
-27cab0b docs: PL-SECURITY-ATTESTATION — 5-section security attestation, key management/data residency/access/incident/compliance
-fcaeb37 docs: L142 — API key rotation procedure added to prerequisites-checklist
-002a1af feat: TW-6 variance growth rate wired to scoring pipeline — slow-walk early warning active, -150 penalty on HIGH_RISK
-6f0a585 feat: update_continuation.sh — automated session state capture, HEAD+tests+commits auto-updated
-fc1c400 test: full compliance chain integration test — 7/7 steps pass, Merkle column fix (agent_id→agent_did, action→decision)
-0241818 docs: session 2 close — Sprint1 5/9 complete, all tests green, HEAD b2096b9
-b2096b9 docs: redis-failover — 4-scenario unavailability matrix, CISO statements, Lloyd one-liner
 
 Tests: ALL GREEN ✅
 
