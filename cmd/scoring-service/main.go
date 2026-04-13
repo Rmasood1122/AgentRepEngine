@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/subtle"
 	"database/sql"
 	"encoding/base64"
 	"encoding/json"
@@ -12,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -35,9 +37,22 @@ func main() {
 	port := getEnv("PORT", "8080")
 	enforcementMode := getEnv("ENFORCEMENT_MODE", "observe")
 
+	// C-5: Fail-closed on missing API key.
+	// The original code warned and passed through — that is the vulnerability.
+	// Production and pilot deployments must always have SCORING_API_KEY set.
+	// Dev mode exception: set SCORING_API_KEY=dev-only-insecure to be explicit.
+	apiKey := os.Getenv("SCORING_API_KEY")
+	if apiKey == "" {
+		slog.Error("SCORING_API_KEY environment variable is not set. " +
+			"Refusing to start — all /score, /event, /audit, /verify, /dashboard endpoints " +
+			"would be unauthenticated. Set SCORING_API_KEY before starting.")
+		os.Exit(1)
+	}
+
 	slog.Info("starting scoring service",
 		"port", port,
 		"enforcement_mode", enforcementMode,
+		"api_key_configured", true,
 	)
 
 	db, err := sql.Open("postgres", dbURL)
@@ -109,23 +124,76 @@ func main() {
 			time.Sleep(60 * time.Second)
 		}
 	}()
+
 	apiHandler := api.NewHandler(scoring.NewSIRMachine(scoring.DefaultSIRThresholds(), scoreStore))
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/health", healthHandler(db, scoreStore, modeCtrl))
-	mux.HandleFunc("/jwks", jwksHandler())
-	mux.HandleFunc("/verify", verifyHandler(scoreStore))
-	_ = metrics.ActiveAgentCount
-	mux.Handle("/metrics", promhttp.Handler())
-	mux.HandleFunc("/score/", requireAPIKey(scoreHandler(scoreStore)))
-	mux.HandleFunc("/event", requireAPIKey(eventHandler(db, scoreStore)))
+	// auth is the closure-bound authentication middleware.
+	// Inlined here (not a separate package) to avoid import cycle with internal packages.
+	// Uses the apiKey captured from os.Getenv above — validated non-empty at startup.
+	auth := func(next http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			provided := extractBearer(r.Header.Get("Authorization"))
 
-	auditHandler := audit.NewHandler(db)
-	mux.HandleFunc("/audit/replay", requireAPIKey(auditHandler.ReplayHandler))
-	mux.HandleFunc("/audit/export", requireAPIKey(auditHandler.ExportHandler))
-	mux.HandleFunc("/dashboard", dashboardHandler(db))
-	mux.HandleFunc("/api/regulatory-package", requireAPIKey(regulatoryPackageHandler(db)))
-	mux.HandleFunc("/agent/", requireAPIKey(apiHandler.HandleAgentClear))
+			// C-5 FIX 1: Removed X-Gateway-Verified bypass.
+			// Original code allowed any caller to set X-Gateway-Verified: true
+			// and skip authentication entirely. This is an unauthenticated bypass
+			// that any internal attacker could exploit.
+			// Kong sends the real SCORING_API_KEY — it does not need a bypass header.
+
+			// C-5 FIX 2: Also accept X-API-Key for Kong plugin backward compatibility.
+			// Kong plugin currently sends X-API-Key. Both headers are accepted during
+			// the transition period. Remove X-API-Key support after Kong plugin is
+			// updated to send Bearer token (see kong/plugins/agent-reputation/handler.lua).
+			if provided == "" {
+				provided = r.Header.Get("X-API-Key")
+			}
+
+			if provided == "" {
+				slog.Warn("unauthorized_request_missing_token",
+					"path", r.URL.Path,
+					"remote_addr", r.RemoteAddr,
+				)
+				http.Error(w, "unauthorized", http.StatusUnauthorized)
+				return
+			}
+
+			// Constant-time comparison prevents timing-based key enumeration.
+			if subtle.ConstantTimeCompare([]byte(provided), []byte(apiKey)) != 1 {
+				slog.Warn("unauthorized_request_invalid_token",
+					"path", r.URL.Path,
+					"remote_addr", r.RemoteAddr,
+				)
+				http.Error(w, "unauthorized", http.StatusUnauthorized)
+				return
+			}
+
+			next(w, r)
+		}
+	}
+
+	mux := http.NewServeMux()
+
+	// UNAUTHENTICATED — intentional, documented:
+	// /health — Docker Compose health checks + Kong upstream probes must reach this
+	//           without credentials. Contains no behavioral data.
+	// /metrics — Prometheus scraper; restrict at network level (firewall/Kong route),
+	//            not at application level. No behavioral agent data exposed.
+	// /jwks    — Public key endpoint. RS256 public keys are not secret by definition.
+	//            Must be reachable by Kong for JWT verification.
+	mux.HandleFunc("/health", healthHandler(db, scoreStore, modeCtrl))
+	mux.Handle("/metrics", promhttp.Handler())
+	mux.HandleFunc("/jwks", jwksHandler())
+
+	// AUTHENTICATED — all endpoints that expose behavioral data or accept agent events:
+	mux.HandleFunc("/verify", auth(verifyHandler(scoreStore)))
+	mux.HandleFunc("/score/", auth(scoreHandler(scoreStore)))
+	mux.HandleFunc("/event", auth(eventHandler(db, scoreStore)))
+	mux.HandleFunc("/audit/replay", auth(audit.NewHandler(db).ReplayHandler))
+	mux.HandleFunc("/audit/export", auth(audit.NewHandler(db).ExportHandler))
+	mux.HandleFunc("/dashboard", auth(dashboardHandler(db)))
+	mux.HandleFunc("/api/regulatory-package", auth(regulatoryPackageHandler(db)))
+	mux.HandleFunc("/agent/", auth(apiHandler.HandleAgentClear))
+	mux.HandleFunc("/enforcement/override", auth(overrideHandler(db, modeCtrl)))
 
 	srv := &http.Server{
 		Addr:         ":" + port,
@@ -157,28 +225,14 @@ func main() {
 	slog.Info("scoring service stopped cleanly")
 }
 
-func requireAPIKey(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("X-Gateway-Verified") == "true" {
-			next(w, r)
-			return
-		}
-		apiKey := os.Getenv("SCORING_API_KEY")
-		if apiKey == "" {
-			slog.Warn("SCORING_API_KEY not set — unprotected in dev mode")
-			next(w, r)
-			return
-		}
-		if r.Header.Get("X-API-Key") != apiKey {
-			slog.Warn("unauthorized access attempt",
-				"path", r.URL.Path,
-				"remote_addr", r.RemoteAddr,
-			)
-			http.Error(w, "unauthorized", http.StatusUnauthorized)
-			return
-		}
-		next(w, r)
+// extractBearer pulls the token from "Authorization: Bearer <token>".
+// Returns empty string if the header is absent or not a Bearer scheme.
+func extractBearer(header string) string {
+	const prefix = "Bearer "
+	if !strings.HasPrefix(header, prefix) {
+		return ""
 	}
+	return strings.TrimSpace(strings.TrimPrefix(header, prefix))
 }
 
 func getEnv(key, fallback string) string {
@@ -353,10 +407,10 @@ func eventHandler(db *sql.DB, s *store.ScoreStore) http.HandlerFunc {
 		}
 
 		var body struct {
-			AgentDID      string `json:"agent_did"`
-			OrgID         string `json:"org_id"`
-			EventType     string `json:"event_type"`
-			PrivacyTier   int    `json:"privacy_tier"`
+			AgentDID    string `json:"agent_did"`
+			OrgID       string `json:"org_id"`
+			EventType   string `json:"event_type"`
+			PrivacyTier int    `json:"privacy_tier"`
 			FeatureVector struct {
 				ToolCallRatePerHour       float64 `json:"tool_call_rate_per_hour"`
 				UniqueEndpointsPerHour    float64 `json:"unique_endpoints_per_hour"`
@@ -414,3 +468,49 @@ func eventHandler(db *sql.DB, s *store.ScoreStore) http.HandlerFunc {
 		fmt.Fprintf(w, `{"status":"queued"}`)
 	}
 }
+
+// overrideHandler handles human override of enforcement decisions.
+// Authenticated — requires SCORING_API_KEY.
+func overrideHandler(db *sql.DB, mc *enforcement.ModeController) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		var body struct {
+			AgentDID   string `json:"agent_did"`
+			ReasonCode string `json:"reason_code"`
+			OperatorID string `json:"operator_id"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			http.Error(w, "invalid json", http.StatusBadRequest)
+			return
+		}
+		if body.AgentDID == "" || body.ReasonCode == "" || body.OperatorID == "" {
+			http.Error(w, "agent_did, reason_code, operator_id required", http.StatusBadRequest)
+			return
+		}
+		_, err := db.Exec(
+			`INSERT INTO enforcement_decisions
+				(agent_did, decision, reason_code, operator_id, override, created_at)
+			 VALUES ($1, 'OVERRIDE', $2, $3, true, NOW())`,
+			body.AgentDID, body.ReasonCode, body.OperatorID,
+		)
+		if err != nil {
+			slog.Error("override_insert_failed", "agent_did", body.AgentDID, "error", err)
+			http.Error(w, "override failed", http.StatusInternalServerError)
+			return
+		}
+		slog.Info("override_recorded",
+			"agent_did", body.AgentDID,
+			"reason_code", body.ReasonCode,
+			"operator_id", body.OperatorID,
+		)
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"status":"override_recorded","agent_did":%q}`, body.AgentDID)
+	}
+}
+
+// dashboardHandler and regulatoryPackageHandler are defined in dashboard_handler.go.
+// C-5 NOTE: dashboard is now wrapped with auth() in the mux registration above —
+// previously it was unauthenticated. The implementation stays in dashboard_handler.go.
