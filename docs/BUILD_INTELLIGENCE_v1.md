@@ -493,3 +493,86 @@ Built March 17–22, 2026 + nuclear sprint March–April 2026
 Last updated: April 7, 2026
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DELTA — POST APRIL 7, 2026 (append per sprint, never rewrite above)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+RULE: This section is append-only. One entry per sprint. Never modify existing
+entries. Never rewrite content above this line. Date every entry.
+
+FORMAT:
+  [DATE] [COMMIT] [CAPABILITY] — [what it does, one sentence] [STATUS]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+April 12, 2026 | 002a1af | TW-6 VARIANCE GROWTH RATE
+  Slow-walk early warning wired to scoring pipeline.
+  VARIANCE_WINDOW_DAYS = 7 (named constant, auditable).
+  Logic: if agent variance growth rate > 2x weekly average → HIGH_RISK flag.
+  Penalty: -150 on HIGH_RISK trigger.
+  Detection: 100% on 10-scenario slow-walk corpus.
+  File: internal/scoring/policy.go
+  STATUS: LIVE ✅
+
+April 12, 2026 | 5b612f2 | FP CORPUS INDEPENDENCE DOC
+  Formal methodology statement for FP validation corpus.
+  Covers: spec-first protocol, CI disclosure [0%, 3.6%] on 100 scenarios,
+  Tier 1→2→3 claim ladder, path to production validation.
+  File: docs/enterprise/fp-corpus-independence.md
+  STATUS: COMMITTED ✅
+
+April 12, 2026 | STRESS TEST VERIFIED
+  50 concurrent score lookups: 0 errors.
+  50 concurrent score writes: 0 errors.
+  50 concurrent baseline ops: 0 errors.
+  Redis contention: none detected.
+  Goroutine ceiling: not hit.
+  File: tests/performance/burst_test.go
+  STATUS: PASSING ✅
+
+April 12, 2026 | SIEM CALLER CHAIN VERIFIED
+  SendBlocked() defined: internal/audit/siem.go:75
+  SendBlocked() called: internal/store/score_store.go:222
+  Wire confirmed. Not spec-only.
+  STATUS: VERIFIED ✅ (not a ghost)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+END OF DELTA v1 | April 12, 2026 | Next entry: post-Lloyd LoU sprint
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DELTA -- POST APRIL 7, 2026 (append per sprint, never rewrite above)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+RULE: Append-only. One entry per sprint. Never modify above this line.
+FORMAT: [DATE] [COMMIT] [CAPABILITY] -- [one sentence] [STATUS]
+
+April 12, 2026 | 002a1af | TW-6 VARIANCE GROWTH RATE
+  Slow-walk early warning wired to scoring pipeline.
+  VARIANCE_WINDOW_DAYS = 7 (named constant, auditable).
+  Logic: variance growth rate > 2x weekly average triggers HIGH_RISK flag.
+  Penalty: -150 on HIGH_RISK. Detection: 100% on 10-scenario corpus.
+  File: internal/scoring/policy.go
+  STATUS: LIVE
+
+April 12, 2026 | 5b612f2 | FP CORPUS INDEPENDENCE DOC
+  Formal methodology statement for FP validation corpus.
+  Covers: spec-first protocol, CI [0%, 3.6%] on 100 scenarios, Tier 1-3 ladder.
+  File: docs/enterprise/fp-corpus-independence.md
+  STATUS: COMMITTED
+
+April 12, 2026 | STRESS TEST VERIFIED
+  50 concurrent lookups/writes/baseline ops: 0 errors each.
+  Redis contention: none. Goroutine ceiling: not hit.
+  File: tests/performance/burst_test.go
+  STATUS: PASSING
+
+April 12, 2026 | SIEM CALLER CHAIN VERIFIED
+  SendBlocked() defined: internal/audit/siem.go:75
+  SendBlocked() called: internal/store/score_store.go:222
+  Wire confirmed. Not spec-only.
+  STATUS: VERIFIED
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+END OF DELTA v1 | April 12, 2026 | Next entry: post-Lloyd LoU sprint
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
