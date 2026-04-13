@@ -76,25 +76,26 @@ RULE: Any unchecked box = that action executes before session opens.
       Not negotiable. Not overridable. No exceptions.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CURRENT STATE — April 12, 2026
+CURRENT STATE — April 13, 2026
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-APEX VERSION: APEX v5.2 + ZROS v2.7 + MASTER_LEARNINGS v2.1 DELTA + LEARNING_INTELLIGENCE v3.1
+APEX VERSION: APEX v5.2 + ZROS v2.8 + MASTER_LEARNINGS v2.1 DELTA + LEARNING_INTELLIGENCE v3.1
 APEX MODE: ENTERPRISE (Mode 4) | SESSION TYPE: ENGINEERING
 COMPOUNDING ACTIONS: ADD3 ✅ ADD1 ✅ ADD2 ✅ ADD4 ⬜ ADD5 ⬜
-NEXT SESSION: "ORCHESTRATION ACTIVATE" — run first, before any other work
+NEXT SESSION: C-2 first — Welford concurrent race fix (internal/scoring/baseline.go, Redis MULTI/EXEC, 3 hrs)
 REPO: https://github.com/Rehanrana11/AgentRepEngine
 Branch: master (push with git push origin master — NOT main)
-HEAD: a77527b
+HEAD: b010b3e
 go test ./... — ALL GREEN ✅ (21 packages passing)
 ZROS GATES: G-FP ✅ PASS | G-HARDEN ✅ PASS | G-IDENTITY ✅ PASS
 
 SESSION CLOSE RECORD
-  Session date:     April 12, 2026
-  Last action:      Claude OS dead zones closed — 3 systems committed, all eng weaknesses resolved
-  Irreversible:     YES ✅ — 4 commits pushed (5b612f2, 11aca5e, 2fbb4a7 + fp-corpus)
+  Session date:     April 13, 2026
+  Last action:      C-5 + C-6 security fixes committed — b010b3e pushed
+  Irreversible:     YES ✅ — b010b3e pushed
 
 RECENT COMMITS
+b010b3e security: C-5 close unauthenticated endpoints + C-6 NOT NULL agent_events.feature_vector
 2fbb4a7 ops: Claude OS active systems — APEX_REASONING_ENGINE v1, SESSION_PROTOCOL v1, DECISION_AUDIT v1
 11aca5e docs: Claude OS orchestration meta prompt v1.0 + SWOT meta prompt v1.0
 5b612f2 docs: FP corpus independence statement — methodology, CI disclosure, Tier 1-3 claim ladder
@@ -121,6 +122,16 @@ COMMERCIAL — BEFORE LLOYD (April 28) — DO FIRST
 [ ] M1 Language upgrade — 13 phrase replacements in all docs       60 min
 [ ] C-Corp conversion — email sent to attorney?                    30 min
 [ ] Sovren Software — follow-up sent?                              15 min
+
+CRITICAL ENGINEERING — BEFORE LLOYD (April 25 hard deadline)
+[✅] C-5: Authenticate /score /verify /dashboard — DONE b010b3e
+[✅] C-6: NOT NULL agent_events.feature_vector — DONE b010b3e
+[ ] C-2: Welford concurrent race — Redis MULTI/EXEC (baseline.go)  3 hrs  ← NEXT
+[ ] C-1: Cold-start bootstrap protocol (baseline.go)               2 hrs
+[ ] C-3: Redis memory alert + write return checks (score_store.go) 2 hrs
+[ ] C-4: Kong circuit breaker + unverified-identity log (handler.lua + main.go) 3 hrs
+[ ] C-7: jti TTL alignment + Redis restart recovery (jwt.go)       2 hrs
+[ ] C-8: Seal held-out evaluation corpus (tests/held_out_sealed/)  1 hr
 
 ENGINEERING — BEFORE LLOYD (April 28) — AFTER COMMERCIAL
 [ ] TW-1: Lloyd_meeting_prep.md — 14 talking points               60 min
@@ -189,6 +200,16 @@ SWOT full analysis completed [F]: April 12, 2026
   Probability Lloyd signs LoU April 28: 35% [ASS]
   Single controlling assumption: Lloyd has pre-qualified enterprise client + budget path.
   Highest leverage action before April 28: TW-REHEARSAL (say C1–C14 aloud) — UNCHECKED.━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+C-5 + C-6 closed [F]: April 13, 2026
+  C-5: X-Gateway-Verified bypass removed. Fail-closed on missing SCORING_API_KEY.
+       /verify + /dashboard now authenticated. Constant-time key comparison. b010b3e.
+  C-6: agent_events.feature_vector SET NOT NULL DEFAULT '{}'. b010b3e.
+  Schema confirmed: feature_vector is single jsonb column in agent_events (not 8 floats).
+  mode_change_log table exists — H-1 (durable mode state) already implemented ✅
+  agent_event_dlq table exists — H-2 (dead-letter queue) already implemented ✅
+  L11 established in ZROS v2.8: Claude files land in ~/Downloads/ — always cp before use.
+  T25 + G-FILE added to ZROS v2.8.
 
 FP rate:             0.00% on 150-scenario internal corpus
                      Production target: <0.1% (Visa standard) [H]
