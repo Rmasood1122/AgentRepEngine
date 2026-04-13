@@ -29,40 +29,28 @@ SINGLE TASK LIST RULE:
   Never pull tasks from archive files directly into session work.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-APEX ACTIVATE — FULL SESSION BOOT SEQUENCE
-Fires every session. Every step. No exceptions.
+APEX ACTIVATE — 90-SECOND BOOT (every session, no exceptions)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-STEP 1 — G-COMMERCIAL (L8)
-  Answer every line of the TIER 0/1/2 checklist before anything else opens.
-  Any unchecked box = that action executes before session opens.
-  Not negotiable. Not overridable. No exceptions.
+Claude reads this block and states all 6 lines before any work opens:
 
-STEP 2 — L1 SESSION CLOSE COMMITMENT
-  State at session open: "This session closes only when one irreversible
-  real-world action is named and confirmed executed."
-  Irreversible = message sent, meeting confirmed, code pushed, doc published.
-  Drafts don't count. Decisions to send don't count. Intentions don't count.
+  HEAD: [hash] | Tests: [GREEN/RED] | Packages: [N]
+  ZROS GATES: G-FP [PASS/FAIL] | G-HARDEN [PASS/FAIL] | G-IDENTITY [PASS/FAIL]
+  APEX MODE: [from CURRENT STATE block] | SESSION TYPE: [COMMERCIAL/ENGINEERING/STRATEGIC/MIXED]
+  G-COMMERCIAL: TIER 0/1/2 checklist answered — any unchecked box executes before session opens
+  SESSION COMMITMENT: "This session closes only when one irreversible action is confirmed executed"
+  PHASE: Phase 1 | T8 [OPEN/CLOSED] | Lloyd April 28 | If MIXED: commercial first, always
 
-STEP 3 — L2 TWO-OPTION ENFORCEMENT
-  Every recommendation ends: "Option A or Option B — which?"
-  Never more than 2 options. Never open-ended asks.
-  Forces decision. Kills avoidance loops.
+GATES EMBEDDED — all six checks fire in 90 seconds:
+  ★ Tests RED → nothing opens until green
+  ★ ZROS gate FAIL → nothing opens until gate passes
+  ★ G-COMMERCIAL unchecked → that action executes first, no exceptions
+  ★ [H] claim as plan → adversarial gate fires before commitment
+  ★ MIXED session → commercial action happens before engineering, always
+  ★ Monday → drift check runs before anything else
 
-STEP 4 — L4 DRIFT CHECK (Mondays only)
-  If today is Monday: run APEX DRIFT before any other work.
-  Paste last 7 days of committed actions. Claude outputs drift score 0–10.
-  If drift score > 5: first task is top restoration action. Nothing else opens.
-
-STEP 5 — L6 ADVERSARIAL GATE
-  Before any [H] claim becomes a plan, name the strongest case it is wrong.
-  If no fatal flaw found → label [H-VALIDATED], proceed.
-  If fatal flaw found → resolve before committing to the plan.
-
-STEP 6 — PHASE CONFIRM
-  State: "Phase 1. T8 open. Lloyd April 28. Engineering complete.
-  This session is [COMMERCIAL / ENGINEERING / STRATEGIC / MIXED]."
-  If MIXED: commercial action happens first, always.
+Full gate detail: SESSION_PROTOCOL v1.0 (A1→C6)
+Two-option rule: every recommendation ends "Option A or Option B — which?"
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 G-COMMERCIAL — FIRES FIRST. EVERY SESSION. NO EXCEPTIONS.
