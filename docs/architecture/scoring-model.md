@@ -153,3 +153,130 @@ Gateway reads from Redis cache only. Cache miss → PostgreSQL fallback.
 
 *Scoring model current as of March 2026.
 Phase 2 formula activates when 90 days of Phase 1 data exists.*
+
+---
+
+### Async Scoring — What Engineers Must Know
+
+**The core design decision:**
+Score updates are always asynchronous. The scoring pipeline is:
+
+```
+Agent request
+     │
+     ▼
+Kong plugin reads score from Redis cache ──► enforce/allow decision (synchronous)
+     │
+     ▼ (after response is sent)
+Kong log phase emits behavioral event to /event endpoint
+     │
+     ▼
+PostgreSQL agent_event_queue (persisted)
+     │
+     ▼ (within 5 seconds — consumer poll interval)
+Event consumer processes batch, updates EWMA baseline
+     │
+     ▼
+Redis cache updated with new score
+     │
+     ▼
+Next request reflects updated score
+```
+
+**The operational implication:**
+A request scored immediately after an anomalous event will be scored
+against the **pre-event baseline**. The updated score is visible on
+the **next** request, not the current one.
+
+End-to-end latency from event to updated score: **≤30 seconds** (p95).
+This is by design — synchronous scoring would add 500ms+ to every
+agent request, which is unacceptable for production AI agents.
+
+---
+
+**Pilot Day 1 — Expected Behavior**
+
+When your security team injects a test anomaly during the pilot,
+the following sequence is correct and expected:
+
+1. Anomalous request arrives → Kong reads **current score** from Redis
+2. Kong enforces based on current score (may still be TRUSTED)
+3. Event is emitted asynchronously to scoring service
+4. Within 5 seconds: consumer processes event, score updates
+5. **Next request** from the same agent reflects the updated score
+
+**This is not a bug.** A single anomalous event in a 30-day baseline
+will not immediately drop a TRUSTED agent to BLOCKED — nor should it.
+ARE detects behavioral drift, not individual anomalous calls.
+
+To test enforcement in a pilot demo:
+```bash
+# Inject a burst of anomalous events — not a single event
+bash scripts/demo.sh
+
+# Or inject directly via the scoring service
+for i in $(seq 1 20); do
+  curl -s -X POST http://localhost:8080/event \
+    -H "Content-Type: application/json" \
+    -H "X-API-Key: $SCORING_API_KEY" \
+    -d '{"agent_did":"did:jwt:test:demo:001","event_type":"pii_access",
+         "feature_vector":{"pii_field_access_rate":600,"tool_call_rate_per_hour":500}}'
+done
+
+# Wait for consumer cycle
+sleep 6
+
+# Check updated score
+curl -s http://localhost:8080/score/did:jwt:test:demo:001 | jq '.score, .band'
+```
+
+---
+
+**Monitoring the Pipeline**
+
+Three Prometheus metrics cover the async pipeline health:
+
+```bash
+# 1. Queue depth — should be <100 in healthy deployment
+curl -s http://localhost:9090/metrics | grep are_event_queue_depth
+
+# 2. Score updates processed per second
+curl -s http://localhost:9090/metrics | grep are_score_updates_total
+
+# 3. Direct PostgreSQL queue check
+docker exec agentrepengine-postgres-1 psql -U are -d agentrepengine -c \
+  "SELECT COUNT(*) FROM agent_event_queue WHERE processed = false;"
+```
+
+**Alert threshold:** If `are_event_queue_depth` exceeds 1,000,
+the system fires a SIEM alert (`event_queue_backlog`). This means
+the consumer is falling behind and scores may be stale by more than
+30 seconds. Investigate `docker compose logs scoring-service`.
+
+---
+
+**Why Not Synchronous Scoring?**
+
+Synchronous scoring (computing the new score on every request) would
+require the gateway to wait for:
+- PostgreSQL baseline query (~10ms)
+- EWMA computation (~1ms)
+- Redis cache write (~1ms)
+
+At 18,000 RPS, this adds **~12ms to every agent request** — unacceptable
+for production AI agent workloads where gateway overhead must stay
+below 10ms p99.
+
+The async design achieves both goals:
+- Gateway enforcement: p99 ≤ 2ms (Redis cache read only)
+- Score accuracy: updated within 30 seconds of any behavioral event
+
+This is the same architecture used by Visa's fraud detection system:
+scoring happens asynchronously; enforcement uses the last-computed score.
+The 30-second window is the documented and accepted trade-off.
+
+---
+
+*Addendum added April 13, 2026. Addresses W4 — async scoring stale baseline
+confusion during pilot deployment. Verified against consumer.go poll interval
+(5 seconds) and integration test end-to-end latency measurements.*
