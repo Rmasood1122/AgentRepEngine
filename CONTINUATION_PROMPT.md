@@ -82,7 +82,7 @@ CURRENT STATE — April 13, 2026
 APEX VERSION: APEX v5.2 + ZROS v2.8 + MASTER_LEARNINGS v2.1 DELTA + LEARNING_INTELLIGENCE v3.1
 APEX MODE: ENTERPRISE (Mode 4) | SESSION TYPE: ENGINEERING
 COMPOUNDING ACTIONS: ADD3 ✅ ADD1 ✅ ADD2 ✅ ADD4 ⬜ ADD5 ⬜
-NEXT SESSION: C-2 first — Welford concurrent race fix (internal/scoring/baseline.go, Redis MULTI/EXEC, 3 hrs)
+NEXT SESSION: TW-REHEARSAL (C1–C14 aloud, HUMAN ONLY) — then C-2 Welford concurrent race fix
 REPO: https://github.com/Rehanrana11/AgentRepEngine
 Branch: master (push with git push origin master — NOT main)
 HEAD: b010b3e
@@ -137,7 +137,7 @@ ENGINEERING — BEFORE LLOYD (April 28) — AFTER COMMERCIAL
 [ ] TW-1: Lloyd_meeting_prep.md — 14 talking points               60 min
 [ ] L139: Add C14 "200-day detection gap" to Lloyd_meeting_prep    15 min
 [ ] TW-2: LoU staged curriculum update                             60 min
-[ ] TW-9: evaluation-harness-methodology.md                        60 min
+[x] TW-9: evaluation-harness-methodology.md ✅
 
 EVENTS
 [ ] Leaders in AI Summit NYC April 21–22 — activation plan + contact list
@@ -210,6 +210,10 @@ C-5 + C-6 closed [F]: April 13, 2026
   agent_event_dlq table exists — H-2 (dead-letter queue) already implemented ✅
   L11 established in ZROS v2.8: Claude files land in ~/Downloads/ — always cp before use.
   T25 + G-FILE added to ZROS v2.8.
+  TW-9 committed [F]: April 13, 2026
+  evaluation-harness-methodology.md → docs/enterprise/evaluation-harness-methodology.md
+  FP measurement, 3 auditor SQL queries, regulatory mapping, 4-tier claim ladder. b010b3e.
+  ZROS FILE TRANSFER RULE: cp ~/Downloads/[filename] [destination] — always. Never heredoc.
 
 FP rate:             0.00% on 150-scenario internal corpus
                      Production target: <0.1% (Visa standard) [H]
