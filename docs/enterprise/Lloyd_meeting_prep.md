@@ -247,5 +247,96 @@ Say each claim aloud in order, C1–C14. Time yourself. Target: under 90 seconds
 
 ---
 
-*TW-1 complete | APEX v5.2 | April 8, 2026*  
+---
+## DEMO DISCLOSURES — SAY THESE PROACTIVELY (do not wait to be asked)
+
+### UW-1 — Pre-Seeded Baseline Disclosure
+Say this before or during the demo, not after:
+
+  "The demo uses a pre-seeded behavioral baseline to show the 4.2σ
+   detection in 60 seconds. In your environment, the baseline builds
+   from your agents' own traffic over 30 days. Day 30 produces your
+   actual sigma values against your actual traffic. The 4.2σ in the
+   demo is illustrative — not a claim about what your environment
+   will produce."
+
+Why proactive: Lloyd's engineer will find this if you don't say it first.
+Saying it first is evidence of honesty. That builds more trust than a
+polished demo that overstates.
+
+### UW-2 — confidence_pct Discrepancy (12% vs 94%)
+If the engineer notices two different confidence values in the demo output:
+
+  "You will see two confidence values. The reason object shows 12% —
+   that is anomaly confidence: how unusual is this behavior relative
+   to the agent's 30-day baseline? The Kong response shows 94% —
+   that is enforcement confidence: given this score, how certain are
+   we that blocking is the correct action? These measure different
+   things. Both are correct."
+
+Anomaly confidence is low (12%) because the agent was new — only 3 events
+in its history. Enforcement confidence is high (94%) because the score
+of 187 is deep in the BLOCKED band.
+
+### UW-3 — Score Drop is Demo-Accelerated
+If Lloyd's engineer asks why the score drops so fast:
+
+  "In the demo, the score drops from 700 to 187 after 3 injected events.
+   This is accelerated to show the detection mechanism in 60 seconds.
+   In your environment with a real 30-day baseline, score decline is
+   more gradual — which is the correct behavior. ARE detects two threat
+   classes: rapid spikes via z-score, and slow drift via variance growth
+   rate. Day 7 of your pilot will show you the variance growth chart.
+   That is the slow-walk detection — the class that traditional security
+   tools miss entirely."
+
+---
+## NEW CLAIMS — ADD TO REHEARSAL (April 13, 2026)
+
+### C15 — Board-Readable Incident Report
+  "Every enforcement decision produces a board-readable incident report.
+   Agent ID. Score before and after. Confidence. Policy fired. Sigma value.
+   Recommended action. Your board reads it without a translation layer.
+   Your auditor cites it without calling us. No competitor produces this.
+   When your board asks what happened with an AI agent incident, this is
+   the document they read. We produce it automatically on every block."
+
+Add C15 to rehearsal after C11.
+
+### HV-4 — Forensics Framing (Day 30 review, not first meeting)
+  "This audit trail is also your forensics report. When legal asks what
+   happened, this is the document. Generated automatically. No incident
+   response firm required. The hash chain proves it was not altered
+   after the fact."
+
+Use at Day 30 pilot review — not in the first meeting.
+
+---
+## UPDATED REHEARSAL CHECKLIST (C1–C15)
+
+Say each claim aloud in order. Target: under 2 minutes for the full set.
+
+- [ ] C1 — Data sovereignty
+- [ ] C2 — Standards alignment
+- [ ] C3 — Regulatory readiness
+- [ ] C4 — Explainability
+- [ ] C5 — Financial services precedent
+- [ ] C6 — Fail-open design
+- [ ] C7 — Invisibility to agents
+- [ ] C8 — Observe mode offer
+- [ ] C9 — Framework agnostic
+- [ ] C10 — Continuous baseline
+- [ ] C11 — Human-readable enforcement
+- [ ] C15 — Board-readable incident report ← NEW
+- [ ] C12 — Regulatory trajectory
+- [ ] C13 — Self-verifying measurement
+- [ ] C14 — Detection gap
+- [ ] CISO unlock phrase
+- [ ] FP reframe
+- [ ] UW-1 disclosure (pre-seeded baseline)
+- [ ] UW-2 explainer (confidence_pct)
+- [ ] UW-3 explainer (score drop acceleration)
+
+---
+*TW-1 updated April 13, 2026 — C15 added, UW-1/2/3 disclosures added, HV-4 framing added*
 *Next: L118 observe-to-enforce-criteria.md — Lloyd will ask for this at the meeting*
