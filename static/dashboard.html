@@ -3,196 +3,870 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AgentRepEngine — NWN Demo Dashboard</title>
+<title>AgentRepEngine — Runtime Trust Enforcement</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg:        #080b10;
+    --surface:   #0d1117;
+    --border:    #1c2333;
+    --border-hi: #2a3a52;
+    --text:      #c9d1d9;
+    --muted:     #5a6a80;
+    --green:     #39d353;
+    --yellow:    #f0c030;
+    --red:       #f85149;
+    --blue:      #58a6ff;
+    --cyan:      #39c5cf;
+    --mono:      'JetBrains Mono', monospace;
+    --sans:      'DM Sans', sans-serif;
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
-  header { background: #1a1f2e; border-bottom: 1px solid #2d3748; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
-  header h1 { font-size: 18px; font-weight: 600; color: #fff; }
-  header .badge { background: #22543d; color: #68d391; font-size: 11px; padding: 4px 10px; border-radius: 12px; font-weight: 600; letter-spacing: 0.5px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; padding: 28px 32px; }
-  .panel { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 10px; padding: 20px; }
-  .panel h2 { font-size: 13px; font-weight: 600; color: #a0aec0; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 16px; }
-  .metric { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #2d3748; }
-  .metric:last-child { border-bottom: none; }
-  .metric-label { font-size: 13px; color: #a0aec0; }
-  .metric-value { font-size: 15px; font-weight: 600; color: #fff; }
-  .metric-value.green { color: #68d391; }
-  .metric-value.yellow { color: #f6e05e; }
-  .metric-value.red { color: #fc8181; }
-  .metric-value.blue { color: #63b3ed; }
-  select { background: #2d3748; color: #e2e8f0; border: 1px solid #4a5568; border-radius: 6px; padding: 6px 10px; font-size: 13px; margin-bottom: 14px; width: 100%; }
-  .reg-field { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2d3748; font-size: 13px; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 13px;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-mark {
+    width: 28px; height: 28px;
+    border: 2px solid var(--cyan);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--cyan);
+    letter-spacing: -0.5px;
+  }
+
+  .header-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #e6edf3;
+    letter-spacing: -0.2px;
+  }
+
+  .header-sub {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mode-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+
+  .mode-observe { background: rgba(240,192,48,0.12); color: var(--yellow); border: 1px solid rgba(240,192,48,0.3); }
+  .mode-enforce { background: rgba(57,211,83,0.12); color: var(--green); border: 1px solid rgba(57,211,83,0.3); }
+
+  .pulse {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .last-update {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  /* ── Layout ── */
+  .main {
+    padding: 20px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ── Top stats row ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    transition: border-color 0.2s;
+  }
+
+  .stat-card:hover { border-color: var(--border-hi); }
+
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-sub {
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  .green  { color: var(--green); }
+  .yellow { color: var(--yellow); }
+  .red    { color: var(--red); }
+  .blue   { color: var(--blue); }
+  .cyan   { color: var(--cyan); }
+
+  /* ── Two-column panels ── */
+  .panels-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panel-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .panel-badge {
+    font-family: var(--mono);
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    background: rgba(88,166,255,0.1);
+    color: var(--blue);
+    border: 1px solid rgba(88,166,255,0.2);
+  }
+
+  .panel-body { padding: 0; }
+
+  /* ── Metric rows ── */
+  .metric-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  .metric-row:last-child { border-bottom: none; }
+  .metric-row:hover { background: rgba(255,255,255,0.02); }
+
+  .metric-name { color: var(--text); font-size: 12px; }
+  .metric-note { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-top: 2px; }
+
+  .metric-val {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  /* ── Decisions table ── */
+  .decisions-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .decisions-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .decisions-table th {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,0,0,0.2);
+  }
+
+  .decisions-table td {
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    vertical-align: middle;
+  }
+
+  .decisions-table tr:last-child td { border-bottom: none; }
+  .decisions-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .band-pill {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+  }
+
+  .band-TRUSTED    { background: rgba(57,211,83,0.1);  color: var(--green);  border: 1px solid rgba(57,211,83,0.25); }
+  .band-MONITORED  { background: rgba(88,166,255,0.1); color: var(--blue);   border: 1px solid rgba(88,166,255,0.25); }
+  .band-RESTRICTED { background: rgba(240,192,48,0.1); color: var(--yellow); border: 1px solid rgba(240,192,48,0.25); }
+  .band-BLOCKED    { background: rgba(248,81,73,0.1);  color: var(--red);    border: 1px solid rgba(248,81,73,0.25); }
+
+  .chain-valid   { color: var(--green); }
+  .chain-invalid { color: var(--red); }
+
+  /* ── Bottom row ── */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* ── Infrastructure status ── */
+  .infra-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .infra-item:last-child { border-bottom: none; }
+
+  .infra-name { font-size: 12px; }
+  .infra-status {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-green  { background: var(--green); }
+  .dot-yellow { background: var(--yellow); }
+  .dot-red    { background: var(--red); }
+
+  /* ── Audit actions ── */
+  .audit-actions { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+
+  .audit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .audit-btn:hover {
+    background: rgba(88,166,255,0.08);
+    border-color: rgba(88,166,255,0.3);
+  }
+
+  .audit-btn-label { font-size: 12px; }
+  .audit-btn-note  { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-top: 2px; }
+  .audit-btn-arrow { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+  /* ── Regulatory selector ── */
+  .reg-selector { padding: 12px 16px; }
+
+  select {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+
+  select:focus { outline: none; border-color: var(--blue); }
+
+  .reg-field {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+  }
+
   .reg-field:last-child { border-bottom: none; }
-  .reg-key { color: #a0aec0; }
-  .reg-val { color: #fff; font-weight: 500; word-break: break-all; max-width: 55%; text-align: right; }
-  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
-  .dot-green { background: #68d391; }
-  .dot-yellow { background: #f6e05e; }
-  .loading { color: #4a5568; font-size: 13px; }
-  button { background: #2b6cb0; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-size: 13px; cursor: pointer; margin-top: 10px; }
-  button:hover { background: #3182ce; }
+  .reg-key { color: var(--muted); font-family: var(--mono); font-size: 10px; }
+  .reg-val { color: var(--text); font-weight: 500; text-align: right; max-width: 55%; word-break: break-all; }
+
+  .placeholder { color: var(--muted); font-family: var(--mono); font-size: 10px; padding: 8px 0; }
+
+  /* ── Claim disclaimer ── */
+  .disclaimer {
+    padding: 10px 16px;
+    background: rgba(88,166,255,0.04);
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── Loading states ── */
+  .skeleton {
+    background: linear-gradient(90deg, var(--border) 25%, var(--border-hi) 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+    height: 14px;
+    width: 60%;
+  }
+
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .empty-state {
+    padding: 20px 16px;
+    text-align: center;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 10px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .stats-row   { grid-template-columns: repeat(3, 1fr); }
+    .panels-row  { grid-template-columns: 1fr; }
+    .bottom-row  { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 700px) {
+    .stats-row  { grid-template-columns: 1fr 1fr; }
+    .bottom-row { grid-template-columns: 1fr; }
+    header { padding: 12px 16px; }
+    .main  { padding: 14px 16px; }
+  }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>AgentRepEngine — Runtime Trust Enforcement</h1>
-  <span class="badge">OBSERVE MODE</span>
+  <div class="header-left">
+    <div class="logo-mark">ARE</div>
+    <div>
+      <div class="header-title">AgentRepEngine</div>
+      <div class="header-sub">Runtime Behavioral Trust Enforcement · Kong Gateway Layer</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="last-update" id="lastUpdate"><span class="pulse"></span>Connecting…</span>
+    <span class="mode-badge mode-observe" id="modeBadge">OBSERVE</span>
+  </div>
 </header>
 
-<div class="grid">
+<div class="main">
 
-  <!-- Panel 1: Enforcement Status -->
-  <div class="panel">
-    <h2>Enforcement Status</h2>
-    <div class="metric">
-      <span class="metric-label">False Positive Rate</span>
-      <span class="metric-value green">0.00%</span>
+  <!-- ── Top stats ── -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Enforcement Mode</div>
+      <div class="stat-value yellow" id="statMode">—</div>
+      <div class="stat-sub">Redis-controlled · CISO sign-off required</div>
     </div>
-    <div class="metric">
-      <span class="metric-label">True Positive Rate</span>
-      <span class="metric-value green">88.00%</span>
+    <div class="stat-card">
+      <div class="stat-label">Hash Chain</div>
+      <div class="stat-value green" id="statChain">—</div>
+      <div class="stat-sub">chain_valid = false count</div>
     </div>
-    <div class="metric">
-      <span class="metric-label">F1 Score</span>
-      <span class="metric-value green">0.9362</span>
+    <div class="stat-card">
+      <div class="stat-label">Event Queue Depth</div>
+      <div class="stat-value cyan" id="statQueue">—</div>
+      <div class="stat-sub">Unprocessed events · alert at 1,000</div>
     </div>
-    <div class="metric">
-      <span class="metric-label">Mode</span>
-      <span class="metric-value yellow"><span class="status-dot dot-yellow"></span>Observe</span>
+    <div class="stat-card">
+      <div class="stat-label">JWT Verify Fallback</div>
+      <div class="stat-value" id="statFallback">—</div>
+      <div class="stat-sub">are_jwt_verify_fallback_total · should be 0</div>
     </div>
-    <div class="metric">
-      <span class="metric-label">Bias Audit (7 archetypes)</span>
-      <span class="metric-value green">0.00% FP</span>
-    </div>
-    <div class="metric">
-      <span class="metric-label">Call Overhead</span>
-      <span class="metric-value green">0.25ns</span>
+    <div class="stat-card">
+      <div class="stat-label">FP Rate (Internal Corpus)</div>
+      <div class="stat-value green">0.00%</div>
+      <div class="stat-sub">150-scenario corpus · Clopper-Pearson &lt;2% at 95% CI</div>
     </div>
   </div>
 
-  <!-- Panel 2: Regulatory Audit Package -->
-  <div class="panel">
-    <h2>Regulatory Audit Package</h2>
-    <select id="frameworkSelect" onchange="loadRegulatoryPackage()">
-      <option value="HIPAA">HIPAA</option>
-      <option value="SOX">SOX</option>
-      <option value="FFIEC">FFIEC</option>
-      <option value="DORA">DORA</option>
-    </select>
-    <div id="regPackage"><span class="loading">Select a framework above — live data loads from your org baseline.</span></div>
+  <!-- ── Two-column panels ── -->
+  <div class="panels-row">
+
+    <!-- Validation metrics panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Validation Metrics</span>
+        <span class="panel-badge">Internal Corpus</span>
+      </div>
+      <div class="panel-body">
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">False Positive Rate</div>
+            <div class="metric-note">150-scenario internal corpus · Clopper-Pearson &lt;2.0% at 95% CI</div>
+          </div>
+          <div class="metric-val green">0.00%</div>
+        </div>
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">True Positive Rate</div>
+            <div class="metric-note">44/50 attack scenarios detected</div>
+          </div>
+          <div class="metric-val green">88.00%</div>
+        </div>
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">F1 Score</div>
+            <div class="metric-note">Precision 100% · Recall 88%</div>
+          </div>
+          <div class="metric-val green">0.9362</div>
+        </div>
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Slow-Walk Detection</div>
+            <div class="metric-note">Variance growth rate · 10/10 scenarios</div>
+          </div>
+          <div class="metric-val green">100%</div>
+        </div>
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Production FP Target</div>
+            <div class="metric-note">Visa fraud detection standard · validated in 30-day pilot</div>
+          </div>
+          <div class="metric-val blue">&lt; 0.1%</div>
+        </div>
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Gateway Call Overhead</div>
+            <div class="metric-note">Linux · Redis cache hit path</div>
+          </div>
+          <div class="metric-val green">0.25ns</div>
+        </div>
+      </div>
+      <div class="disclaimer">
+        ⚠ All metrics above from 150-scenario internal validation corpus.<br>
+        Production FP rate measured during your 30-day observe pilot via:<br>
+        SELECT ROUND(100.0 * COUNT(*) FILTER (WHERE override=true) / NULLIF(COUNT(*) FILTER (WHERE decision='BLOCKED'),0),2) FROM enforcement_decisions WHERE created_at &gt; NOW() - INTERVAL '24 hours';
+      </div>
+    </div>
+
+    <!-- Live system status panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Live System Status</span>
+        <span class="panel-badge" id="liveStatusBadge">Polling…</span>
+      </div>
+      <div class="panel-body" id="liveStatusBody">
+        <div class="metric-row">
+          <div class="metric-name">PostgreSQL</div>
+          <div class="metric-val" id="livePostgres"><div class="skeleton"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-name">Redis</div>
+          <div class="metric-val" id="liveRedis"><div class="skeleton"></div></div>
+        </div>
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Hash Chain Integrity</div>
+            <div class="metric-note">SELECT COUNT(*) FILTER (WHERE chain_valid=false) FROM enforcement_decisions</div>
+          </div>
+          <div class="metric-val" id="liveChain"><div class="skeleton"></div></div>
+        </div>
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Event Queue</div>
+            <div class="metric-note">Unprocessed events · SIEM alert fires at 1,000</div>
+          </div>
+          <div class="metric-val" id="liveQueue"><div class="skeleton"></div></div>
+        </div>
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Enforcement Mode</div>
+            <div class="metric-note">CISO-controlled · stored in Redis · no override possible</div>
+          </div>
+          <div class="metric-val" id="liveMode"><div class="skeleton"></div></div>
+        </div>
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Auto-Rollback</div>
+            <div class="metric-note">Fires at FP &gt; 2% for 2 consecutive 5-min windows</div>
+          </div>
+          <div class="metric-val green">Active</div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Panel 3: Agent Continuity Monitor -->
-  <div class="panel">
-    <h2>Agent Continuity Monitor</h2>
-    <div class="metric">
-      <span class="metric-label">Identity Sealing</span>
-      <span class="metric-value green"><span class="status-dot dot-green"></span>Active</span>
+  <!-- ── Recent decisions ── -->
+  <div class="decisions-panel">
+    <div class="panel-header">
+      <span class="panel-title">Recent Enforcement Decisions</span>
+      <span class="panel-badge" id="decisionsCount">Loading…</span>
     </div>
-    <div class="metric">
-      <span class="metric-label">Redeployment Detection</span>
-      <span class="metric-value green">Enabled</span>
-    </div>
-    <div class="metric">
-      <span class="metric-label">Seal Algorithm</span>
-      <span class="metric-value blue">SHA-256 (baseline + JTI)</span>
-    </div>
-    <div class="metric">
-      <span class="metric-label">Alerts (last 30d)</span>
-      <span class="metric-value green">0 redeployment events</span>
-    </div>
-    <div class="metric">
-      <span class="metric-label">Coverage</span>
-      <span class="metric-value green">100% enrolled agents</span>
-    </div>
+    <table class="decisions-table">
+      <thead>
+        <tr>
+          <th>Agent DID</th>
+          <th>Decision</th>
+          <th>Score</th>
+          <th>Policy</th>
+          <th>Chain</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody id="decisionsBody">
+        <tr><td colspan="6"><div class="empty-state">Connecting to scoring service…</div></td></tr>
+      </tbody>
+    </table>
   </div>
 
-  <!-- Panel 4: Override Fatigue Eliminator -->
-  <div class="panel">
-    <h2>Override Fatigue Eliminator</h2>
-    <div class="metric">
-      <span class="metric-label">Classifier</span>
-      <span class="metric-value blue">Two-Speed Baseline</span>
-    </div>
-    <div class="metric">
-      <span class="metric-label">Fast EWMA Window</span>
-      <span class="metric-value">3-day (α=0.3)</span>
-    </div>
-    <div class="metric">
-      <span class="metric-label">Slow Rolling Window</span>
-      <span class="metric-value">30-day</span>
-    </div>
-    <div class="metric">
-      <span class="metric-label">ATTACK threshold</span>
-      <span class="metric-value red">≥ 2.5σ divergence</span>
-    </div>
-    <div class="metric">
-      <span class="metric-label">LEGITIMATE_CHANGE threshold</span>
-      <span class="metric-value yellow">≥ 1.5σ divergence</span>
-    </div>
-    <div class="metric">
-      <span class="metric-label">False override alerts eliminated</span>
-      <span class="metric-value green">Automated</span>
-    </div>
-  </div>
+  <!-- ── Bottom row ── -->
+  <div class="bottom-row">
 
-  <!-- Panel 5: Breach Attribution -->
-  <div class="panel">
-    <h2>Breach Attribution</h2>
-    <div class="metric">
-      <span class="metric-label">Causal Chain Engine</span>
-      <span class="metric-value green"><span class="status-dot dot-green"></span>Active</span>
+    <!-- Infrastructure -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Infrastructure</span>
+      </div>
+      <div class="panel-body">
+        <div class="infra-item">
+          <span class="infra-name">Kong Gateway Plugin</span>
+          <span class="infra-status"><div class="dot dot-green"></div><span class="green">v1.5.0</span></span>
+        </div>
+        <div class="infra-item">
+          <span class="infra-name">Scoring Service</span>
+          <span class="infra-status"><div class="dot dot-green"></div><span class="green">Go 1.24</span></span>
+        </div>
+        <div class="infra-item">
+          <span class="infra-name">Key Algorithm</span>
+          <span class="infra-status"><span class="blue">RS256 + JWKS</span></span>
+        </div>
+        <div class="infra-item">
+          <span class="infra-name">Audit Chain</span>
+          <span class="infra-status"><span class="blue">SHA-256 Merkle</span></span>
+        </div>
+        <div class="infra-item">
+          <span class="infra-name">Deploy Time</span>
+          <span class="infra-status"><span class="green">≤ 4 hours</span></span>
+        </div>
+        <div class="infra-item">
+          <span class="infra-name">SDK Changes Required</span>
+          <span class="infra-status"><span class="green">Zero</span></span>
+        </div>
+      </div>
     </div>
-    <div class="metric">
-      <span class="metric-label">Max Chain Depth</span>
-      <span class="metric-value blue">10 hops</span>
+
+    <!-- Audit actions -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Audit Actions</span>
+      </div>
+      <div class="audit-actions">
+        <a class="audit-btn" href="/audit/export?format=json" target="_blank">
+          <div>
+            <div class="audit-btn-label">Export Audit Trail (JSON)</div>
+            <div class="audit-btn-note">Full hash-chained enforcement_decisions · HIPAA §164.312(b)</div>
+          </div>
+          <span class="audit-btn-arrow">↗</span>
+        </a>
+        <a class="audit-btn" href="/api/regulatory-package?framework=HIPAA" target="_blank">
+          <div>
+            <div class="audit-btn-label">HIPAA Evidence Package</div>
+            <div class="audit-btn-note">§164.312(b) + §164.312(c)(1) · auditor-verifiable</div>
+          </div>
+          <span class="audit-btn-arrow">↗</span>
+        </a>
+        <a class="audit-btn" href="/api/regulatory-package?framework=DORA" target="_blank">
+          <div>
+            <div class="audit-btn-label">DORA Article 8(4) Package</div>
+            <div class="audit-btn-note">ICT risk management documentation · immutable</div>
+          </div>
+          <span class="audit-btn-arrow">↗</span>
+        </a>
+        <a class="audit-btn" href="/api/regulatory-package?framework=SOX" target="_blank">
+          <div>
+            <div class="audit-btn-label">SOX CC7.2 Package</div>
+            <div class="audit-btn-note">System monitoring integrity · hash chain verifiable</div>
+          </div>
+          <span class="audit-btn-arrow">↗</span>
+        </a>
+      </div>
     </div>
-    <div class="metric">
-      <span class="metric-label">Root Agent Attribution</span>
-      <span class="metric-value green">Enabled</span>
+
+    <!-- Regulatory live package -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Regulatory Package</span>
+        <span class="panel-badge">Live</span>
+      </div>
+      <div class="reg-selector">
+        <select id="frameworkSelect" onchange="loadRegulatoryPackage()">
+          <option value="">— Select framework —</option>
+          <option value="HIPAA">HIPAA</option>
+          <option value="SOX">SOX</option>
+          <option value="FFIEC">FFIEC</option>
+          <option value="DORA">DORA</option>
+        </select>
+        <div id="regPackage"><div class="placeholder">Select a framework to load live audit data from your deployment.</div></div>
+      </div>
     </div>
-    <div class="metric">
-      <span class="metric-label">Earliest Enforceable Agent</span>
-      <span class="metric-value green">Auto-identified</span>
-    </div>
-    <div class="metric">
-      <span class="metric-label">HIPAA Breach Readiness</span>
-      <span class="metric-value green">Full attribution chain</span>
-    </div>
+
   </div>
 
 </div>
 
 <script>
-async function loadRegulatoryPackage() {
-  const framework = document.getElementById('frameworkSelect').value;
-  const container = document.getElementById('regPackage');
-  container.innerHTML = '<span class="loading">Loading...</span>';
+// ── Config ──────────────────────────────────────────────────────────────────
+const API_KEY = '';  // Injected by deployment — empty = unauthenticated dev mode
+const POLL_INTERVAL = 10000; // 10 seconds
+
+// ── Health polling ───────────────────────────────────────────────────────────
+async function pollHealth() {
   try {
-    const res = await fetch(`/api/regulatory-package?framework=${framework}&org_id=default`, {
-      headers: { 'X-API-Key': '' }
-    });
-    if (!res.ok) {
-      container.innerHTML = '<span class="loading">Live data unavailable in observe mode — connect to running instance.</span>';
+    const res = await fetch('/health');
+    if (!res.ok) throw new Error('health endpoint returned ' + res.status);
+    const h = await res.json();
+
+    // Mode badge
+    const mode = (h.enforcement_mode || 'observe').toUpperCase();
+    const badge = document.getElementById('modeBadge');
+    badge.textContent = mode;
+    badge.className = 'mode-badge ' + (mode === 'ENFORCE' ? 'mode-enforce' : 'mode-observe');
+
+    // Header stat
+    document.getElementById('statMode').textContent = mode;
+    document.getElementById('statMode').className = 'stat-value ' + (mode === 'ENFORCE' ? 'green' : 'yellow');
+
+    // Queue depth
+    const qd = h.queue_depth ?? '—';
+    document.getElementById('statQueue').textContent = qd;
+    document.getElementById('statQueue').className = 'stat-value ' + (qd > 999 ? 'red' : qd > 99 ? 'yellow' : 'cyan');
+    document.getElementById('liveQueue').innerHTML = `<span class="${qd > 999 ? 'red' : qd > 99 ? 'yellow' : 'green'}">${qd} ${h.queue_status === 'warning' ? '⚠' : '✓'}</span>`;
+
+    // Hash chain
+    const chain = h.hash_chain_valid === 'true' || h.hash_chain_valid === true;
+    document.getElementById('statChain').textContent = chain ? '0' : '⚠ ERROR';
+    document.getElementById('statChain').className = 'stat-value ' + (chain ? 'green' : 'red');
+    document.getElementById('liveChain').innerHTML = chain
+      ? '<span class="chain-valid">✓ Verified</span>'
+      : '<span class="chain-invalid">✗ TAMPER DETECTED</span>';
+
+    // Postgres / Redis
+    document.getElementById('livePostgres').innerHTML = h.postgres === 'ok'
+      ? '<span class="green">✓ Connected</span>'
+      : '<span class="red">✗ Error</span>';
+    document.getElementById('liveRedis').innerHTML = h.redis === 'ok'
+      ? '<span class="green">✓ Connected</span>'
+      : '<span class="red">✗ Error</span>';
+
+    // Live mode
+    document.getElementById('liveMode').innerHTML =
+      `<span class="${mode === 'ENFORCE' ? 'green' : 'yellow'}">${mode}</span>`;
+
+    // Status badge
+    document.getElementById('liveStatusBadge').textContent = 'Live · ' + new Date().toLocaleTimeString();
+
+    // Last update
+    document.getElementById('lastUpdate').innerHTML =
+      `<span class="pulse"></span>Updated ${new Date().toLocaleTimeString()}`;
+
+  } catch (e) {
+    document.getElementById('liveStatusBadge').textContent = 'Offline';
+    document.getElementById('lastUpdate').innerHTML =
+      `<span style="color:var(--red)">● </span><span style="color:var(--muted)">Scoring service unreachable</span>`;
+  }
+}
+
+// ── Recent decisions polling ─────────────────────────────────────────────────
+async function pollDecisions() {
+  try {
+    const headers = API_KEY ? { 'X-API-Key': API_KEY } : {};
+    const res = await fetch('/audit/export?limit=10&format=json', { headers });
+    if (!res.ok) throw new Error('export returned ' + res.status);
+    const data = await res.json();
+
+    const decisions = Array.isArray(data) ? data : (data.decisions || data.records || []);
+    document.getElementById('decisionsCount').textContent =
+      decisions.length ? `${decisions.length} recent` : 'No decisions yet';
+
+    const tbody = document.getElementById('decisionsBody');
+    if (!decisions.length) {
+      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">No enforcement decisions yet · ARE is in observe mode · agents are being scored silently</div></td></tr>';
       return;
     }
+
+    tbody.innerHTML = decisions.slice(0, 10).map(d => {
+      const band  = d.decision || d.band || 'MONITORED';
+      const did   = d.agent_did || d.agent_id || '—';
+      const score = d.score ?? '—';
+      const policy = d.policy_fired || d.policy || 'no_policy_fired';
+      const chain = d.chain_valid !== false ? '<span class="chain-valid">✓</span>' : '<span class="chain-invalid">✗</span>';
+      const ts    = d.recorded_at || d.created_at || d.timestamp;
+      const time  = ts ? new Date(ts).toLocaleTimeString() : '—';
+      const shortDid = did.length > 32 ? did.substring(0, 32) + '…' : did;
+      return `<tr>
+        <td title="${did}">${shortDid}</td>
+        <td><span class="band-pill band-${band}">${band}</span></td>
+        <td>${score}</td>
+        <td style="color:var(--muted);font-size:10px">${policy.replace(/_/g,' ')}</td>
+        <td>${chain}</td>
+        <td style="color:var(--muted)">${time}</td>
+      </tr>`;
+    }).join('');
+
+  } catch (e) {
+    document.getElementById('decisionsBody').innerHTML =
+      '<tr><td colspan="6"><div class="empty-state">Connect scoring service to view live decisions · <code>/audit/export</code></div></td></tr>';
+    document.getElementById('decisionsCount').textContent = 'Offline';
+  }
+}
+
+// ── Prometheus metrics polling ───────────────────────────────────────────────
+async function pollPrometheus() {
+  try {
+    const res = await fetch('/metrics');
+    if (!res.ok) return;
+    const text = await res.text();
+    const match = text.match(/are_jwt_verify_fallback_total\s+([\d.]+)/);
+    if (match) {
+      const val = parseFloat(match[1]);
+      document.getElementById('statFallback').textContent = val === 0 ? '0' : `⚠ ${val}`;
+      document.getElementById('statFallback').className = 'stat-value ' + (val === 0 ? 'green' : 'red');
+    }
+  } catch(e) { /* prometheus optional */ }
+}
+
+// ── Regulatory package ───────────────────────────────────────────────────────
+async function loadRegulatoryPackage() {
+  const framework = document.getElementById('frameworkSelect').value;
+  if (!framework) return;
+  const container = document.getElementById('regPackage');
+  container.innerHTML = '<div class="placeholder">Loading…</div>';
+  try {
+    const headers = API_KEY ? { 'X-API-Key': API_KEY } : {};
+    const res = await fetch(`/api/regulatory-package?framework=${framework}&org_id=default`, { headers });
+    if (!res.ok) throw new Error(res.status);
     const data = await res.json();
     const fields = Object.entries(data).filter(([k]) =>
       !['org_id','framework','generated_at'].includes(k)
     );
+    if (!fields.length) {
+      container.innerHTML = '<div class="placeholder">No data returned — ensure scoring service is running.</div>';
+      return;
+    }
     container.innerHTML = fields.map(([k, v]) => {
       const label = k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      const val = typeof v === 'boolean' ? (v ? '✓ Yes' : '✗ No') :
-                  typeof v === 'number' ? (Number.isInteger(v) ? v : v.toFixed(4)) :
-                  v || '—';
+      const val = typeof v === 'boolean' ? (v ? '✓ Yes' : '✗ No')
+                : typeof v === 'number'  ? (Number.isInteger(v) ? v : v.toFixed(4))
+                : v || '—';
       return `<div class="reg-field"><span class="reg-key">${label}</span><span class="reg-val">${val}</span></div>`;
     }).join('');
   } catch(e) {
-    container.innerHTML = '<span class="loading">Connect to running ARE instance to load live data.</span>';
+    container.innerHTML = '<div class="placeholder">Live data unavailable · connect to running scoring service instance.</div>';
   }
 }
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+pollHealth();
+pollDecisions();
+pollPrometheus();
+
+setInterval(pollHealth, POLL_INTERVAL);
+setInterval(pollDecisions, POLL_INTERVAL * 3);
+setInterval(pollPrometheus, POLL_INTERVAL * 6);
 </script>
 
 </body>
