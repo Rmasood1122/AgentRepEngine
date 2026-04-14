@@ -219,6 +219,9 @@ local function verify_token(token, scoring_url)
     if not res or err then
         kong.log.warn("verify_service_unavailable: ", err,
             " — falling back to unverified claims")
+        -- Set header so scoring service can increment the fallback metric.
+        -- This header is checked in eventHandler in main.go.
+        kong.service.request.set_header("X-Verify-Fallback", "true")
         return extract_jwt_claims_unverified(token), nil
     end
 
@@ -230,6 +233,7 @@ local function verify_token(token, scoring_url)
 
     if res.status ~= 200 then
         kong.log.warn("verify_unexpected_status: ", res.status, " — falling back")
+        kong.service.request.set_header("X-Verify-Fallback", "true")
         return extract_jwt_claims_unverified(token), nil
     end
 

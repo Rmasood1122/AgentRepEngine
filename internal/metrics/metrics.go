@@ -69,4 +69,13 @@ var (
 		},
 		[]string{"status"}, // "success" or "failed"
 	)
+
+	// JWT verify fallback counter — incremented when Kong falls back to
+	// unverified claim extraction because /verify service was unavailable.
+	// Nonzero value in production means RS256 verification is not running.
+	// Monitor: are_jwt_verify_fallback_total should be 0 in healthy deployment.
+	JWTVerifyFallbackTotal = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "are_jwt_verify_fallback_total",
+		Help: "JWT verifications that fell back to unverified extraction (verify service unavailable)",
+	})
 )

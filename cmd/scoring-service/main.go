@@ -439,6 +439,13 @@ func eventHandler(db *sql.DB, s *store.ScoreStore) http.HandlerFunc {
 			return
 		}
 
+		// Track JWT verify fallback — Kong sets this header when /verify
+		// service was unavailable and unverified extraction was used.
+		// Nonzero in production = RS256 verification not running.
+		if r.Header.Get("X-Verify-Fallback") == "true" {
+			metrics.JWTVerifyFallbackTotal.Inc()
+		}
+
 		privacyTier := body.PrivacyTier
 		if privacyTier == 0 {
 			privacyTier = 1
