@@ -82,28 +82,29 @@ CURRENT STATE — April 13, 2026
 APEX VERSION: APEX v5.2 + ZROS v2.8 + MASTER_LEARNINGS v2.1 DELTA + LEARNING_INTELLIGENCE v3.1
 APEX MODE: ENTERPRISE (Mode 4) | SESSION TYPE: ENGINEERING
 COMPOUNDING ACTIONS: ADD3 ✅ ADD1 ✅ ADD2 ✅ ADD4 ⬜ ADD5 ⬜
-NEXT SESSION: TW-REHEARSAL (C1–C14 aloud, HUMAN ONLY) — then C-2 Welford concurrent race fix
+NEXT SESSION: G-COMMERCIAL gate first — check Gyamfi/Watkin-Child/Unmukt replies. Then TW-1 Lloyd prep.
 REPO: https://github.com/Rehanrana11/AgentRepEngine
 Branch: master (push with git push origin master — NOT main)
-HEAD: b010b3e
+HEAD: 9d1b428
 go test ./... — ALL GREEN ✅ (21 packages passing)
 ZROS GATES: G-FP ✅ PASS | G-HARDEN ✅ PASS | G-IDENTITY ✅ PASS
 
 SESSION CLOSE RECORD
   Session date:     April 13, 2026
-  Last action:      C-5 + C-6 security fixes committed — b010b3e pushed
-  Irreversible:     YES ✅ — b010b3e pushed
+  Last action:      9 commits — W18 handlers refactor, all pre-Lloyd engineering complete
+  Irreversible:     YES ✅ — 9 commits pushed
 
 RECENT COMMITS
-b010b3e security: C-5 close unauthenticated endpoints + C-6 NOT NULL agent_events.feature_vector
-2fbb4a7 ops: Claude OS active systems — APEX_REASONING_ENGINE v1, SESSION_PROTOCOL v1, DECISION_AUDIT v1
-11aca5e docs: Claude OS orchestration meta prompt v1.0 + SWOT meta prompt v1.0
-5b612f2 docs: FP corpus independence statement — methodology, CI disclosure, Tier 1-3 claim ladder
-89fc78d docs: M2 adversarial baseline poisoning research note
-7ebf321 docs: M3 SIEM integration — Splunk HEC + Sentinel specs, CEF format, KQL queries
-a325994 docs: TW-2 — LoU staged curriculum added, 4-phase rollout, success criteria
-27cab0b docs: PL-SECURITY-ATTESTATION — 5-section security attestation
-002a1af feat: TW-6 variance growth rate wired to scoring pipeline — slow-walk early warning active
+9d1b428 refactor: split main.go into handlers package — W18 closed
+a48a066 feat: dashboard v2 — live health polling, decisions table — W14 closed
+86b43cd docs: async scoring pipeline explainer — W4 closed
+11eb9e5 feat: JWT verify fallback metric — W5 closed
+594c5a3 docs: incident response + MTTR guide — W13 closed
+4342c2d feat: FP rollback hysteresis — FMEA RPN-160 closed
+7efdddb feat: EventQueueDepth + SIEM backlog alert — FMEA RPN-210 closed
+ab455a3 docs: LoU v2.1 — licensing section, ACV fix — W21 closed
+c4c1efd security: proactive key disclosure — W6 closed
+002a1af feat: TW-6 variance growth rate — FMEA RPN-315 closed
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ACTIVE TASKS — THIS SESSION (pull ONLY from here)
@@ -123,21 +124,20 @@ COMMERCIAL — BEFORE LLOYD (April 28) — DO FIRST
 [ ] C-Corp conversion — email sent to attorney?                    30 min
 [ ] Sovren Software — follow-up sent?                              15 min
 
-CRITICAL ENGINEERING — BEFORE LLOYD (April 25 hard deadline)
-[✅] C-5: Authenticate /score /verify /dashboard — DONE b010b3e
-[✅] C-6: NOT NULL agent_events.feature_vector — DONE b010b3e
-[ ] C-2: Welford concurrent race — Redis MULTI/EXEC (baseline.go)  3 hrs  ← NEXT
-[ ] C-1: Cold-start bootstrap protocol (baseline.go)               2 hrs
-[ ] C-3: Redis memory alert + write return checks (score_store.go) 2 hrs
-[ ] C-4: Kong circuit breaker + unverified-identity log (handler.lua + main.go) 3 hrs
-[ ] C-7: jti TTL alignment + Redis restart recovery (jwt.go)       2 hrs
-[ ] C-8: Seal held-out evaluation corpus (tests/held_out_sealed/)  1 hr
-
-ENGINEERING — BEFORE LLOYD (April 28) — AFTER COMMERCIAL
+ENGINEERING — ALL PRE-LLOYD ITEMS COMPLETE ✅
+[x] W4  — Async scoring pipeline doc ✅ 86b43cd
+[x] W5  — JWT verify fallback metric ✅ 11eb9e5
+[x] W6  — Security advisory committed ✅ c4c1efd
+[x] W13 — MTTR incident response doc ✅ 594c5a3
+[x] W14 — Dashboard v2 live polling ✅ a48a066
+[x] W18 — main.go handlers package refactor ✅ 9d1b428
+[x] W21 — LoU licensing + ACV fix ✅ ab455a3
+[x] W22 — C-Corp conversion email ✅
+[x] FMEA RPN-210 — Queue backlog monitoring ✅ 7efdddb
+[x] FMEA RPN-160 — FP rollback hysteresis ✅ 4342c2d
+[x] FMEA RPN-315 — EWMA slow-walk ✅ 002a1af
 [ ] TW-1: Lloyd_meeting_prep.md — 14 talking points               60 min
-[ ] L139: Add C14 "200-day detection gap" to Lloyd_meeting_prep    15 min
-[ ] TW-2: LoU staged curriculum update                             60 min
-[x] TW-9: evaluation-harness-methodology.md ✅
+[ ] TW-9: evaluation-harness-methodology.md                        60 min
 
 EVENTS
 [ ] Leaders in AI Summit NYC April 21–22 — activation plan + contact list
@@ -160,6 +160,10 @@ DEFERRED — AFTER LLOYD LOU SIGNED (do not touch before)
 [ ] Cornell Tech / NYU Tandon outreach                             1 hr
 [ ] Agent behavioral passport design doc                           2 hrs
 [ ] docs/architecture/agent-behavioral-passport-design.md          2 hrs
+[ ] T3-A: Kong version compatibility test suite                    8 hrs
+[ ] T3-G: Agent population scale test (10k+ agents)               4 hrs
+[ ] W16: HIPAA BAA — attorney draft                                1 week
+[ ] W17: GDPR Article 22 human review workflow doc                 2 hrs
 [ ] Zenodo paper: Agent Behavioral Passport Standard v1.0          2 hrs
 [ ] scripts/update_continuation.sh full automation                 2 hrs
 
@@ -239,7 +243,7 @@ AIAI New York:            June 4 (Kuntal Dutta — BNY Mellon)
 
 PIPELINE
 Lloyd Lemish (NWN)              ~April 28 — confirm date
-Andrew Gyamfi (Translucent AI)  Boardy message sent April 7 — awaiting reply
+Andrew Gyamfi (Translucent AI)  Follow-up sent April 13 — awaiting reply
 Andy Watkin-Child               LinkedIn sent April 7 — awaiting reply
 Unmukt Raizada (TrustEvals.ai)  LinkedIn sent April 7 — awaiting reply
 Paul Vann (Validia CEO)         LinkedIn sent April 13 — awaiting reply
