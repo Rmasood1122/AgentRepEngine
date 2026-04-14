@@ -6,6 +6,9 @@ import (
 	"log/slog"
 	"math"
 	"time"
+
+	"github.com/agentrepengine/are/internal/audit"
+	are_metrics "github.com/agentrepengine/are/internal/metrics"
 )
 
 // ScoringPayload is the typed reason object written by the consumer.
@@ -38,12 +41,20 @@ type EventConsumer struct {
 	scoreWriter ScoreWriter
 	batchSize   int
 	interval    time.Duration
+	siem        *audit.SIEMWebhook
 }
+
+// QueueBacklogThreshold is the unprocessed event count that triggers a SIEM
+// alert. At 1000 unprocessed events the consumer is materially behind —
+// agent scores may not reflect recent behavioral events.
+// Addresses FMEA RPN-210: async pipeline backlog → stale agent scores.
+const QueueBacklogThreshold = 1000
 
 func NewEventConsumer(db *sql.DB, sw ScoreWriter) *EventConsumer {
 	return &EventConsumer{
 		db:          db,
 		scoreWriter: sw,
+		siem:        audit.NewSIEMWebhook(),
 		batchSize:   100,
 		interval:    5 * time.Second,
 	}
@@ -61,8 +72,35 @@ func (c *EventConsumer) Start() {
 		} else if processed > 0 {
 			slog.Info("consumer batch processed", "count", processed)
 		}
+		c.updateQueueDepth()
 		time.Sleep(c.interval)
 	}
+}
+
+// updateQueueDepth queries the unprocessed event count, updates the
+// Prometheus gauge, and fires a SIEM alert if the backlog exceeds
+// QueueBacklogThreshold. Called after every consumer batch cycle.
+// Addresses FMEA RPN-210: async pipeline backlog → stale agent scores.
+func (c *EventConsumer) updateQueueDepth() {
+        var depth int
+        err := c.db.QueryRow(`
+                SELECT COUNT(*)
+                FROM agent_event_queue
+                WHERE processed = false`).Scan(&depth)
+        if err != nil {
+                slog.Warn("queue_depth_check_failed", "error", err)
+                return
+        }
+        are_metrics.EventQueueDepth.Set(float64(depth))
+        slog.Debug("queue_depth_updated", "depth", depth)
+        if depth > QueueBacklogThreshold {
+                slog.Warn("event_queue_backlog_alert",
+                        "depth", depth,
+                        "threshold", QueueBacklogThreshold,
+                        "action", "investigate_consumer_lag",
+                )
+                c.siem.SendQueueBacklog(depth)
+        }
 }
 
 func (c *EventConsumer) processBatch() (int, error) {

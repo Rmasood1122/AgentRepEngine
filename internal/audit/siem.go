@@ -100,6 +100,25 @@ func (s *SIEMWebhook) SendRestricted(
 	go s.send(agentDID, "RESTRICTED", score, scoreDelta, policyFired, reasonJSON, "MEDIUM")
 }
 
+// SendQueueBacklog fires a SIEM alert when the async event queue exceeds
+// QueueBacklogThreshold. Indicates consumer lag â agent scores may be stale.
+// Wired from EventConsumer.updateQueueDepth() in consumer.go.
+// Addresses FMEA RPN-210: async pipeline backlog.
+func (s *SIEMWebhook) SendQueueBacklog(depth int) {
+	if !s.enabled {
+		return
+	}
+	reason := []byte(`{"alert":"event_queue_backlog","action":"investigate_consumer"}`)
+	go s.send(
+		"system",
+		"QUEUE_BACKLOG",
+		depth, 0,
+		"event_queue_depth_exceeded",
+		reason,
+		"HIGH",
+	)
+}
+
 func (s *SIEMWebhook) send(
 	agentDID, decision string,
 	score, scoreDelta int,
