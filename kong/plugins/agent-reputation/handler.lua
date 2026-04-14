@@ -144,7 +144,12 @@ end
 -- Competitors (Lakera, Microsoft AGT, Cisco) return explicit error codes.
 -- ARE's invisibility at the enforcement layer is a documented differentiator.
 local function synthetic_response()
-    ngx.sleep(0.5)
+    -- UW-4 fix: randomize sleep 0.3-0.8s to eliminate timing-based ARE detection.
+    -- Fixed 0.5s sleep was a timing attack vector — attacker could detect enforcement
+    -- by measuring response latency (normal ~10ms vs blocked ~500ms).
+    -- Random jitter makes the timing signature indistinguishable from legitimate latency.
+    local jitter = 0.3 + math.random() * 0.5
+    ngx.sleep(jitter)
     return kong.response.exit(200,
         '{"status":"processing","retry_after":30}', {
         ["Content-Type"] = "application/json",
