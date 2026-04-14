@@ -83,9 +83,9 @@ APEX VERSION: APEX v5.2 + ZROS v2.8 + MASTER_LEARNINGS v2.1 DELTA + LEARNING_INT
 APEX MODE: ENTERPRISE (Mode 4) | SESSION TYPE: ENGINEERING
 COMPOUNDING ACTIONS: ADD3 ✅ ADD1 ✅ ADD2 ✅ ADD4 ⬜ ADD5 ⬜
 NEXT SESSION: G-COMMERCIAL gate first — check Gyamfi/Watkin-Child/Unmukt replies.
-              Then: UW-4 (synthetic response timing fix) + UW-5 (fail-open demo step) + UT-4 (LoU disclaimer).
-              Then: TW-1 Lloyd prep with C15 + confidence_pct explainer added.
-              Meta system prompt for compounding roadmap: build after LoU fixes.
+              All pre-Lloyd compounding items COMPLETE.
+              Remaining: HV-3 (after Watkin-Child), HV-5 (after Lloyd pilot), UT-3 (after LoU).
+              Focus: Lloyd meeting April 28 — TW-REHEARSAL C1-C15, demo run, LoU ready.
 REPO: https://github.com/Rehanrana11/AgentRepEngine
 Branch: master (push with git push origin master — NOT main)
 HEAD: 9d1b428
@@ -108,6 +108,11 @@ a48a066 feat: dashboard v2 — live health polling, decisions table — W14 clos
 ab455a3 docs: LoU v2.1 — licensing section, ACV fix — W21 closed
 c4c1efd security: proactive key disclosure — W6 closed
 002a1af feat: TW-6 variance growth rate — FMEA RPN-315 closed
+b440c0c docs: Wiz AI-SPM competitive response — UT-1 closed
+1212ec9 docs: TW-1 updated — C15, UW-1/2/3, HV-4 closed
+e8199d0 feat: demo step 10 fail-open verification — UW-5 closed
+5069268 security: synthetic response timing randomized — UW-4 closed
+e0af0da docs: LoU v2.2 liability disclaimer — UT-4 closed
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ACTIVE TASKS — THIS SESSION (pull ONLY from here)
