@@ -112,7 +112,18 @@ func TestAutoRollback(t *testing.T) {
 			FPRateThreshold, fpRate)
 	}
 
-	// Trigger rollback check
+	// Reset breach counter — ensure clean state before test
+	rdb.Set(context.Background(), FPBreachKey, 0, 0)
+
+	// Hysteresis: requires FPBreachesRequired consecutive breaches.
+	// First check increments counter to 1 — no rollback yet.
+	mc.checkAndRollbackIfNeeded()
+	if mc.GetMode() != ModeEnforce {
+		t.Fatal("❌ Rolled back on first breach — hysteresis not working")
+	}
+	t.Log("✅ First breach: counter=1, no rollback yet (hysteresis)")
+
+	// Second check increments counter to 2 — rollback fires.
 	mc.checkAndRollbackIfNeeded()
 
 	// Verify mode rolled back to observe
@@ -177,6 +188,9 @@ func TestFPMonitorNoRollbackBelowThreshold(t *testing.T) {
 	defer db.Close()
 
 	mc := NewModeController(rdb, db, ModeEnforce)
+
+	// Reset breach counter — prevent leakage from previous tests
+	rdb.Set(context.Background(), FPBreachKey, 0, 0)
 
 	// Seed 100 BLOCKED decisions, 1 overridden = 1% FP (below 2% threshold)
 	ctx := context.Background()

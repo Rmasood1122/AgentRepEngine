@@ -11,12 +11,20 @@ import (
 )
 
 const (
-	ModeKey         = "config:enforcement_mode"
-	ModeObserve     = "observe"
-	ModeEnforce     = "enforce"
-	FPRateThreshold = 2.0
-	FPCheckInterval = 5 * time.Minute
-	FPWindowHours   = 1
+	ModeKey          = "config:enforcement_mode"
+	ModeObserve      = "observe"
+	ModeEnforce      = "enforce"
+	FPRateThreshold  = 2.0
+	FPCheckInterval  = 5 * time.Minute
+	FPWindowHours    = 1
+	// FPBreachKey tracks consecutive FP threshold breaches in Redis.
+	// Resets to 0 on any clean check. Rollback fires at FPBreachesRequired.
+	FPBreachKey = "fp:consecutive_breaches"
+	// FPBreachesRequired is the number of consecutive FP threshold breaches
+	// required before auto-rollback fires. Prevents flapping on single
+	// traffic spikes. Two consecutive 5-minute windows = 10 minutes of
+	// sustained FP elevation before enforcement is suspended.
+	FPBreachesRequired = 2
 )
 
 // SIEMNotifier sends alerts when auto-rollback fires.
@@ -104,6 +112,7 @@ func (mc *ModeController) StartFPMonitor() {
 func (mc *ModeController) checkAndRollbackIfNeeded() {
 	currentMode := mc.GetMode()
 	if currentMode != ModeEnforce {
+		mc.rdb.Set(mc.ctx, FPBreachKey, 0, 0)
 		return
 	}
 
@@ -117,13 +126,25 @@ func (mc *ModeController) checkAndRollbackIfNeeded() {
 		return
 	}
 
-	slog.Info("fp_rate_check",
-		"fp_rate_pct", fpRate,
-		"threshold_pct", FPRateThreshold,
-		"mode", currentMode)
-
 	if fpRate > FPRateThreshold {
-		mc.rollbackToObserve(fpRate)
+		breaches, _ := mc.rdb.Incr(mc.ctx, FPBreachKey).Result()
+		slog.Warn("fp_rate_breach",
+			"fp_rate_pct", fpRate,
+			"threshold_pct", FPRateThreshold,
+			"consecutive_breaches", breaches,
+			"required_to_rollback", FPBreachesRequired,
+		)
+		if breaches >= FPBreachesRequired {
+			mc.rdb.Set(mc.ctx, FPBreachKey, 0, 0)
+			mc.rollbackToObserve(fpRate)
+		}
+	} else {
+		mc.rdb.Set(mc.ctx, FPBreachKey, 0, 0)
+		slog.Info("fp_rate_check_clean",
+			"fp_rate_pct", fpRate,
+			"threshold_pct", FPRateThreshold,
+			"mode", currentMode,
+		)
 	}
 }
 
