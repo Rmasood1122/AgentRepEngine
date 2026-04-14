@@ -204,6 +204,28 @@ You never depend on a vendor black box for runtime enforcement.
 - No SLA applies during observe-mode pilot
 - Enforce-mode SLA negotiated at Day 30 if proceeding
 
+### Reason Object Disclaimer
+ARE produces a structured reason object for every enforcement decision.
+This object includes a `recommended_action` field derived from behavioral
+analysis of the agent's activity relative to its baseline.
+
+**This output is informational only. It is not a directive.**
+
+The `recommended_action` field provides guidance to support human
+decision-making. All enforcement decisions and responses to enforcement
+decisions remain the sole responsibility of the customer's authorized
+personnel.
+
+ARE does not make authorization decisions about agents — it provides
+behavioral evidence to support human judgment. The customer retains
+full decision authority at all times. No automated action by ARE
+substitutes for human review where human review is required by the
+customer's policies or applicable regulations.
+
+Legal admissibility of ARE output as evidence in any proceeding is the
+responsibility of the customer's legal counsel. ARE makes no
+representations about the admissibility of its output in any jurisdiction.
+
 ---
 
 ## TECHNICAL PREREQUISITES
