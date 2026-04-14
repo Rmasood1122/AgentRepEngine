@@ -82,7 +82,10 @@ CURRENT STATE — April 13, 2026
 APEX VERSION: APEX v5.2 + ZROS v2.8 + MASTER_LEARNINGS v2.1 DELTA + LEARNING_INTELLIGENCE v3.1
 APEX MODE: ENTERPRISE (Mode 4) | SESSION TYPE: ENGINEERING
 COMPOUNDING ACTIONS: ADD3 ✅ ADD1 ✅ ADD2 ✅ ADD4 ⬜ ADD5 ⬜
-NEXT SESSION: G-COMMERCIAL gate first — check Gyamfi/Watkin-Child/Unmukt replies. Then TW-1 Lloyd prep.
+NEXT SESSION: G-COMMERCIAL gate first — check Gyamfi/Watkin-Child/Unmukt replies.
+              Then: UW-4 (synthetic response timing fix) + UW-5 (fail-open demo step) + UT-4 (LoU disclaimer).
+              Then: TW-1 Lloyd prep with C15 + confidence_pct explainer added.
+              Meta system prompt for compounding roadmap: build after LoU fixes.
 REPO: https://github.com/Rehanrana11/AgentRepEngine
 Branch: master (push with git push origin master — NOT main)
 HEAD: 9d1b428
@@ -136,8 +139,12 @@ ENGINEERING — ALL PRE-LLOYD ITEMS COMPLETE ✅
 [x] FMEA RPN-210 — Queue backlog monitoring ✅ 7efdddb
 [x] FMEA RPN-160 — FP rollback hysteresis ✅ 4342c2d
 [x] FMEA RPN-315 — EWMA slow-walk ✅ 002a1af
-[ ] TW-1: Lloyd_meeting_prep.md — 14 talking points               60 min
-[ ] TW-9: evaluation-harness-methodology.md                        60 min
+[ ] TW-1: Lloyd_meeting_prep.md — 14 talking points + C15 + confidence_pct explainer  60 min
+[ ] TW-9: evaluation-harness-methodology.md                                            60 min
+[ ] UW-2: confidence_pct explainer — one sentence in meeting prep                     15 min
+[ ] UW-4: Randomize synthetic response sleep 0.3–0.8s (handler.lua)                  30 min
+[ ] UW-5: Add fail-open demo step to scripts/demo.sh                                  30 min
+[ ] UT-4: Add reason object liability disclaimer to LoU                               30 min
 
 EVENTS
 [ ] Leaders in AI Summit NYC April 21–22 — activation plan + contact list
@@ -161,6 +168,8 @@ DEFERRED — AFTER LLOYD LOU SIGNED (do not touch before)
 [ ] Agent behavioral passport design doc                           2 hrs
 [ ] docs/architecture/agent-behavioral-passport-design.md          2 hrs
 [ ] T3-A: Kong version compatibility test suite                    8 hrs
+[ ] UT-1: Wiz.io competitive doc — docs/competitive/wiz-ai-spm-response.md            1 hr
+[ ] UT-2: Kong licensing risk register entry                                           30 min
 [ ] T3-G: Agent population scale test (10k+ agents)               4 hrs
 [ ] W16: HIPAA BAA — attorney draft                                1 week
 [ ] W17: GDPR Article 22 human review workflow doc                 2 hrs
@@ -170,6 +179,54 @@ DEFERRED — AFTER LLOYD LOU SIGNED (do not touch before)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 KEY DECISIONS — APRIL 7 + APRIL 12 + APRIL 13 SESSIONS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HIDDEN VALUE DISCOVERIES [F]: April 13, 2026 — Expert panel demo forensics
+  HV-1: Reason object is board-readable incident report — untapped positioning angle
+        "Every enforcement decision produces a board-readable report. No vendor translation."
+        Add as C15 in Lloyd claims. Use in every CISO conversation.
+  HV-2: Deceptive enforcement (synthetic 200) is patent-defensible differentiator
+        No competitor returns synthetic 200. All return 403/401.
+        Attacker cannot detect ARE is deployed. Cannot calibrate against threshold.
+        Add to competitive positioning. Potentially patentable trade secret.
+  HV-3: ARE is GDPR Article 22 compliance infrastructure for AI agents
+        Reason object = Article 22 explainability artifact. No vendor has built this.
+        Primary angle for Andy Watkin-Child + EU pipeline.
+  HV-4: Forensics use case — incident report auto-generated on every block
+        Legal, insurance, IR firms value this independently of security use case.
+  HV-5: SR 11-7 model risk management compliance for FFIEC banking
+        SQL-queryable FP rate = first product satisfying SR 11-7 for AI agent models.
+        Primary anchor for every FFIEC-regulated bank conversation.
+  HV-6: Hash chain = legal evidence preservation for breach litigation
+        chain_valid = true is cryptographically admissible. Law firms value this.
+
+UNKNOWN WEAKNESSES IDENTIFIED [F]: April 13, 2026
+  UW-1: Demo 4.2σ is pre-seeded — not computed from real 30-day baseline
+        Disclose proactively in Lloyd meeting: "Demo uses pre-seeded baseline.
+        Your pilot builds a real one over 30 days."
+  UW-2: confidence_pct inconsistency — reason object shows 12%, Kong shows 94%
+        These measure different things (anomaly confidence vs enforcement confidence).
+        One sentence needed in TW-1 prep: explain the distinction explicitly.
+  UW-3: Score drop 700→187 in 3 events is demo-accelerated, not production reality
+        Production decline is more gradual. Pre-sell patience before pilot starts.
+  UW-4: Synthetic response leaks 500ms timing signature — timing attack vector
+        Fix: randomize sleep 0.3–0.8s. Eliminates timing-based ARE detection.
+  UW-5: Fail-open behavior not in demo — Lloyd's engineer will ask about downtime
+        Fix: add demo step showing scorer unavailable → agents pass through.
+
+UNKNOWN THREATS IDENTIFIED [F]: April 13, 2026
+  UT-1: Wiz.io AI-SPM — untracked competitor with 35% Fortune 500 CSPM penetration
+        Currently: data exposure + model inventory. Not behavioral enforcement yet.
+        Risk: one product cycle away from entering ARE's space with existing distribution.
+        Action: add to competitive docs immediately.
+  UT-2: Kong open-source licensing risk — Kong Inc. not profitable since 2021
+        Acquisition or enterprise-only pivot breaks ARE's deployment model.
+        Action: add to risk register. Monitor Kong licensing quarterly.
+  UT-3: 30-day observe dead zone — no blocked incidents = no ROI at day 15
+        Gen Digital ADR shows immediate blocks from day 1 (signature-based).
+        Action: pre-sell patience before pilot. Frame observe output as ROI evidence.
+  UT-4: Reason object liability surface — "recommended_action" creates legal exposure
+        If customer follows recommendation and FP causes disruption → negligence claim.
+        Fix: add liability disclaimer to LoU. Reason objects are informational only.
 
 FP framing change [F]: Stop leading with 0.00%. Lead with Visa standard.
   "ARE targets below 0.1% FP in production — matching Visa's fraud detection standard.
@@ -279,6 +336,9 @@ C11 "Every enforcement decision is human-readable. Agent ID, score, confidence, 
 C12 "Regulators are about to require AI audit trails. ARE is the implementation, already running."
 C13 "Here is the SQL query. Run it yourself. The result is your FP rate. No vendor controls the measurement."
 C14 "The average breach goes undetected 200 days. ARE detects behavioral drift in real time."
+C15 "Every enforcement decision produces a board-readable incident report. Agent ID, score,
+     confidence, policy fired, sigma value, recommended action. Your board reads it without
+     a translation layer. Your auditor cites it without calling us."
 CISO unlock: "You control the pace — we don't advance to enforce mode without your sign-off."
 FP reframe:  "We target the Visa standard — below 0.1% FP in production."
 
