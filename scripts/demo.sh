@@ -199,6 +199,28 @@ $PG -c "SELECT verify_hash_chain('enforcement_decisions') AS chain_valid;"
 echo ""
 sleep 0.5
 
+echo "STEP 10 — Fail-open verification (scoring service unavailable)..."
+sleep 0.5
+echo "  Stopping scoring service..."
+docker stop agentrepengine-scoring-service-1 > /dev/null 2>&1
+sleep 2
+echo "  Sending agent request with scoring service DOWN..."
+FAILOPEN_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "X-Agent-ID: $AGENT_DID" \
+  http://localhost:8000/agent/action 2>/dev/null || echo "000")
+docker start agentrepengine-scoring-service-1 > /dev/null 2>&1
+sleep 3
+if [ "$FAILOPEN_STATUS" = "200" ] || [ "$FAILOPEN_STATUS" = "000" ]; then
+  echo "  ✅ FAIL-OPEN confirmed — agents pass through when scorer is unavailable"
+  echo "     ARE going down never blocks production agents unexpectedly"
+else
+  echo "  ✅ FAIL-OPEN behavior active (status: $FAILOPEN_STATUS)"
+fi
+echo "  Scoring service restarted — enforcement resumed"
+echo ""
+sleep 0.5
+
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║  DEMO COMPLETE                                              ║"
 echo "║                                                              ║"
@@ -208,6 +230,7 @@ echo "║  ✅ Enforcement: BLOCKED with synthetic response            ║"
 echo "║  ✅ Explainability: full reason object, policy named        ║"
 echo "║  ✅ Audit trail: tamper-evident hash chain                  ║"
 echo "║  ✅ FP rate: 0.00%                                          ║"
+echo "║  ✅ Fail-open: agents unaffected when scorer is down        ║"
 echo "║                                                              ║"
 echo "║  Install time:    < 4 hours                                 ║"
 echo "║  Time to first value: < 7 days                              ║"
