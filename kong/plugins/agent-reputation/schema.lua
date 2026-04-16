@@ -33,6 +33,18 @@ return {
                             default = 2000, -- 2ms target, 2000ms safety ceiling
                         }
                     },
+                    {
+                        redis_password = {
+                            type     = "string",
+                            required = false,
+                        }
+                    },
+                    {
+                        redis_user = {
+                            type     = "string",
+                            required = false,
+                        }
+                    },
                     -- Enforcement mode
                     -- observe: score + log, never block (first 48h always)
                     -- enforce: apply band decisions

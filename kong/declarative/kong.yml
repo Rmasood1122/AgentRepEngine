@@ -3,19 +3,23 @@ _transform: true
 
 services:
   - name: test-upstream
-    url: http://httpbin.org/anything
+    url: http://scoring-service:8080
     routes:
       - name: test-route
         paths:
-          - /test
+          - /health
         methods:
           - GET
           - POST
+        strip_path: false
+
     plugins:
       - name: agent-reputation
         config:
           redis_host: redis
           redis_port: 6379
+          redis_password: are_redis_dev
+          redis_user: are_admin
           redis_timeout_ms: 2000
           enforcement_mode: observe
           scoring_service_url: http://scoring-service:8080

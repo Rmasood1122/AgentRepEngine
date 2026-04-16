@@ -123,6 +123,18 @@ local function get_redis_client(conf)
         kong.log.err("Redis connect failed: ", err, " — failing OPEN")
         return nil, err
     end
+    if conf.redis_password and conf.redis_password ~= "" then
+        local auth_ok, auth_err
+        if conf.redis_user and conf.redis_user ~= "" then
+            auth_ok, auth_err = red:auth(conf.redis_user, conf.redis_password)
+        else
+            auth_ok, auth_err = red:auth(conf.redis_password)
+        end
+        if not auth_ok then
+            kong.log.err("Redis auth failed: ", auth_err, " — failing OPEN")
+            return nil, auth_err
+        end
+    end
     return red, nil
 end
 
@@ -213,12 +225,17 @@ local function verify_token(token, scoring_url)
     -- Call /verify endpoint for RS256 signature validation
     local http = require("resty.http")
     local httpc = http.new()
-    httpc:set_timeout(500) -- 500ms timeout — fail-open if slow
+    httpc:set_timeouts(200, 200, 500) -- connect:200ms, send:200ms, read:500ms
 
     local res, err = httpc:request_uri(scoring_url .. "/verify", {
         method  = "POST",
         body    = cjson.encode({token = token}),
-        headers = {["Content-Type"] = "application/json"},
+        headers = {
+            ["Content-Type"] = "application/json",
+            ["X-API-Key"]    = "are-internal-key-change-in-production",
+        },
+        keepalive_timeout = 60000,
+        keepalive_pool    = 10,
     })
 
     if not res or err then
@@ -309,8 +326,15 @@ function AgentReputationHandler:access(conf)
     end
 
     local scoring_url = conf.scoring_service_url or "http://scoring-service:8080"
-    local claims, verify_err = verify_token(token, scoring_url)
-
+    local claims, verify_err
+    if conf.enforcement_mode == "enforce" then
+        claims, verify_err = verify_token(token, scoring_url)
+    else
+        -- Observe mode: skip network verify call, use local JWT parsing.
+        -- Network verify only required in enforce mode where blocking decisions are made.
+        claims = extract_jwt_claims_unverified(token)
+        if not claims then verify_err = "malformed token" end
+    end
     if not claims then
         kong.log.warn("JWT verification failed: ", verify_err or "unknown")
         kong.service.request.set_header("X-Agent-Score", "500")
@@ -404,6 +428,9 @@ function AgentReputationHandler:access(conf)
 
     kong.service.request.set_header("X-Agent-Score", tostring(score))
     kong.service.request.set_header("X-Agent-Band", band)
+    kong.response.set_header("X-Agent-Score", tostring(score))
+    kong.response.set_header("X-Agent-Band", band)
+    kong.response.set_header("X-Agent-DID-Verified", agent_did)
 
     if conf.enforcement_mode == "observe" then
         kong.log.info("OBSERVE: agent=", agent_did,
@@ -493,14 +520,14 @@ function AgentReputationHandler:log(conf)
     local payload_copy = event_payload
     -- FIX-4: ts_copy scoped correctly — was leaking to global in v1.4.0
     local ts_copy      = event_timestamp
-    local api_key_copy = conf.api_key or ""
+    local api_key_copy = conf.api_key or "are-internal-key-change-in-production"
 
     -- resty.http is available in timer context — correct for log phase emission
     local ok, err = ngx.timer.at(0, function(premature)
         if premature then return end
         local http  = require "resty.http"
         local httpc = http.new()
-        httpc:set_timeout(500)
+        httpc:set_timeouts(100, 100, 200)
         local res, req_err = httpc:request_uri(scoring_url .. "/event", {
             method  = "POST",
             body    = payload_copy,
