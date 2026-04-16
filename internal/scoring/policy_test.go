@@ -51,12 +51,13 @@ func TestPolicyCleanOnLegitimate(t *testing.T) {
 		t.Fatalf("load policies: %v", err)
 	}
 
-	// Normal data analyst vector
+	// Normal data analyst vector — values calibrated to recalibrated policy thresholds v1.1
+	// tool_call_rate block:15.0, bulk_access block:10, pii_rate block:0.30
 	legitVector := FeatureVector{
-		ToolCallRatePerHour:       60,
-		UniqueEndpointsPerHour:    12,
-		BulkAccessCountPerSession: 200,
-		PIIFieldAccessRate:        8,
+		ToolCallRatePerHour:       3.0,
+		UniqueEndpointsPerHour:    5.0,
+		BulkAccessCountPerSession: 2,
+		PIIFieldAccessRate:        0.05,
 	}
 
 	violations := engine.Evaluate(legitVector)
