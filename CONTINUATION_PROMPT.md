@@ -132,6 +132,32 @@ COMMERCIAL — BEFORE LLOYD (April 28) — DO FIRST
 [ ] C-Corp conversion — email sent to attorney?                    30 min
 [ ] Sovren Software — follow-up sent?                              15 min
 
+SESSION 2 COMPLETE (Apr 16, commit 462656a):
+  [x] internal/audit/chain_writer.go — WriteEnforcementDecision() hash chain writer
+      Two-step: INSERT RETURNING chain_position → SHA256 → UPDATE this_hash/prev_hash
+      chain_position from SEQUENCE — fork-proof. Hash algorithm LOCKED — never change.
+  [x] internal/audit/freeze.go — fixed broken INSERT (org_id + reason columns don't exist)
+      Pre-existing bug: freeze audit log was silently failing at runtime. Now fixed.
+  [x] Confirmed: Welford race does not exist — UpdateAgentBaseline already uses
+      PostgreSQL ON CONFLICT DO UPDATE (atomic in SQL). No Go-level race.
+  [x] Confirmed: cold-start div/zero handled by hardcodedBaseline() fallback. Safe.
+  [x] Migration 002: chain_position BIGINT NOT NULL via SEQUENCE on enforcement_decisions
+  [x] Migration 003: baseline_observations table (append-only, Phase 2 extension point)
+  [x] Migration 004: session_id column + partial indexes on enforcement_decisions
+
+SESSION 3 NEXT (Apr 17) — commit target: health.go + policy.go + siem.go:
+  [ ] cmd/scoring-service/handlers/health.go — add chain_fork_count to /health
+      File confirmed at handlers/health.go line 45. Read before touching.
+  [ ] internal/scoring/policy.go — dual-window variance detection
+      SHORT_WINDOW_DAYS=3, LONG_WINDOW_DAYS=14, ratio=2.5x (conservative)
+      Add constants to config/scoring_weights.yaml — config-driven not hardcoded
+      Gate: go test ./tests/fp_scenarios/... must stay 0.00% after this change
+  [ ] internal/audit/siem.go — add halt_advisory bool + session_id fields (additive only)
+      Operator SIEM channel for orchestrator halt. Agent response untouched.
+  [ ] internal/scoring/scorer.go — bootstrap guard
+      BOOTSTRAP_MIN_EVENTS=5, BOOTSTRAP_DEFAULT_V=850.0 in scorer.go only
+      Gate: go test ./... green after
+
 ENGINEERING — ALL PRE-LLOYD ITEMS COMPLETE ✅
 [x] W4  — Async scoring pipeline doc ✅ 86b43cd
 [x] W5  — JWT verify fallback metric ✅ 11eb9e5
