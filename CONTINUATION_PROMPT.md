@@ -4,14 +4,18 @@ Read this first. Every session. Non-negotiable.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ACTIVE FILES — full attention, apply every session:
-  1. CONTINUATION_PROMPT.md     ← THIS FILE — live state, tasks, pipeline
-  2. CLAUDE_MASTER v2.0         ← product truth, four numbers, architecture
-  3. APEX_REASONING_ENGINE v1.0 ← how to think, 7 experts, quality gate
-  4. ZROS v2.7                  ← anti-rework laws, failure taxonomy, L7 done
-  5. BUILD_INTELLIGENCE v1.0    ← what the code actually does
-  6. APEX v5.2                  ← strategy, gates, modes, prime directive
-  7. SESSION_PROTOCOL v1.0      ← session sequence A1→C2
-  8. DECISION_AUDIT v1.0        ← [H] claim tracking, monthly verification
+  1. CONTINUATION_PROMPT.md          ← THIS FILE — live state, tasks, pipeline
+  2. CLAUDE_MASTER v2.0              ← product truth, four numbers, architecture
+  3. APEX_REASONING_ENGINE v1.0      ← how to think, 7 experts, quality gate
+  4. ZROS v2.8                       ← anti-rework laws, L1–L12, G-FILE gate
+  5. BUILD_INTELLIGENCE v1.0         ← what code does [STALE — update next eng session]
+  6. APEX v5.2                       ← strategy, gates, modes, prime directive
+  7. SESSION_PROTOCOL v1.0           ← session sequence A1→C6
+  8. DECISION_AUDIT v1.0             ← [H] claims — D005 verdict due NOW
+  9. INTEGRITY_SENTINEL v1.0         ← G-SENTINEL fires before engineering; SENTINEL RUN
+  10. ARE_BULLETPROOF v1.0           ← BULLETPROOF RUN fires April 27 before Lloyd
+  11. APEX-OS v1.0                   ← Ω audit, pipeline health, commercial intel log
+  12. APEX_DECISION_GOVERNANCE v1.0  ← APEX DECIDE fires before any arch change
 
 ARCHIVE FILES — reference only, do not generate tasks from these:
   - LEARNING_INTELLIGENCE v3.1  ← learning history, 73 learnings
@@ -79,7 +83,7 @@ RULE: Any unchecked box = that action executes before session opens.
 CURRENT STATE — April 16, 2026
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-APEX VERSION: APEX v5.2 + ZROS v2.8 + MASTER_LEARNINGS v2.1 DELTA + LEARNING_INTELLIGENCE v3.1
+APEX VERSION: APEX v5.2 + ZROS v2.8 + INTEGRITY_SENTINEL v1.0 + ARE_BULLETPROOF v1.0 + APEX-OS v1.0 + APEX_DECISION_GOVERNANCE v1.0
 APEX MODE: ENTERPRISE (Mode 4) | SESSION TYPE: ENGINEERING
 COMPOUNDING ACTIONS: ADD3 ✅ ADD1 ✅ ADD2 ✅ ADD4 ⬜ ADD5 ⬜
 NEXT SESSION: G-COMMERCIAL gate first — check Gyamfi/Watkin-Child/Unmukt replies.
@@ -91,6 +95,10 @@ Branch: master (push with git push origin master — NOT main)
 HEAD: 03354ab
 go test ./... — ALL GREEN ✅ (21 packages passing)
 ZROS GATES: G-FP ✅ PASS | G-HARDEN ✅ PASS | G-IDENTITY ✅ PASS
+Ω SCAN (last session): Ω1=0 Ω2=0 Ω3=0 Ω4=0
+APEX-OS STATUS: Pipeline Health=6/10 | Last calibration=UNCALIBRATED
+BULLETPROOF RUN: scheduled April 27 (mandatory — day before Lloyd)
+D005 VERDICT: Character Capital rejection logged — calibration loop open
 
 SESSION CLOSE RECORD
   Session date:     April 16, 2026
