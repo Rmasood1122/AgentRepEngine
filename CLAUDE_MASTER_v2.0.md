@@ -95,7 +95,7 @@ The number stays. The framing protects credibility (L77).
 ## THE FOUR NUMBERS — KNOW COLD. REPRODUCE ON DEMAND.
 
 ```
-0.00%   FP rate on 100-scenario internal corpus
+0.00%   FP rate on 150-scenario internal corpus
 88.00%  TP rate on 50-scenario attack corpus (TP=88.00%, Precision=100%, F1=0.9362)
 100%    Slow-walk detection via score + HIGH_RISK VERIFY (10 scenarios, single-agent)
 ~60s    Full demo end-to-end (scripts/demo.sh — streaming output, not batch)
@@ -757,7 +757,7 @@ Fix: `grep -rn "SendBlocked" internal/ | grep -v "siem.go"` before every claim.
 **METRIC OVERCONFIDENCE**
 Stating "0.00% false positives" without the corpus qualifier.
 Watch for: Any unqualified "zero" or "0.00%" FP claim in materials or conversation.
-Fix: "0.00% on our 100-scenario internal validation corpus. External validation
+Fix: "0.00% on our 150-scenario internal validation corpus. External validation
 available during pilot."
 
 ---
@@ -865,7 +865,7 @@ These are non-negotiable in any enterprise conversation:
    Full phrase: "You control the pace — we don't advance to enforce mode
    without your sign-off after 14 days of clean observe."
 
-4. FP framing (never deviate): "0.00% on our 100-scenario internal
+4. FP framing (never deviate): "0.00% on our 150-scenario internal
    validation corpus. External validation available during pilot."
 
 5. 4-metric format required for any performance claim (L87):

@@ -1,7 +1,7 @@
 # OWASP LLM04 — Model Denial of Service
 # Detects agents making abnormally high tool call rates
 name: high_frequency_tool_abuse
-version: "1.0.0"
+version: "1.1.0"
 owasp_ref: LLM04
 description: >
   Detects agents calling tools at rates inconsistent with
@@ -10,14 +10,14 @@ description: >
 
 thresholds:
   tool_call_rate_per_hour:
-    warning: 150    # 2x normal — log
-    throttle: 300   # 4x normal — rate limit
-    block: 600      # 8x normal — synthetic response
+    warning: 5.0     # 2.5x baseline of 2/hr — log
+    throttle: 10.0   # 5x baseline — rate limit
+    block: 15.0      # 7.5x baseline — synthetic response
 
   sub_agent_spawn_depth:
     warning: 2
     throttle: 3
-    block: 4        # max depth per APEX spec = 5, block at 4
+    block: 4         # max depth per APEX spec = 5, block at 4
 
 score_penalties:
   warning: -25
@@ -30,5 +30,5 @@ human_review_required: false
 
 explainability_template:
   policy_fired: high_frequency_tool_abuse_v1
-  policy_threshold: "Tool call rate >{threshold}/hour (>{zscore_threshold} sigma above baseline)"
+  policy_threshold: "Tool call rate >{threshold}/hr (>{zscore_threshold} sigma above baseline)"
   recommended_action: "Review agent task definition for recursive patterns"

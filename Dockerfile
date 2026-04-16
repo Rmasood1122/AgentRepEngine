@@ -9,5 +9,6 @@ FROM alpine:3.19
 RUN apk add --no-cache ca-certificates
 WORKDIR /app
 COPY --from=builder /app/scoring-service .
+COPY --from=builder /app/config ./config
 EXPOSE 8080
 CMD ["./scoring-service"]

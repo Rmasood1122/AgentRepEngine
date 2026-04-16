@@ -1,0 +1,5 @@
+ARE KONG PLUGIN COMPATIBILITY CERTIFICATE
+Generated: 2026-04-16T01:51:03Z
+Repo: github.com/Rehanrana11/AgentRepEngine
+Plugin: kong/plugins/agent-reputation/handler.lua
+

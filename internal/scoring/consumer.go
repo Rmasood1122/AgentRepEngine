@@ -39,6 +39,7 @@ type ScoreWriter interface {
 type EventConsumer struct {
 	db          *sql.DB
 	scoreWriter ScoreWriter
+	policy      *PolicyEngine
 	batchSize   int
 	interval    time.Duration
 	siem        *audit.SIEMWebhook
@@ -51,9 +52,18 @@ type EventConsumer struct {
 const QueueBacklogThreshold = 1000
 
 func NewEventConsumer(db *sql.DB, sw ScoreWriter) *EventConsumer {
+	var pe *PolicyEngine
+	if loaded, err := NewPolicyEngine("config/policy_packs"); err != nil {
+		slog.Warn("policy engine load failed — running without policy evaluation",
+			"error", err,
+		)
+	} else {
+		pe = loaded
+	}
 	return &EventConsumer{
 		db:          db,
 		scoreWriter: sw,
+		policy:      pe,
 		siem:        audit.NewSIEMWebhook(),
 		batchSize:   100,
 		interval:    5 * time.Second,
@@ -82,25 +92,25 @@ func (c *EventConsumer) Start() {
 // QueueBacklogThreshold. Called after every consumer batch cycle.
 // Addresses FMEA RPN-210: async pipeline backlog → stale agent scores.
 func (c *EventConsumer) updateQueueDepth() {
-        var depth int
-        err := c.db.QueryRow(`
+	var depth int
+	err := c.db.QueryRow(`
                 SELECT COUNT(*)
                 FROM agent_event_queue
                 WHERE processed = false`).Scan(&depth)
-        if err != nil {
-                slog.Warn("queue_depth_check_failed", "error", err)
-                return
-        }
-        are_metrics.EventQueueDepth.Set(float64(depth))
-        slog.Debug("queue_depth_updated", "depth", depth)
-        if depth > QueueBacklogThreshold {
-                slog.Warn("event_queue_backlog_alert",
-                        "depth", depth,
-                        "threshold", QueueBacklogThreshold,
-                        "action", "investigate_consumer_lag",
-                )
-                c.siem.SendQueueBacklog(depth)
-        }
+	if err != nil {
+		slog.Warn("queue_depth_check_failed", "error", err)
+		return
+	}
+	are_metrics.EventQueueDepth.Set(float64(depth))
+	slog.Debug("queue_depth_updated", "depth", depth)
+	if depth > QueueBacklogThreshold {
+		slog.Warn("event_queue_backlog_alert",
+			"depth", depth,
+			"threshold", QueueBacklogThreshold,
+			"action", "investigate_consumer_lag",
+		)
+		c.siem.SendQueueBacklog(depth)
+	}
 }
 
 func (c *EventConsumer) processBatch() (int, error) {
@@ -273,6 +283,34 @@ func (c *EventConsumer) processEvent(id int64, agentDID,
 	if varianceHighRisk {
 		newScore = int(max(0, float64(newScore)-150))
 		band = ScoreBand(newScore)
+	}
+
+	// Policy evaluation — ceiling override model.
+	// Threshold breaches apply penalty regardless of behavioral score.
+	// A TRUSTED agent cannot silently execute HIGH_RISK actions.
+	// Second detection layer: catches what z-score misses.
+	if c.policy != nil {
+		violations := c.policy.Evaluate(v)
+		if worst := WorstViolation(violations); worst != nil {
+			penalty := worst.ScorePenalty
+			if penalty < 0 {
+				penalty = -penalty
+			}
+			newScore = int(max(0, float64(newScore)-float64(penalty)))
+			band = ScoreBand(newScore)
+			if policyFired == "no_policy_fired" {
+				policyFired = worst.ExplainTemplate.PolicyFired
+			}
+			slog.Warn("policy_violation_detected",
+				"agent_did", agentDID,
+				"policy", worst.PolicyName,
+				"feature", worst.Feature,
+				"value", worst.Value,
+				"threshold", worst.Threshold,
+				"level", worst.Level,
+				"penalty", penalty,
+			)
+		}
 	}
 
 	reason := ScoringPayload{

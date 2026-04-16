@@ -2,7 +2,7 @@
 # Ensures AI agent enforcement actions are proportionate to the assessed risk level.
 # Required for EU operators subject to NIS2 (financial, health, infrastructure sectors).
 name: nis2_proportionality
-version: "1.0.0"
+version: "1.1.0"
 nis2_ref: "Art.21 — Security of network and information systems"
 dora_ref: "Art.9 — Protection and prevention"
 description: >
@@ -12,8 +12,8 @@ description: >
   High-confidence → block with mandatory human review.
   Prevents disproportionate blocking that would violate NIS2 Art.21(2)(a)
   requirement for risk-proportionate security measures.
+
 thresholds:
-  thresholds:
   confidence_pct:
     warning: 40.0
     throttle: 70.0
@@ -22,23 +22,28 @@ thresholds:
     warning: 1.5
     throttle: 2.0
     block: 3.0
+
 score_penalties:
   observe: 0
   throttle: -50
   block: -200
+
 enforcement_action: THROTTLE
 escalation_action: BLOCK
 human_review_required: true
+
 proportionality_override:
   enabled: true
   description: >
     If confidence_pct < confidence_pct_block_min, enforcement is capped at THROTTLE
     even if score band is BLOCKED. Audit log records proportionality_override=true.
     CISO must manually escalate to BLOCK for low-confidence decisions.
+
 explainability_template:
   policy_fired: nis2_proportionality_v1
   policy_threshold: "Confidence >{confidence_pct_block_min}% required for BLOCK enforcement"
   recommended_action: "Review confidence score before escalating enforcement level"
+
 regulatory_evidence:
   framework: NIS2
   article: "Art.21(2)(a) — Policies on risk analysis and information system security"

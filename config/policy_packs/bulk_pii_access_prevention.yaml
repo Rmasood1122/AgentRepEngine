@@ -1,7 +1,7 @@
-# OWASP LLM06 — Sensitive Information Disclosure
+# # OWASP LLM06 — Sensitive Information Disclosure
 # Prevents agents from bulk-extracting PII fields
 name: bulk_pii_access_prevention
-version: "1.0.0"
+version: "1.1.0"
 owasp_ref: LLM06
 description: >
   Detects and throttles agents performing bulk PII field access
@@ -10,14 +10,14 @@ description: >
 
 thresholds:
   pii_field_access_rate:
-    warning: 50      # per hour — log only
-    throttle: 100    # per hour — rate limit
-    block: 500       # per hour — synthetic response
+    warning: 0.10    # rate 0.0–1.0 — 10% of requests touch PII fields
+    throttle: 0.20   # 20% — rate limit
+    block: 0.30      # 30% — synthetic response
 
   bulk_access_count_per_session:
-    warning: 500
-    throttle: 1000
-    block: 5000
+    warning: 3
+    throttle: 5
+    block: 10
 
 score_penalties:
   warning: -25
@@ -30,5 +30,5 @@ human_review_required: true
 
 explainability_template:
   policy_fired: bulk_pii_access_prevention_v1
-  policy_threshold: "PII access >{threshold} records in {window}h window"
+  policy_threshold: "PII field access rate >{threshold} (0.0–1.0 scale)"
   recommended_action: "Human review before re-authorization"

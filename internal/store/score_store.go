@@ -160,10 +160,12 @@ func (s *ScoreStore) WriteScore(agentDID string, score int, reasonObj interface{
 	metrics.ScoreUpdatesTotal.WithLabelValues(band, policyName).Inc()
 
 	_, err = s.db.Exec(`
-		UPDATE agent_identities
-		SET current_score = $1, last_seen = NOW()
-		WHERE did = $2`,
-		score, agentDID)
+		INSERT INTO agent_identities (did, org_id, instance_id, current_score, last_seen)
+		VALUES ($1, gen_random_uuid(), gen_random_uuid(), $2, NOW())
+		ON CONFLICT (did) DO UPDATE
+		SET current_score = EXCLUDED.current_score,
+		    last_seen = NOW()`,
+		agentDID, score)
 	if err != nil {
 		return fmt.Errorf("postgres score write: %w", err)
 	}
