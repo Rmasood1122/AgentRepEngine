@@ -116,17 +116,20 @@ func NewFreezeHandler(db *sql.DB, rdb *redis.Client) http.HandlerFunc {
 			http.Error(w, "freeze storage failed", http.StatusInternalServerError)
 			return
 		}
-		_, dbErr := db.Exec(`
-			INSERT INTO enforcement_decisions
-				(agent_did, org_id, decision, score, reason, override, reviewer_id)
-			VALUES ($1, $2, 'FREEZE', 0, $3, false, $4)`,
-			req.AgentDID, req.OrgID,
-			fmt.Sprintf("maintenance window: %s to %s — %s",
-				windowStart.Format(time.RFC3339),
-				windowEnd.Format(time.RFC3339),
-				req.Reason),
-			req.ReviewerID,
-		)
+		_, dbErr := WriteEnforcementDecision(db, EnforcementDecisionInput{
+			AgentDID:    req.AgentDID,
+			Decision:    "FREEZE",
+			Score:       0,
+			ScoreDelta:  0,
+			PolicyFired: "maintenance_window",
+			ReasonObj: map[string]string{
+				"window_start": windowStart.Format(time.RFC3339),
+				"window_end":   windowEnd.Format(time.RFC3339),
+				"reason":       req.Reason,
+			},
+			Override:   false,
+			ReviewerID: req.ReviewerID,
+		})
 		if dbErr != nil {
 			slog.Warn("freeze_audit_log_failed", "agent_did", req.AgentDID, "error", dbErr)
 		}
