@@ -76,7 +76,7 @@ RULE: Any unchecked box = that action executes before session opens.
       Not negotiable. Not overridable. No exceptions.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CURRENT STATE — April 13, 2026
+CURRENT STATE — April 16, 2026
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 APEX VERSION: APEX v5.2 + ZROS v2.8 + MASTER_LEARNINGS v2.1 DELTA + LEARNING_INTELLIGENCE v3.1
@@ -88,16 +88,34 @@ NEXT SESSION: G-COMMERCIAL gate first — check Gyamfi/Watkin-Child/Unmukt repli
               Focus: Lloyd meeting April 28 — TW-REHEARSAL C1-C15, demo run, LoU ready.
 REPO: https://github.com/Rehanrana11/AgentRepEngine
 Branch: master (push with git push origin master — NOT main)
-HEAD: 9d1b428
+HEAD: 03354ab
 go test ./... — ALL GREEN ✅ (21 packages passing)
 ZROS GATES: G-FP ✅ PASS | G-HARDEN ✅ PASS | G-IDENTITY ✅ PASS
 
 SESSION CLOSE RECORD
-  Session date:     April 13, 2026
-  Last action:      9 commits — W18 handlers refactor, all pre-Lloyd engineering complete
-  Irreversible:     YES ✅ — 9 commits pushed
+  Session date:     April 16, 2026
+  Last action:      Kong demo working + scoring demo working — 3 commits pushed
+  Irreversible:     YES ✅ — commits 5c65e0a, 8e27554, 03354ab pushed
+
+KONG DEMO STATUS: WORKING ✅
+  Warmup: JWT=$(go run ./cmd/gentoken/main.go 2>/dev/null)
+          curl -s http://localhost:8000/health -H "Authorization: Bearer $JWT" -H "X-Agent-DID: did:jwt:finserv-demo:trading-agent:001" > /dev/null
+  Live:   curl -s http://localhost:8000/health -H "Authorization: Bearer $JWT" -H "X-Agent-DID: did:jwt:finserv-demo:trading-agent:001" -D - | head -20
+  Result: X-Agent-Score, X-Agent-Band, X-Agent-DID-Verified in response headers, 3ms latency
+  Note:   First call cold (8s), calls 2+ warm (<200ms). KONG_NGINX_WORKER_PROCESSES=1.
+
+SCORING DEMO STATUS: WORKING ✅
+  Result: score 999/TRUSTED → 274/RESTRICTED
+  policy_fired: bulk_pii_access_prevention_v1
+  Both z-score (worst_z: 5.84) and policy (pii_field_access_rate 0.35 > 0.30) firing
+
+OPEN BUG (non-blocking):
+  fp_candidates org_id uuid constraint — does not affect demo or pilot
 
 RECENT COMMITS
+03354ab feat: Kong plugin Redis auth, response headers, single worker, sub-5ms latency
+8e27554 fix: update policy test vector to recalibrated thresholds v1.1
+5c65e0a fix: policy engine wired to consumer, upsert score store, policy threshold calibration, config in Docker image
 9d1b428 refactor: split main.go into handlers package — W18 closed
 a48a066 feat: dashboard v2 — live health polling, decisions table — W14 closed
 86b43cd docs: async scoring pipeline explainer — W4 closed
