@@ -72,9 +72,9 @@ Installation time: under 4 hours, customer-hosted, no external dependencies.
 |--------|-------|
 | Call-level overhead | 0.25ns (Linux), 0 B/op allocations |
 | Score computation p99 | 10ms hard ceiling |
-| False positive rate | 0.00% on 100-scenario held-out validation corpus |
-| True positive rate | 86.67% |
-| F1 score | 0.9286 |
+| False positive rate | 0.00% on 150-scenario internal validation corpus (bounded <2.0% at 95% CI) |
+| True positive rate | 88.00% (44/50) |
+| F1 score | 0.9362 |
 | Precision | 100% (zero legitimate agents blocked) |
 | Adversarial baseline poisoning detection | 100% (10/10 slow-walk scenarios) |
 | Detection proof runtime | ~60 seconds streaming |

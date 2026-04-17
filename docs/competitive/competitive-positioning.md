@@ -199,7 +199,7 @@ Recite these without hesitation in every conversation:
 | TP rate | 88% (44/50) | Above 85% gate [F] |
 | Held-out TP | 100% (6/6) | Unseen scenarios [F] |
 | Slow-walk detection | 100% | 10/10 scenarios [F] |
-| F1 score | 0.9286 | [F] |
+| F1 score | 0.9362 | [F] |
 | Precision | 100% | [F] |
 | Call overhead | 0.25ns | Linux production [F] |
 | Install time | 4 hours | G-WEDGE gate [F] |

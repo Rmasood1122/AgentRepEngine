@@ -47,7 +47,7 @@ Trigger:     847 PII field accesses in 90 min (4.2σ above baseline)
 Score:       700 → 187 (BLOCKED)
 Policy:      bulk_pii_access_prevention_v1
 Action:      Human review before re-authorization
-FP rate:     0.00% on 150-scenario internal validation corpus (95% CI: <3.6%). Production target: <0.1% (Visa standard)
+FP rate:     0.00% on 150-scenario internal validation corpus (95% CI: <2.0%). Production target: <0.1% (Visa standard)
 Hash chain:  valid — tamper-evident audit trail
 ```
 
