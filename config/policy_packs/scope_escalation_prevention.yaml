@@ -13,7 +13,7 @@ thresholds:
   permission_escalation_count:
     warning: 1
     throttle: 2
-    block: 1       # any cross-tenant = immediate block
+    block: 3       # escalates from throttle
 
   cross_tenant_probe_count:
     warning: 0     # zero tolerance

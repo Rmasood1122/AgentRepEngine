@@ -116,11 +116,65 @@ func loadPolicyPack(path string) (*PolicyPack, error) {
 		return nil, fmt.Errorf("parse policy YAML: %w", err)
 	}
 
-	if pack.Name == "" {
-		return nil, fmt.Errorf("policy pack missing name in %s", path)
+	if err := validatePolicyPack(&pack, path); err != nil {
+		return nil, err
 	}
 
 	return &pack, nil
+}
+
+// validatePolicyPack performs strict schema validation on a loaded policy pack.
+// A1 Hardening Sprint: prevents misconfiguration crash at pilot deployment.
+// Every field required for enforcement must be present and valid.
+// Fails fast with a clear error message naming the exact field and file.
+func validatePolicyPack(pack *PolicyPack, path string) error {
+	if pack.Name == "" {
+		return fmt.Errorf("policy pack missing required field 'name' in %s", path)
+	}
+	if pack.Version == "" {
+		return fmt.Errorf("policy pack %q missing required field 'version' in %s", pack.Name, path)
+	}
+	if pack.EnforcementAction == "" {
+		return fmt.Errorf("policy pack %q missing required field 'enforcement_action' in %s", pack.Name, path)
+	}
+	if pack.EscalationAction == "" {
+		return fmt.Errorf("policy pack %q missing required field 'escalation_action' in %s", pack.Name, path)
+	}
+	if len(pack.Thresholds) == 0 {
+		return fmt.Errorf("policy pack %q has no thresholds defined in %s -- at least one threshold required", pack.Name, path)
+	}
+
+	// Validate each threshold: no negative values, ordering must be warning <= throttle <= block
+	for feature, t := range pack.Thresholds {
+		if t.Warning < 0 || t.Throttle < 0 || t.Block < 0 {
+			return fmt.Errorf(
+				"policy pack %q feature %q has negative threshold (warning=%.2f throttle=%.2f block=%.2f) in %s",
+				pack.Name, feature, t.Warning, t.Throttle, t.Block, path,
+			)
+		}
+
+		// Only validate ordering between levels that are set (> 0)
+		if t.Warning > 0 && t.Throttle > 0 && t.Warning > t.Throttle {
+			return fmt.Errorf(
+				"policy pack %q feature %q: warning (%.2f) must be <= throttle (%.2f) in %s",
+				pack.Name, feature, t.Warning, t.Throttle, path,
+			)
+		}
+		if t.Throttle > 0 && t.Block > 0 && t.Throttle > t.Block {
+			return fmt.Errorf(
+				"policy pack %q feature %q: throttle (%.2f) must be <= block (%.2f) in %s",
+				pack.Name, feature, t.Throttle, t.Block, path,
+			)
+		}
+		if t.Warning > 0 && t.Block > 0 && t.Warning > t.Block {
+			return fmt.Errorf(
+				"policy pack %q feature %q: warning (%.2f) must be <= block (%.2f) in %s",
+				pack.Name, feature, t.Warning, t.Block, path,
+			)
+		}
+	}
+
+	return nil
 }
 
 // Evaluate checks a feature vector against all loaded policy packs.

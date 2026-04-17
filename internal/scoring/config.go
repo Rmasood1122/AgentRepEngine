@@ -45,7 +45,36 @@ func LoadScoringConfig(path string) (*ScoringConfig, error) {
 		)
 	}
 
+	// A1 Hardening Sprint: validate all field ranges, not just weight sum
+	if err := validateScoringConfig(&cfg); err != nil {
+		return nil, fmt.Errorf("scoring config validation failed: %w", err)
+	}
+
 	return &cfg, nil
+}
+
+// validateScoringConfig checks all scoring parameters are within valid ranges.
+// Prevents silent misconfiguration that causes incorrect enforcement decisions.
+func validateScoringConfig(cfg *ScoringConfig) error {
+	if cfg.DecayRate < 0 {
+		return fmt.Errorf("decay_rate must be >= 0, got %.4f", cfg.DecayRate)
+	}
+	if cfg.ZScoreThreshold <= 0 {
+		return fmt.Errorf("zscore_threshold must be > 0, got %.4f", cfg.ZScoreThreshold)
+	}
+	if cfg.PenaltyPerSigma < 0 {
+		return fmt.Errorf("penalty_per_sigma must be >= 0, got %.4f", cfg.PenaltyPerSigma)
+	}
+	if cfg.MaxPenalty < 0 {
+		return fmt.Errorf("max_penalty must be >= 0, got %.4f", cfg.MaxPenalty)
+	}
+	if cfg.MinStdDev <= 0 {
+		return fmt.Errorf("min_std_dev must be > 0, got %.4f", cfg.MinStdDev)
+	}
+	if cfg.BootstrapSampleThreshold < 0 {
+		return fmt.Errorf("bootstrap_sample_threshold must be >= 0, got %d", cfg.BootstrapSampleThreshold)
+	}
+	return nil
 }
 
 // ToScoreWeights converts config to the ScoreWeights struct.
