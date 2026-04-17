@@ -93,6 +93,14 @@ func main() {
 	go consumer.Start()
 	slog.Info("event consumer started")
 
+	// A2 Hardening Sprint: per-agent-DID rate limit on /event.
+	// 100 events/min per agent. 16x headroom over legitimate peak.
+	eventRateLimiter := handlers.NewRateLimiter(
+		handlers.RateLimitPerMinute, handlers.RateLimitWindow)
+	slog.Info("event_rate_limiter_started",
+		"limit_per_min", handlers.RateLimitPerMinute,
+		"window", handlers.RateLimitWindow.String())
+
 	store.StartRetentionJob(db)
 	slog.Info("retention job started",
 		"retention_days", store.RetentionDays,
@@ -165,7 +173,7 @@ func main() {
 	// AUTHENTICATED — all endpoints exposing behavioral data or accepting agent events:
 	mux.HandleFunc("/verify", auth(handlers.VerifyHandler(scoreStore)))
 	mux.HandleFunc("/score/", auth(handlers.ScoreHandler(scoreStore)))
-	mux.HandleFunc("/event", auth(handlers.EventHandler(db, scoreStore)))
+	mux.HandleFunc("/event", auth(handlers.RateLimitMiddleware(eventRateLimiter, handlers.EventHandler(db, scoreStore))))
 	mux.HandleFunc("/audit/replay", auth(audit.NewHandler(db).ReplayHandler))
 	mux.HandleFunc("/audit/export", auth(audit.NewHandler(db).ExportHandler))
 	mux.HandleFunc("/dashboard", auth(handlers.DashboardHandler(db)))
