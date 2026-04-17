@@ -78,4 +78,11 @@ var (
 		Name: "are_jwt_verify_fallback_total",
 		Help: "JWT verifications that fell back to unverified extraction (verify service unavailable)",
 	})
+
+        // A3 Hardening Sprint: Redis memory utilization gauge.
+        // Alert threshold: 80%. Prevents silent score staleness from Redis OOM.
+        RedisMemoryPct = promauto.NewGauge(prometheus.GaugeOpts{
+                Name: "are_redis_memory_pct",
+                Help: "Redis memory usage as percentage of maxmemory (0-100)",
+        })
 )

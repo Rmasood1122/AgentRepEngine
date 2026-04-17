@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/subtle"
 	"database/sql"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -124,6 +125,20 @@ func main() {
 				ORDER BY date DESC LIMIT 1`).Scan(&fpRate)
 			metrics.FPRateGauge.Set(fpRate)
 
+			// A3 Hardening Sprint: Redis memory utilization check.
+			// Fires every 60s. Logs warning at 80%. Prevents silent OOM.
+			if info, err := scoreStore.GetRedisClient().Info(context.Background(), "memory").Result(); err == nil {
+				memPct := parseRedisMemoryPct(info)
+				metrics.RedisMemoryPct.Set(memPct)
+				if memPct > 80.0 {
+					slog.Warn("redis_memory_high",
+						"memory_pct", fmt.Sprintf("%.1f", memPct),
+						"threshold", 80.0,
+						"action", "investigate_memory_growth",
+					)
+				}
+			}
+
 			time.Sleep(60 * time.Second)
 		}
 	}()
@@ -219,6 +234,24 @@ func extractBearer(header string) string {
 		return ""
 	}
 	return strings.TrimSpace(strings.TrimPrefix(header, prefix))
+}
+
+// parseRedisMemoryPct extracts memory usage percentage from Redis INFO memory output.
+// Returns 0.0 if maxmemory is not set (unbounded).
+func parseRedisMemoryPct(info string) float64 {
+	var usedMem, maxMem int64
+	for _, line := range strings.Split(info, "\r\n") {
+		if strings.HasPrefix(line, "used_memory:") {
+			fmt.Sscanf(line, "used_memory:%d", &usedMem)
+		}
+		if strings.HasPrefix(line, "maxmemory:") {
+			fmt.Sscanf(line, "maxmemory:%d", &maxMem)
+		}
+	}
+	if maxMem <= 0 {
+		return 0.0 // no limit set
+	}
+	return float64(usedMem) / float64(maxMem) * 100.0
 }
 
 func getEnv(key, fallback string) string {
