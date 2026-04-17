@@ -16,6 +16,7 @@ ACTIVE FILES — full attention, apply every session:
   10. ARE_BULLETPROOF v1.0           ← BULLETPROOF RUN fires April 27 before Lloyd
   11. APEX-OS v1.0                   ← Ω audit, pipeline health, commercial intel log
   12. APEX_DECISION_GOVERNANCE v1.0  ← APEX DECIDE fires before any arch change
+  13. HARDENING_SPRINT.md            ← FAANG hardening plan, session-persistent execution
 
 ARCHIVE FILES — reference only, do not generate tasks from these:
   - LEARNING_INTELLIGENCE v3.1  ← learning history, 73 learnings
@@ -83,17 +84,17 @@ RULE: Any unchecked box = that action executes before session opens.
 CURRENT STATE — April 16, 2026
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-APEX VERSION: APEX v5.2 + ZROS v2.8 + INTEGRITY_SENTINEL v1.0 + ARE_BULLETPROOF v1.0 + APEX-OS v1.0 + APEX_DECISION_GOVERNANCE v1.0
+APEX VERSION: APEX v5.2 + ZROS v2.8 + INTEGRITY_SENTINEL v1.0 + ARE_BULLETPROOF v1.0 + APEX-OS v1.0 + APEX_DECISION_GOVERNANCE v1.0 + HARDENING_SPRINT v1.0
 APEX MODE: ENTERPRISE (Mode 4) | SESSION TYPE: ENGINEERING
 COMPOUNDING ACTIONS: ADD3 ✅ ADD1 ✅ ADD2 ✅ ADD4 ⬜ ADD5 ⬜
-NEXT SESSION: G-COMMERCIAL gate first — check Gyamfi/Watkin-Child/Unmukt replies.
-              All pre-Lloyd compounding items COMPLETE.
-              Remaining: HV-3 (after Watkin-Child), HV-5 (after Lloyd pilot), UT-3 (after LoU).
-              Focus: Lloyd meeting April 28 — TW-REHEARSAL C1-C15, demo run, LoU ready.
+NEXT SESSION: "HARDENING SPRINT — read HARDENING_SPRINT.md, start A1"
+              Lloyd meeting pushed ~30 days. Product hardening is primary.
+              Momina FP-6 review in progress (sent April 16).
+              Gravity Score: 3/10 (G1:0, G2:1, G3:0, G4:0, G5:2)
 REPO: https://github.com/Rehanrana11/AgentRepEngine
 Branch: master (push with git push origin master — NOT main)
-HEAD: 03354ab
-go test ./... — ALL GREEN ✅ (21 packages passing)
+HEAD: c4f50c8
+go test ./... — 12/14 green ✅ (tests/ + tests/kong/ require live Docker stack)
 ZROS GATES: G-FP ✅ PASS | G-HARDEN ✅ PASS | G-IDENTITY ✅ PASS
 Ω SCAN (last session): Ω1=0 Ω2=0 Ω3=0 Ω4=0
 APEX-OS STATUS: Pipeline Health=6/10 | Last calibration=UNCALIBRATED
@@ -102,8 +103,8 @@ D005 VERDICT: Character Capital rejection logged — calibration loop open
 
 SESSION CLOSE RECORD
   Session date:     April 16, 2026
-  Last action:      Kong demo working + scoring demo working — 3 commits pushed
-  Irreversible:     YES ✅ — commits 5c65e0a, 8e27554, 03354ab pushed
+  Last action:      FP-6 paper + Momina review sent + metrics standardized + HARDENING_SPRINT committed
+  Irreversible:     YES ✅ — 6 commits (8c93939, fbdad99, b7e9a8a, ca3c8ea, 876f699, c4f50c8) + Momina message sent
 
 KONG DEMO STATUS: WORKING ✅
   Warmup: JWT=$(go run ./cmd/gentoken/main.go 2>/dev/null)
@@ -121,6 +122,12 @@ OPEN BUG (non-blocking):
   fp_candidates org_id uuid constraint — does not affect demo or pilot
 
 RECENT COMMITS
+c4f50c8 ops: HARDENING_SPRINT v1.0 — 19-item FAANG-grade hardening plan
+876f699 fix: remaining stale metrics in CLAUDE_MASTER + BUILD_INTELLIGENCE
+ca3c8ea fix: standardize metrics — 150 scenarios, 88% TP, F1 0.9362, CI <2.0%, specs dir
+b7e9a8a docs: FP corpus independence v2.0 — 150 scenarios, 11 categories
+fbdad99 docs: FP-6 methodology paper v2.0 — complete 12-section paper
+8c93939 docs: eval harness methodology v2.0 — fixed categories, CI bounds
 03354ab feat: Kong plugin Redis auth, response headers, single worker, sub-5ms latency
 8e27554 fix: update policy test vector to recalibrated thresholds v1.1
 5c65e0a fix: policy engine wired to consumer, upsert score store, policy threshold calibration, config in Docker image
@@ -403,7 +410,7 @@ FP reframe:  "We target the Visa standard — below 0.1% FP in production."
 INFRASTRUCTURE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Tests:          ALL GREEN — go test ./... ✅
+Tests:          12/14 green — go test ./... (tests/ + tests/kong/ need Docker stack)
 Docker:         All containers healthy
 PostgreSQL:     port 5433 — agentrepengine-postgres-1
 Redis:          AOF+RDB, 512mb noeviction, are_admin ACL
