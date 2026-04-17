@@ -5,9 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"math"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/agentrepengine/are/internal/metrics"
 )
 
 // SIEMEvent is the payload sent to the SIEM webhook.
@@ -119,6 +122,14 @@ func (s *SIEMWebhook) SendQueueBacklog(depth int) {
 	)
 }
 
+
+// A4 Hardening Sprint: retry constants for SIEM delivery.
+// Exponential backoff: 30s, 60s, 120s. Prevents thundering herd.
+const (
+	SIEMMaxRetries  = 3
+	SIEMBaseBackoff = 30 * time.Second
+)
+
 func (s *SIEMWebhook) send(
 	agentDID, decision string,
 	score, scoreDelta int,
@@ -149,13 +160,49 @@ func (s *SIEMWebhook) send(
 	payload, err := json.Marshal(event)
 	if err != nil {
 		slog.Error("siem_marshal_failed", "error", err)
+		metrics.SIEMDeliveryTotal.WithLabelValues("failed").Inc()
 		return
 	}
 
+	// A4: Retry with exponential backoff (30s, 60s, 120s).
+	for attempt := 0; attempt <= SIEMMaxRetries; attempt++ {
+		if attempt > 0 {
+			backoff := time.Duration(math.Pow(2, float64(attempt-1))) * SIEMBaseBackoff
+			slog.Warn("siem_retry",
+				"agent_did", agentDID,
+				"attempt", attempt,
+				"backoff", backoff.String(),
+			)
+			time.Sleep(backoff)
+		}
+
+		success, permanent := s.doSend(payload, agentDID, decision, severity)
+		if success {
+			metrics.SIEMDeliveryTotal.WithLabelValues("success").Inc()
+			return
+		}
+		if permanent {
+			break
+		}
+	}
+
+	metrics.SIEMDeliveryTotal.WithLabelValues("failed").Inc()
+	slog.Error("siem_delivery_exhausted",
+		"agent_did", agentDID,
+		"decision", decision,
+		"max_retries", SIEMMaxRetries,
+	)
+}
+
+// doSend attempts one SIEM delivery. Returns (success, permanentFailure).
+func (s *SIEMWebhook) doSend(
+	payload []byte,
+	agentDID, decision, severity string,
+) (bool, bool) {
 	req, err := http.NewRequest("POST", s.webhookURL, bytes.NewBuffer(payload))
 	if err != nil {
 		slog.Error("siem_request_failed", "error", err)
-		return
+		return false, true
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -170,16 +217,24 @@ func (s *SIEMWebhook) send(
 			"decision", decision,
 			"error", err,
 		)
-		return
+		return false, false
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode >= 500 {
+		slog.Warn("siem_server_error",
+			"agent_did", agentDID,
+			"status", resp.StatusCode,
+		)
+		return false, false
+	}
 
 	if resp.StatusCode >= 400 {
 		slog.Error("siem_rejected",
 			"agent_did", agentDID,
 			"status", resp.StatusCode,
 		)
-		return
+		return false, true
 	}
 
 	slog.Info("siem_delivered",
@@ -188,4 +243,5 @@ func (s *SIEMWebhook) send(
 		"severity", severity,
 		"status", resp.StatusCode,
 	)
+	return true, false
 }
