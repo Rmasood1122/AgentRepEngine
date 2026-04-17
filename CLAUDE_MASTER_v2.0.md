@@ -869,7 +869,7 @@ These are non-negotiable in any enterprise conversation:
    validation corpus. External validation available during pilot."
 
 5. 4-metric format required for any performance claim (L87):
-   "TP=86.67%, FP=0.00%, Precision=100%, F1=0.9286"
+   "TP=88.00%, FP=0.00%, Precision=100%, F1=0.9362"
 
 6. Do not discuss federation in Phase 1 sales conversations.
    Do not claim SOC2 Type II — claim "SOC2-ready architecture."

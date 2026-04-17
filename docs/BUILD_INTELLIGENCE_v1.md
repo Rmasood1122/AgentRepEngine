@@ -408,8 +408,8 @@ If you are picking this up for the first time:
 SECTION 9 — THE FOUR NUMBERS THAT MATTER
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-0.00%   FP rate on 100-scenario internal corpus
-86.67%  TP rate on 30-scenario attack corpus
+0.00%   FP rate on 150-scenario internal corpus (bounded <2.0% at 95% CI)
+88.00%  TP rate on 50-scenario attack corpus (TP=88%, Precision=100%, F1=0.9362)
 100%    Slow-walk detection via score + HIGH_RISK VERIFY (10 scenarios)
 ~60     Seconds for the full demo end-to-end (streaming output)
 
@@ -516,7 +516,7 @@ April 12, 2026 | 002a1af | TW-6 VARIANCE GROWTH RATE
 
 April 12, 2026 | 5b612f2 | FP CORPUS INDEPENDENCE DOC
   Formal methodology statement for FP validation corpus.
-  Covers: spec-first protocol, CI disclosure [0%, 3.6%] on 100 scenarios,
+  Covers: spec-first protocol, CI disclosure [0%, 2.0%] on 150 scenarios,
   Tier 1→2→3 claim ladder, path to production validation.
   File: docs/enterprise/fp-corpus-independence.md
   STATUS: COMMITTED ✅
@@ -557,7 +557,7 @@ April 12, 2026 | 002a1af | TW-6 VARIANCE GROWTH RATE
 
 April 12, 2026 | 5b612f2 | FP CORPUS INDEPENDENCE DOC
   Formal methodology statement for FP validation corpus.
-  Covers: spec-first protocol, CI [0%, 3.6%] on 100 scenarios, Tier 1-3 ladder.
+  Covers: spec-first protocol, CI [0%, 2.0%] on 150 scenarios, Tier 1-3 ladder.
   File: docs/enterprise/fp-corpus-independence.md
   STATUS: COMMITTED
 
