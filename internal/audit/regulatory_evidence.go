@@ -226,7 +226,7 @@ func populateDORA(db *sql.DB, pkg *RegulatoryPackage, from, to time.Time) error 
 
 	fpRow := db.QueryRow(`
 		SELECT COALESCE(AVG(fp_rate), 0.0) FROM daily_fp_metrics
-		WHERE metric_date BETWEEN $1 AND $2
+		WHERE date BETWEEN $1 AND $2
 	`, from, to)
 	return fpRow.Scan(&pkg.FPRate)
 }
