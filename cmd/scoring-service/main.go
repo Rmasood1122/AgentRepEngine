@@ -212,6 +212,7 @@ func main() {
 	mux.HandleFunc("/api/regulatory-package", auth(handlers.RegulatoryPackageHandler(db)))
 	mux.HandleFunc("/agent/", auth(apiHandler.HandleAgentClear))
 	mux.HandleFunc("/enforcement/override", auth(handlers.OverrideHandler(db, modeCtrl)))
+	mux.HandleFunc("/certificate/issue/", auth(handlers.CertificationHandler(db)))
 
 	srv := &http.Server{
 		Addr:         ":" + port,
