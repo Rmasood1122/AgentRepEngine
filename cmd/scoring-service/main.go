@@ -139,6 +139,23 @@ func main() {
 				}
 			}
 
+			// OTel Feature: Per-agent reputation score gauge.
+			metrics.AgentScoreGauge.Reset()
+			agentRows, agentErr := db.Query(`
+				SELECT DISTINCT ON (agent_id) agent_id, score, band
+				FROM enforcement_decisions
+				ORDER BY agent_id, created_at DESC`)
+			if agentErr == nil {
+				for agentRows.Next() {
+					var agentID, band string
+					var score float64
+					if agentRows.Scan(&agentID, &score, &band) == nil {
+						metrics.AgentScoreGauge.WithLabelValues(agentID, band).Set(score)
+					}
+				}
+				agentRows.Close()
+			}
+
 			time.Sleep(60 * time.Second)
 		}
 	}()

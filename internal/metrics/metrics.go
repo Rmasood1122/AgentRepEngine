@@ -79,10 +79,32 @@ var (
 		Help: "JWT verifications that fell back to unverified extraction (verify service unavailable)",
 	})
 
-        // A3 Hardening Sprint: Redis memory utilization gauge.
-        // Alert threshold: 80%. Prevents silent score staleness from Redis OOM.
-        RedisMemoryPct = promauto.NewGauge(prometheus.GaugeOpts{
-                Name: "are_redis_memory_pct",
-                Help: "Redis memory usage as percentage of maxmemory (0-100)",
-        })
+	// A3 Hardening Sprint: Redis memory utilization gauge.
+	// Alert threshold: 80%. Prevents silent score staleness from Redis OOM.
+	RedisMemoryPct = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "are_redis_memory_pct",
+		Help: "Redis memory usage as percentage of maxmemory (0-100)",
+	})
+
+	// OTel Feature: Per-agent reputation score — Kong dashboard visibility.
+	// Background updater sets latest score per agent every 60s.
+	// High cardinality acceptable for Phase 1 pilot agent counts.
+	AgentScoreGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "are_agent_score",
+		Help: "Current reputation score per agent",
+	}, []string{"agent_did", "band"})
+
+	// OTel Feature: Per-agent anomaly events — behavioral drift counter.
+	// Incremented at scoring path when z-score exceeds threshold.
+	AgentAnomaliesTotal = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "are_agent_anomalies_total",
+		Help: "Total behavioral anomalies detected per agent",
+	}, []string{"agent_did"})
+
+	// OTel Feature: Enforcement decisions by regulatory framework.
+	// Incremented when compliance export tags a decision to a framework.
+	EnforcementByFramework = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "are_enforcement_by_framework_total",
+		Help: "Enforcement decisions tagged by regulatory framework",
+	}, []string{"framework", "decision"})
 )

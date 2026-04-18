@@ -36,7 +36,7 @@ func BuildCausalChain(db *sql.DB, enforcementEventID string) (*CausalChain, erro
 
 	err := db.QueryRow(`
 		SELECT agent_id, action, anomaly_score, created_at
-		FROM enforcement_events
+		FROM enforcement_decisions
 		WHERE event_id = $1
 	`, enforcementEventID).Scan(&rootAgentID, &action, &anomalyScore, &createdAt)
 
@@ -59,7 +59,7 @@ func BuildCausalChain(db *sql.DB, enforcementEventID string) (*CausalChain, erro
 				ee.created_at,
 				0 AS depth
 			FROM agent_calls ac
-			JOIN enforcement_events ee ON ee.agent_id = ac.callee_agent_id
+			JOIN enforcement_decisions ee ON ee.agent_id = ac.callee_agent_id
 			WHERE ac.callee_agent_id = $1
 
 			UNION ALL
@@ -73,7 +73,7 @@ func BuildCausalChain(db *sql.DB, enforcementEventID string) (*CausalChain, erro
 				ee2.created_at,
 				chain.depth + 1
 			FROM agent_calls ac2
-			JOIN enforcement_events ee2 ON ee2.agent_id = ac2.callee_agent_id
+			JOIN enforcement_decisions ee2 ON ee2.agent_id = ac2.callee_agent_id
 			JOIN chain ON chain.caller_agent_id = ac2.callee_agent_id
 			WHERE chain.depth < 10
 		)
