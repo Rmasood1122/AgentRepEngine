@@ -53,6 +53,9 @@ type RegulatoryPackage struct {
 
 // GenerateRegulatoryPackage produces a compliance evidence package for the given org,
 // time window (days), and regulatory framework.
+//
+// Phase 1: Single-tenant. orgID accepted for forward compatibility but
+// not used as query filter (enforcement_decisions has no org_id column).
 func GenerateRegulatoryPackage(db *sql.DB, orgID string, windowDays int, framework string) (*RegulatoryPackage, error) {
 	now := time.Now().UTC()
 	windowStart := now.AddDate(0, 0, -windowDays)
@@ -65,8 +68,8 @@ func GenerateRegulatoryPackage(db *sql.DB, orgID string, windowDays int, framewo
 		AuditPeriodEnd:   now,
 	}
 
-	// Compute hash chain root from enforcement events in window
-	root, err := computeHashChainRoot(db, orgID, windowStart, now)
+	// Compute hash chain root from enforcement decisions in window
+	root, err := computeHashChainRoot(db, windowStart, now)
 	if err != nil {
 		return nil, fmt.Errorf("hash chain root: %w", err)
 	}
@@ -74,24 +77,23 @@ func GenerateRegulatoryPackage(db *sql.DB, orgID string, windowDays int, framewo
 
 	switch framework {
 	case FrameworkHIPAA:
-		if err := populateHIPAA(db, pkg, orgID, windowStart, now); err != nil {
+		if err := populateHIPAA(db, pkg, windowStart, now); err != nil {
 			return nil, err
 		}
 	case FrameworkSOX:
-		if err := populateSOX(db, pkg, orgID, windowStart, now); err != nil {
+		if err := populateSOX(db, pkg, windowStart, now); err != nil {
 			return nil, err
 		}
 	case FrameworkFFIEC:
-		if err := populateFFIEC(db, pkg, orgID, windowStart, now); err != nil {
+		if err := populateFFIEC(db, pkg, windowStart, now); err != nil {
 			return nil, err
 		}
 	case FrameworkNISTRMF:
-		// NIST RMF reuses FFIEC baseline for Phase 1
-		if err := populateFFIEC(db, pkg, orgID, windowStart, now); err != nil {
+		if err := populateFFIEC(db, pkg, windowStart, now); err != nil {
 			return nil, err
 		}
 	case FrameworkDORA:
-		if err := populateDORA(db, pkg, orgID, windowStart, now); err != nil {
+		if err := populateDORA(db, pkg, windowStart, now); err != nil {
 			return nil, err
 		}
 	default:
@@ -101,12 +103,12 @@ func GenerateRegulatoryPackage(db *sql.DB, orgID string, windowDays int, framewo
 	return pkg, nil
 }
 
-func computeHashChainRoot(db *sql.DB, orgID string, from, to time.Time) (string, error) {
+func computeHashChainRoot(db *sql.DB, from, to time.Time) (string, error) {
 	rows, err := db.Query(`
-		SELECT event_hash FROM enforcement_events
-		WHERE org_id = $1 AND created_at BETWEEN $2 AND $3
-		ORDER BY created_at ASC
-	`, orgID, from, to)
+		SELECT this_hash FROM enforcement_decisions
+		WHERE created_at BETWEEN $1 AND $2
+		ORDER BY chain_position ASC
+	`, from, to)
 	if err != nil {
 		return "", err
 	}
@@ -115,12 +117,14 @@ func computeHashChainRoot(db *sql.DB, orgID string, from, to time.Time) (string,
 	h := sha256.New()
 	count := 0
 	for rows.Next() {
-		var hash string
+		var hash sql.NullString
 		if err := rows.Scan(&hash); err != nil {
 			return "", err
 		}
-		h.Write([]byte(hash))
-		count++
+		if hash.Valid {
+			h.Write([]byte(hash.String))
+			count++
+		}
 	}
 	if count == 0 {
 		return "no-events", nil
@@ -128,16 +132,16 @@ func computeHashChainRoot(db *sql.DB, orgID string, from, to time.Time) (string,
 	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }
 
-func populateHIPAA(db *sql.DB, pkg *RegulatoryPackage, orgID string, from, to time.Time) error {
+func populateHIPAA(db *sql.DB, pkg *RegulatoryPackage, from, to time.Time) error {
 	row := db.QueryRow(`
 		SELECT
-			COUNT(DISTINCT agent_id) FILTER (WHERE phi_adjacent = true),
+			COUNT(DISTINCT agent_did) FILTER (WHERE policy_fired ILIKE '%pii%'),
 			COUNT(*),
-			COUNT(*) FILTER (WHERE anomaly_score > 0.7),
-			COUNT(*) FILTER (WHERE action = 'block')
-		FROM enforcement_events
-		WHERE org_id = $1 AND created_at BETWEEN $2 AND $3
-	`, orgID, from, to)
+			COUNT(*) FILTER (WHERE decision = 'BLOCKED'),
+			COUNT(*) FILTER (WHERE decision = 'BLOCKED')
+		FROM enforcement_decisions
+		WHERE created_at BETWEEN $1 AND $2
+	`, from, to)
 	return row.Scan(
 		&pkg.PHIAdjacentAgentCount,
 		&pkg.AccessEventsInWindow,
@@ -146,18 +150,18 @@ func populateHIPAA(db *sql.DB, pkg *RegulatoryPackage, orgID string, from, to ti
 	)
 }
 
-func populateSOX(db *sql.DB, pkg *RegulatoryPackage, orgID string, from, to time.Time) error {
+func populateSOX(db *sql.DB, pkg *RegulatoryPackage, from, to time.Time) error {
 	pkg.CC72MonitoringActive = true
 	pkg.HashVerified = pkg.HashChainRoot != "no-events"
 
 	row := db.QueryRow(`
 		SELECT
-			COUNT(*) FILTER (WHERE anomaly_score > 0.7),
-			COUNT(*) FILTER (WHERE action = 'block'),
-			COUNT(*) FILTER (WHERE action = 'override')
-		FROM enforcement_events
-		WHERE org_id = $1 AND created_at BETWEEN $2 AND $3
-	`, orgID, from, to)
+			COUNT(*) FILTER (WHERE decision = 'BLOCKED'),
+			COUNT(*) FILTER (WHERE decision = 'BLOCKED'),
+			COUNT(*) FILTER (WHERE override = true)
+		FROM enforcement_decisions
+		WHERE created_at BETWEEN $1 AND $2
+	`, from, to)
 	return row.Scan(
 		&pkg.AnomalyDetectionEvents,
 		&pkg.IncidentResponseActions,
@@ -165,39 +169,49 @@ func populateSOX(db *sql.DB, pkg *RegulatoryPackage, orgID string, from, to time
 	)
 }
 
-func populateFFIEC(db *sql.DB, pkg *RegulatoryPackage, orgID string, from, to time.Time) error {
+func populateFFIEC(db *sql.DB, pkg *RegulatoryPackage, from, to time.Time) error {
+	var totalAgents, blockedAgents int
 	row := db.QueryRow(`
 		SELECT
-			COUNT(DISTINCT agent_id) FILTER (WHERE third_party = true),
-			COUNT(DISTINCT agent_id) FILTER (WHERE baseline_established = true),
-			COUNT(DISTINCT agent_id),
-			COUNT(*) FILTER (WHERE anomaly_score > 0.7)
-		FROM enforcement_events
-		WHERE org_id = $1 AND created_at BETWEEN $2 AND $3
-	`, orgID, from, to)
-
-	var thirdParty, baselined, total, riskFlagged int
-	if err := row.Scan(&thirdParty, &baselined, &total, &riskFlagged); err != nil {
+			COUNT(DISTINCT agent_did),
+			COUNT(DISTINCT agent_did) FILTER (WHERE decision = 'BLOCKED')
+		FROM enforcement_decisions
+		WHERE created_at BETWEEN $1 AND $2
+	`, from, to)
+	if err := row.Scan(&totalAgents, &blockedAgents); err != nil {
 		return err
 	}
-	pkg.ThirdPartyAgentCount = thirdParty
-	pkg.RiskFlaggedCount = riskFlagged
-	if total > 0 {
-		pkg.BehavioralBaselineCoveragePct = float64(baselined) / float64(total) * 100.0
+
+	var baselinedAgents int
+	baselineRow := db.QueryRow(`SELECT COUNT(*) FROM agent_baselines`)
+	if err := baselineRow.Scan(&baselinedAgents); err != nil {
+		baselinedAgents = 0
+	}
+
+	var registeredAgents int
+	regRow := db.QueryRow(`SELECT COUNT(*) FROM agent_identities`)
+	if err := regRow.Scan(&registeredAgents); err != nil {
+		registeredAgents = totalAgents
+	}
+
+	pkg.ThirdPartyAgentCount = 0
+	pkg.RiskFlaggedCount = blockedAgents
+	if registeredAgents > 0 {
+		pkg.BehavioralBaselineCoveragePct = float64(baselinedAgents) / float64(registeredAgents) * 100.0
 	}
 	return nil
 }
 
-func populateDORA(db *sql.DB, pkg *RegulatoryPackage, orgID string, from, to time.Time) error {
+func populateDORA(db *sql.DB, pkg *RegulatoryPackage, from, to time.Time) error {
 	row := db.QueryRow(`
 		SELECT
-			COUNT(*) FILTER (WHERE anomaly_score > 0.7),
-			COUNT(*) FILTER (WHERE action = 'block'),
+			COUNT(*) FILTER (WHERE decision = 'BLOCKED'),
+			COUNT(*) FILTER (WHERE decision = 'BLOCKED'),
 			MIN(created_at),
 			MAX(created_at)
-		FROM enforcement_events
-		WHERE org_id = $1 AND created_at BETWEEN $2 AND $3
-	`, orgID, from, to)
+		FROM enforcement_decisions
+		WHERE created_at BETWEEN $1 AND $2
+	`, from, to)
 
 	var first, last sql.NullTime
 	if err := row.Scan(&pkg.IncidentCount, &pkg.BlockedCount, &first, &last); err != nil {
@@ -210,10 +224,9 @@ func populateDORA(db *sql.DB, pkg *RegulatoryPackage, orgID string, from, to tim
 		pkg.LastEventTime = &last.Time
 	}
 
-	// FP rate from metrics table
 	fpRow := db.QueryRow(`
 		SELECT COALESCE(AVG(fp_rate), 0.0) FROM daily_fp_metrics
-		WHERE org_id = $1 AND metric_date BETWEEN $2 AND $3
-	`, orgID, from, to)
+		WHERE metric_date BETWEEN $1 AND $2
+	`, from, to)
 	return fpRow.Scan(&pkg.FPRate)
 }

@@ -28,22 +28,18 @@ func TestGenerateRegulatoryPackage_HIPAA(t *testing.T) {
 	}
 	defer db.Close()
 
-	orgID := "org-hipaa"
-	now := time.Now().UTC()
-	windowStart := now.AddDate(0, 0, -30)
+	// hash chain query — now uses enforcement_decisions, no org_id
+	mock.ExpectQuery("SELECT this_hash FROM enforcement_decisions").
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"this_hash"}).AddRow("abc123"))
 
-	// hash chain query
-	mock.ExpectQuery("SELECT event_hash FROM enforcement_events").
-		WithArgs(orgID, sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnRows(sqlmock.NewRows([]string{"event_hash"}).AddRow("abc123"))
-
-	// HIPAA query
+	// HIPAA query — no org_id
 	mock.ExpectQuery("SELECT").
-		WithArgs(orgID, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"phi", "access", "anomalous", "blocked"}).
 			AddRow(3, 100, 5, 2))
 
-	pkg, err := GenerateRegulatoryPackage(db, orgID, 30, FrameworkHIPAA)
+	pkg, err := GenerateRegulatoryPackage(db, "org-hipaa", 30, FrameworkHIPAA)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -62,7 +58,6 @@ func TestGenerateRegulatoryPackage_HIPAA(t *testing.T) {
 	if pkg.HashChainRoot == "" || pkg.HashChainRoot == "no-events" {
 		t.Error("expected non-empty hash chain root")
 	}
-	_ = windowStart
 }
 
 func TestGenerateRegulatoryPackage_SOX(t *testing.T) {
@@ -72,18 +67,16 @@ func TestGenerateRegulatoryPackage_SOX(t *testing.T) {
 	}
 	defer db.Close()
 
-	orgID := "org-sox"
-
-	mock.ExpectQuery("SELECT event_hash FROM enforcement_events").
-		WithArgs(orgID, sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnRows(sqlmock.NewRows([]string{"event_hash"}).AddRow("def456"))
+	mock.ExpectQuery("SELECT this_hash FROM enforcement_decisions").
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"this_hash"}).AddRow("def456"))
 
 	mock.ExpectQuery("SELECT").
-		WithArgs(orgID, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"anomaly", "incident", "override"}).
 			AddRow(10, 3, 1))
 
-	pkg, err := GenerateRegulatoryPackage(db, orgID, 30, FrameworkSOX)
+	pkg, err := GenerateRegulatoryPackage(db, "org-sox", 30, FrameworkSOX)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -105,23 +98,31 @@ func TestGenerateRegulatoryPackage_FFIEC(t *testing.T) {
 	}
 	defer db.Close()
 
-	orgID := "org-ffiec"
+	// hash chain — empty
+	mock.ExpectQuery("SELECT this_hash FROM enforcement_decisions").
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"this_hash"}))
 
-	mock.ExpectQuery("SELECT event_hash FROM enforcement_events").
-		WithArgs(orgID, sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnRows(sqlmock.NewRows([]string{"event_hash"}))
-
+	// FFIEC enforcement_decisions query
 	mock.ExpectQuery("SELECT").
-		WithArgs(orgID, sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnRows(sqlmock.NewRows([]string{"third_party", "baselined", "total", "risk_flagged"}).
-			AddRow(5, 8, 10, 3))
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"total_agents", "blocked_agents"}).
+			AddRow(10, 3))
 
-	pkg, err := GenerateRegulatoryPackage(db, orgID, 30, FrameworkFFIEC)
+	// agent_baselines count
+	mock.ExpectQuery("SELECT COUNT").
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(8))
+
+	// agent_identities count
+	mock.ExpectQuery("SELECT COUNT").
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(10))
+
+	pkg, err := GenerateRegulatoryPackage(db, "org-ffiec", 30, FrameworkFFIEC)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if pkg.ThirdPartyAgentCount != 5 {
-		t.Errorf("expected 5 third-party agents, got %d", pkg.ThirdPartyAgentCount)
+	if pkg.RiskFlaggedCount != 3 {
+		t.Errorf("expected 3 risk-flagged agents, got %d", pkg.RiskFlaggedCount)
 	}
 	if pkg.BehavioralBaselineCoveragePct != 80.0 {
 		t.Errorf("expected 80.0%% coverage, got %f", pkg.BehavioralBaselineCoveragePct)
@@ -135,25 +136,24 @@ func TestGenerateRegulatoryPackage_DORA(t *testing.T) {
 	}
 	defer db.Close()
 
-	orgID := "org-dora"
 	now := time.Now().UTC()
 	first := now.AddDate(0, 0, -20)
 	last := now.AddDate(0, 0, -1)
 
-	mock.ExpectQuery("SELECT event_hash FROM enforcement_events").
-		WithArgs(orgID, sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnRows(sqlmock.NewRows([]string{"event_hash"}).AddRow("ghi789"))
+	mock.ExpectQuery("SELECT this_hash FROM enforcement_decisions").
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"this_hash"}).AddRow("ghi789"))
 
 	mock.ExpectQuery("SELECT").
-		WithArgs(orgID, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"incident", "blocked", "first", "last"}).
 			AddRow(7, 4, sql.NullTime{Time: first, Valid: true}, sql.NullTime{Time: last, Valid: true}))
 
 	mock.ExpectQuery("SELECT COALESCE").
-		WithArgs(orgID, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"fp_rate"}).AddRow(0.0))
 
-	pkg, err := GenerateRegulatoryPackage(db, orgID, 30, FrameworkDORA)
+	pkg, err := GenerateRegulatoryPackage(db, "org-dora", 30, FrameworkDORA)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
