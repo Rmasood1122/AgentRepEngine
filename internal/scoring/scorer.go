@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"math"
 	"time"
+
+	"github.com/agentrepengine/are/internal/metrics"
 )
 
 // ScoredResult is the output of a full scoring computation.
@@ -107,6 +109,7 @@ func (s *Scorer) Score(orgID, agentDID string, vector FeatureVector,
 			s.config.PenaltyPerSigma*(blendedZ-s.config.ZScoreThreshold),
 			s.config.MaxPenalty,
 		)
+		metrics.AgentAnomaliesTotal.WithLabelValues(agentDID).Inc()
 	}
 	V := math.Max(0, 1000-penalty*3)
 

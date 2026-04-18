@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/agentrepengine/are/internal/metrics"
 )
 
 // Framework constants
@@ -100,6 +102,7 @@ func GenerateRegulatoryPackage(db *sql.DB, orgID string, windowDays int, framewo
 		return nil, fmt.Errorf("unsupported framework: %s", framework)
 	}
 
+	metrics.EnforcementByFramework.WithLabelValues(framework, "export").Inc()
 	return pkg, nil
 }
 
