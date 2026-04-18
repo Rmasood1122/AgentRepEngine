@@ -30,3 +30,21 @@ services:
           fault_tolerant: true
           hide_client_headers: false
           error_message: "Rate limit exceeded for org — 500 req/s maximum"
+  - name: a2a-test-api
+    url: http://finserv-demo-api:9090
+    routes:
+      - name: a2a-route
+        paths:
+          - /a2a-test
+        methods:
+          - GET
+          - POST
+        strip_path: true
+    plugins:
+      - name: agent-reputation-a2a
+        config:
+          redis_host: redis
+          redis_port: 6379
+          redis_password: are_redis_dev
+          redis_user: are_admin
+          redis_timeout_ms: 2000
