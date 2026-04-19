@@ -210,7 +210,18 @@ func main() {
 	mux.HandleFunc("/audit/export", auth(audit.NewHandler(db).ExportHandler))
 	mux.HandleFunc("/dashboard", auth(handlers.DashboardHandler(db)))
 	mux.HandleFunc("/api/regulatory-package", auth(handlers.RegulatoryPackageHandler(db)))
-	mux.HandleFunc("/agent/", auth(apiHandler.HandleAgentClear))
+	mux.HandleFunc("/agent/", auth(func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+		switch {
+		case strings.HasSuffix(path, "/trend"):
+			handlers.HandleAgentTrend(db)(w, r)
+		case strings.HasSuffix(path, "/clearance"):
+			handlers.HandleAgentClearance(db)(w, r)
+		default:
+			apiHandler.HandleAgentClear(w, r)
+		}
+	}))
+	mux.HandleFunc("/api/compliance-bundle", auth(handlers.HandleComplianceBundle(db)))
 	mux.HandleFunc("/enforcement/override", auth(handlers.OverrideHandler(db, modeCtrl)))
 	mux.HandleFunc("/certificate/issue/", auth(handlers.CertificationHandler(db)))
 
