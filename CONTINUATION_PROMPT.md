@@ -40,6 +40,7 @@ APEX ACTIVATE — 90-SECOND BOOT (every session, no exceptions)
 Claude reads this block and states all 6 lines before any work opens:
 
   HEAD: [hash] | Tests: [GREEN/RED] | Packages: [N]
+
   ZROS GATES: G-FP [PASS/FAIL] | G-HARDEN [PASS/FAIL] | G-IDENTITY [PASS/FAIL]
   APEX MODE: [from CURRENT STATE block] | SESSION TYPE: [COMMERCIAL/ENGINEERING/STRATEGIC/MIXED]
   G-COMMERCIAL: TIER 0/1/2 checklist answered — any unchecked box executes before session opens
@@ -87,22 +88,21 @@ CURRENT STATE — April 19, 2026
 APEX VERSION: APEX v5.2 + ZROS v2.8 + INTEGRITY_SENTINEL v1.0 + ARE_BULLETPROOF v1.0 + APEX-OS v1.0 + APEX_DECISION_GOVERNANCE v1.0 + HARDENING_SPRINT v1.0
 APEX MODE: ENTERPRISE (Mode 4) | SESSION TYPE: ENGINEERING
 COMPOUNDING ACTIONS: ADD3 ✅ ADD1 ✅ ADD2 ✅ ADD4 ✅ ADD5 ⬜
-KONG BUILD SPRINT: ALL 5 FEATURES COMPLETE ✅ (April 18-19, 2026)
+KONG BUILD SPRINT: ALL 5 FEATURES + 4 VALUE MULTIPLIERS COMPLETE ✅ (April 18-19, 2026)
   Feature 1: Compliance Export ✅ (8a53ee1)
   Feature 2: OTel Metrics — 13 gauges wired ✅ (7c3530f + 0996fe4)
   Feature 3: A2A Reputation Header ✅ (983513f)
   Feature 4: Behavioral Certificate ✅ (d6bd8ed)
   Feature 5: Blast Radius ✅ (849ff05)
-NEXT SESSION: Build 3 value multiplier features + 1 gap fix (all READ-ONLY, additive only):
-  1. GAP-2: verify_hash_chain() wrapper — 5 min
-  2. Agent Risk Trend API — GET /agent/{did}/trend — 30 min
-  3. One-Click Compliance Bundle — GET /api/compliance-bundle — 20 min
-  4. Agent Clearance Endpoint — GET /agent/{did}/clearance — 45 min
+  Value 1: Agent Risk Trend API ✅ (d54eefc)
+  Value 2: One-Click Compliance Bundle ✅ (d54eefc)
+  Value 3: Agent Clearance Endpoint ✅ (d54eefc)
+  Value 4: verify_hash_chain() zero-arg wrapper ✅ (d54eefc)
               Momina FP-6 review in progress (sent April 16).
               Gravity Score: 3/10 (G1:0, G2:1, G3:0, G4:0, G5:2)
 REPO: https://github.com/Rehanrana11/AgentRepEngine
 Branch: master (push with git push origin master — NOT main)
-HEAD: 849ff05
+HEAD: d54eefc
 go test ./... — ALL GREEN ✅ (all packages passing)
 ZROS GATES: G-FP ✅ PASS | G-HARDEN ✅ PASS | G-IDENTITY ✅ PASS
 Ω SCAN (last session): Ω1=0 Ω2=0 Ω3=0 Ω4=0
@@ -131,6 +131,7 @@ OPEN BUG (non-blocking):
   fp_candidates org_id uuid constraint — does not affect demo or pilot
 
 RECENT COMMITS
+d54eefc feat: Agent Trend + Compliance Bundle + Clearance + hash chain wrapper
 849ff05 feat: Blast Radius analysis — agent interaction graph traversal
 d6bd8ed feat: Behavioral Certificate endpoint — RS256-signed attestations
 983513f feat: A2A Reputation Header plugin — advisory headers on /a2a-test
