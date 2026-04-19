@@ -81,30 +81,39 @@ RULE: Any unchecked box = that action executes before session opens.
       Not negotiable. Not overridable. No exceptions.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CURRENT STATE — April 16, 2026
+CURRENT STATE — April 19, 2026
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 APEX VERSION: APEX v5.2 + ZROS v2.8 + INTEGRITY_SENTINEL v1.0 + ARE_BULLETPROOF v1.0 + APEX-OS v1.0 + APEX_DECISION_GOVERNANCE v1.0 + HARDENING_SPRINT v1.0
 APEX MODE: ENTERPRISE (Mode 4) | SESSION TYPE: ENGINEERING
-COMPOUNDING ACTIONS: ADD3 ✅ ADD1 ✅ ADD2 ✅ ADD4 ⬜ ADD5 ⬜
-NEXT SESSION: "HARDENING SPRINT — read HARDENING_SPRINT.md, start A1"
-              Lloyd meeting pushed ~30 days. Product hardening is primary.
+COMPOUNDING ACTIONS: ADD3 ✅ ADD1 ✅ ADD2 ✅ ADD4 ✅ ADD5 ⬜
+KONG BUILD SPRINT: ALL 5 FEATURES COMPLETE ✅ (April 18-19, 2026)
+  Feature 1: Compliance Export ✅ (8a53ee1)
+  Feature 2: OTel Metrics — 13 gauges wired ✅ (7c3530f + 0996fe4)
+  Feature 3: A2A Reputation Header ✅ (983513f)
+  Feature 4: Behavioral Certificate ✅ (d6bd8ed)
+  Feature 5: Blast Radius ✅ (849ff05)
+NEXT SESSION: Build 3 value multiplier features + 1 gap fix (all READ-ONLY, additive only):
+  1. GAP-2: verify_hash_chain() wrapper — 5 min
+  2. Agent Risk Trend API — GET /agent/{did}/trend — 30 min
+  3. One-Click Compliance Bundle — GET /api/compliance-bundle — 20 min
+  4. Agent Clearance Endpoint — GET /agent/{did}/clearance — 45 min
               Momina FP-6 review in progress (sent April 16).
               Gravity Score: 3/10 (G1:0, G2:1, G3:0, G4:0, G5:2)
 REPO: https://github.com/Rehanrana11/AgentRepEngine
 Branch: master (push with git push origin master — NOT main)
-HEAD: c4f50c8
-go test ./... — 12/14 green ✅ (tests/ + tests/kong/ require live Docker stack)
+HEAD: 849ff05
+go test ./... — ALL GREEN ✅ (all packages passing)
 ZROS GATES: G-FP ✅ PASS | G-HARDEN ✅ PASS | G-IDENTITY ✅ PASS
 Ω SCAN (last session): Ω1=0 Ω2=0 Ω3=0 Ω4=0
 APEX-OS STATUS: Pipeline Health=6/10 | Last calibration=UNCALIBRATED
-BULLETPROOF RUN: scheduled April 27 (mandatory — day before Lloyd)
+BULLETPROOF RUN: scheduled April 27 (mandatory — day before Kong meeting)
 D005 VERDICT: Character Capital rejection logged — calibration loop open
 
 SESSION CLOSE RECORD
-  Session date:     April 16, 2026
-  Last action:      FP-6 paper + Momina review sent + metrics standardized + HARDENING_SPRINT committed
-  Irreversible:     YES ✅ — 6 commits (8c93939, fbdad99, b7e9a8a, ca3c8ea, 876f699, c4f50c8) + Momina message sent
+  Session date:     April 19, 2026
+  Last action:      5 Kong features shipped + Kong meeting Q&A prep + value multiplier roadmap
+  Irreversible:     YES ✅ — 6 commits (8a53ee1, 7c3530f, 0996fe4, 983513f, d6bd8ed, 849ff05) pushed to master
 
 KONG DEMO STATUS: WORKING ✅
   Warmup: JWT=$(go run ./cmd/gentoken/main.go 2>/dev/null)
@@ -122,6 +131,13 @@ OPEN BUG (non-blocking):
   fp_candidates org_id uuid constraint — does not affect demo or pilot
 
 RECENT COMMITS
+849ff05 feat: Blast Radius analysis — agent interaction graph traversal
+d6bd8ed feat: Behavioral Certificate endpoint — RS256-signed attestations
+983513f feat: A2A Reputation Header plugin — advisory headers on /a2a-test
+0996fe4 feat: wire AgentAnomaliesTotal and EnforcementByFramework counters
+7c3530f feat: OTel metrics exporter + fix causal_chain enforcement_events refs
+8a53ee1 fix: DORA daily_fp_metrics column metric_date → date
+8475a4a fix: regulatory evidence queries now use enforcement_decisions table
 c4f50c8 ops: HARDENING_SPRINT v1.0 — 19-item FAANG-grade hardening plan
 876f699 fix: remaining stale metrics in CLAUDE_MASTER + BUILD_INTELLIGENCE
 ca3c8ea fix: standardize metrics — 150 scenarios, 88% TP, F1 0.9362, CI <2.0%, specs dir
@@ -410,7 +426,7 @@ FP reframe:  "We target the Visa standard — below 0.1% FP in production."
 INFRASTRUCTURE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Tests:          12/14 green — go test ./... (tests/ + tests/kong/ need Docker stack)
+Tests:          ALL GREEN — go test ./... ✅
 Docker:         All containers healthy
 PostgreSQL:     port 5433 — agentrepengine-postgres-1
 Redis:          AOF+RDB, 512mb noeviction, are_admin ACL
